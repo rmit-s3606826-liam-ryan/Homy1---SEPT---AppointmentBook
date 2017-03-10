@@ -1,10 +1,10 @@
-package owner;
+package users;
 
 import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-public class Owner_tests
+public class User_tests
 {
 
     @Test
