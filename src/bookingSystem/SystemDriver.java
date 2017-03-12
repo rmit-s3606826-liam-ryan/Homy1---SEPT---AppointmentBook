@@ -46,7 +46,7 @@ public class SystemDriver
 							 + "1. View Bookings\n"
 							 + "2. Make Booking\n"
 							 + "3. Quit\n"
-							 + "4. register/login menu (testing)\n"
+							 + "4. Register/login menu (testing)\n"
 							 + "5. Owner menu (testing)\n");
 			
 			int answer = Integer.parseInt(keyboard.nextLine());
