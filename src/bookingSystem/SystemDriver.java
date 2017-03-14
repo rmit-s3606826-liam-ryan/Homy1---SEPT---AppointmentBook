@@ -194,7 +194,9 @@ public class SystemDriver
         {
             String customerName = customerInputStream.next();
             String customerPassword = customerInputStream.next();
+
             User newUser = new User(customerName, customerPassword);
+
             userList.add(newUser);
 
         }
