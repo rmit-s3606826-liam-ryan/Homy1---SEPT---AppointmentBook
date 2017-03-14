@@ -1,15 +1,10 @@
 package bookingSystem;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-import java.util.stream.Stream;
 
 import users.User;
 
@@ -31,7 +26,7 @@ public class SystemDriver
 	public void registerAndLogin()
 	{
 		loadFromFile("customerinfo");
-		System.out.print(userList.size());
+		
 		while (running)
 		{
 			System.out.println("======================\n"
