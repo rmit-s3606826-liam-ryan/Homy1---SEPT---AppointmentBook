@@ -6,6 +6,6 @@ public class Main
 	{
 		SystemDriver system = new SystemDriver();
 		
-		system.registerAndLogin();
+		system.loadSystem();
 	}
 }

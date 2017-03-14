@@ -8,10 +8,14 @@ import java.util.Scanner;
 
 import users.User;
 
+/** System driver class - contains menus and functions used to run the system */
 public class SystemDriver
 {
 	private Scanner keyboard = new Scanner(System.in);
-	
+    private String customerInfoFileName = "src/users/customerinfo";
+
+    /** list to hold user data (may use one list for all 
+     * people type objects customer/owner/employee and differentiate with a field) */
 	List<User> userList = new ArrayList<User>();
 	
 	public SystemDriver()
@@ -19,6 +23,16 @@ public class SystemDriver
 		
 	}
 	
+	/** loads the system at start up, call functions to load users currently
+	 *  will be used to load all data
+	 */
+    public void loadSystem()
+    {
+        loadFromFile(customerInfoFileName);
+        registerAndLogin();
+    }
+	
+    /** boolean running keeps menus looping until quit is selected */
 	static Boolean running = true;
 	
 	public void registerAndLogin()
@@ -46,6 +60,7 @@ public class SystemDriver
 		}
 	}
 
+	/** Customer specific menu, user sent here when valid customer account used*/
 	private void customerMenu()
 	{
 		while (running)
@@ -71,6 +86,7 @@ public class SystemDriver
 		}
 	}
 
+	/** Owner specific menu - only accessible with owner user name and password */
 	private void ownerMenu()
 	{
 		while (running)
@@ -102,6 +118,7 @@ public class SystemDriver
 		}
 	}
 
+	/** super secret menu... 'nuff said */
 	private void superSecretMenu()
 	{
 		while (running)
@@ -175,6 +192,7 @@ public class SystemDriver
 		
 	}
 
+	/** load data from file - currently loads customer data only, will be refactored to be more general */
     public boolean loadFromFile(String customerInfoFileName)
     {
         Scanner customerInputStream = null;
@@ -203,4 +221,5 @@ public class SystemDriver
         customerInputStream.close();
         return true;
     }
+
 }
