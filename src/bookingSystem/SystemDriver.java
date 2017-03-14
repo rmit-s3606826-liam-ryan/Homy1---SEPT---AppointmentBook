@@ -1,10 +1,18 @@
 package bookingSystem;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
+
+import users.User;
 
 public class SystemDriver
 {
 	private Scanner keyboard = new Scanner(System.in);
+	
+	List<User> userList = new ArrayList<User>();
 	
 	public SystemDriver()
 	{
@@ -46,8 +54,8 @@ public class SystemDriver
 							 + "1. View Bookings\n"
 							 + "2. Make Booking\n"
 							 + "3. Quit\n"
-							 + "4. Register/login menu (testing)\n"
-							 + "5. Owner menu (testing)\n");
+							 + "4. register/login menu (testing)\n"
+							 + "5. owner menu (testing)\n");
 			
 			int answer = Integer.parseInt(keyboard.nextLine());
 			
@@ -166,4 +174,31 @@ public class SystemDriver
 		// TODO Auto-generated method stub
 		
 	}
+
+    public boolean loadFromFile(String customerInfoFileName)
+    {
+        Scanner customerInputStream = null;
+
+        try
+        {
+            customerInputStream = new Scanner(new File(customerInfoFileName));
+            customerInputStream.useDelimiter(",");
+        }
+        catch (FileNotFoundException e)
+        {
+            System.out.println("Error opening " + customerInfoFileName);
+            return false;
+        }
+
+        while (customerInputStream.hasNextLine())
+        {
+            String customerName = customerInputStream.next();
+            String customerPassword = customerInputStream.next();
+            User newUser = new User(customerName, customerPassword);
+            userList.add(newUser);
+
+        }
+        customerInputStream.close();
+        return true;
+    }
 }
