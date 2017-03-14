@@ -39,8 +39,6 @@ public class SystemDriver
 	
 	public void registerAndLogin()
 	{
-		loadFromFile("customerinfo");
-		
 		while (running)
 		{
 			System.out.println("======================\n"
@@ -201,10 +199,37 @@ public class SystemDriver
 
 	private void register()
 	{
-		// TODO Auto-generated method stub
-		
 		// Prevent duplicate registrations, check for existing username entries
 		
+		String username, password = null;
+		System.out.println("======================\n"
+				 + "Enter username: ");
+		username = keyboard.nextLine();
+		
+		System.out.println("\nEnter password: ");
+		password = keyboard.nextLine();
+		
+		User newUser = new User(username, password);
+		User userCheck = null;
+		boolean invalid = false;
+		
+		for (int index = 0; !invalid && index < userList.size(); ++index)
+		{
+			userCheck = userList.get(index);
+			invalid = userCheck.getName().equals(newUser.getName());
+		}
+		if (invalid)
+		{
+			System.out.println("Username taken");
+		}
+		else
+		{
+			userList.add(newUser);
+			System.out.println("User Registered. Welcome " + newUser.getName());
+			customerMenu();
+		}
+		
+
 	}
 
 	private void login()
@@ -222,6 +247,15 @@ public class SystemDriver
 		{
 			authUser = auth(username,password);
 			System.out.println("\nSuccessfully logged in as " + authUser.getName() + ".\n");
+			if (authUser.getName().equals("Owner"))
+			{
+				System.out.println("Directing to Owners menu.");
+				ownerMenu();
+			}
+			else
+			{
+				customerMenu();
+			}
 			// Should this check be moved to the menu code, and login() changed to boolean return to check for success?
 		}
 		catch(AuthException e)
@@ -262,8 +296,7 @@ public class SystemDriver
 
         try
         {
-        	File f = new File(getClass().getResource("../users/"+customerInfoFileName).getFile());
-            customerInputStream = new Scanner(f);
+            customerInputStream = new Scanner(new File(customerInfoFileName));
             customerInputStream.useDelimiter(",");
         }
         catch (FileNotFoundException e)
@@ -275,11 +308,12 @@ public class SystemDriver
         while (customerInputStream.hasNextLine())
         {
             String customerName = customerInputStream.next();
-            String customerPassword = customerInputStream.next();
-
+            String customerPassword = customerInputStream.nextLine();
+            customerPassword = customerPassword.substring(1);
             User newUser = new User(customerName, customerPassword);
 
             userList.add(newUser);
+            System.out.println(newUser.getName() + newUser.getPassword());
 
         }
         customerInputStream.close();
