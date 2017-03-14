@@ -1,10 +1,15 @@
 package bookingSystem;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Stream;
 
 import users.User;
 
@@ -13,6 +18,8 @@ public class SystemDriver
 	private Scanner keyboard = new Scanner(System.in);
 	
 	List<User> userList = new ArrayList<User>();
+	
+	User authUser = null;	// TODO Add logout options to menus?
 	
 	public SystemDriver()
 	{
@@ -23,6 +30,8 @@ public class SystemDriver
 	
 	public void registerAndLogin()
 	{
+		loadFromFile("customerinfo");
+		System.out.print(userList.size());
 		while (running)
 		{
 			System.out.println("======================\n"
@@ -30,7 +39,8 @@ public class SystemDriver
 							 + "2. Register\n"
 							 + "3. Quit\n"
 							 + "4. owner menu (testing)\n"
-							 + "5. customer menu (testing)\n");
+							 + "5. customer menu (testing)\n"
+							 + "6. show currently authenticated user (testing)\n");
 			
 			int answer = Integer.parseInt(keyboard.nextLine());
 			
@@ -41,11 +51,26 @@ public class SystemDriver
 			case 3: running = false;           break;
 			case 4: ownerMenu();               break;
 			case 5: customerMenu();            break;
+			case 6: printCurrentUser();        break;
 			default: System.out.println("no"); break;
 			}
 		}
 	}
 
+	
+	private void printCurrentUser()
+	{
+		User u = getAuthUser();
+		System.out.println("======================\n"
+				 + "Current User: ");
+		if (u != null)
+		{
+			System.out.println(u.getName() + "\n");
+		}
+		else
+		System.out.println("NONE\n");
+	}
+	
 	private void customerMenu()
 	{
 		while (running)
@@ -167,21 +192,66 @@ public class SystemDriver
 	{
 		// TODO Auto-generated method stub
 		
+		// Prevent duplicate registrations, check for existing username entries
+		
 	}
 
 	private void login()
 	{
-		// TODO Auto-generated method stub
+		User authUser = null;
+		String username, password = null;
+		System.out.println("======================\n"
+				 + "Enter username: ");
+		username = keyboard.nextLine();
 		
+		System.out.println("\nEnter password: ");
+		password = keyboard.nextLine();
+		
+		try
+		{
+			authUser = auth(username,password);
+			System.out.println("\nSuccessfully logged in as " + authUser.getName() + ".\n");
+			// Should this check be moved to the menu code, and login() changed to boolean return to check for success?
+		}
+		catch(AuthException e)
+		{
+			System.out.println("\nAuthorisation error - " + e.getMessage() + ".\n");
+		}
+		
+		setAuthUser(authUser);
+	}
+	
+	private User auth(String username, String password) throws AuthException
+	{
+		User user = null;
+		
+		for (int i = 0; i < userList.size(); i++)
+		{
+			user = userList.get(i);
+			if (user.getName().equals(username))
+			{
+				if (user.getPassword().equals(password))
+					return user;
+				break;		// break regardless of correct or incorrect creds, since there won't be another matching
+							// username in the userlist with a different p/w. We can split this up if we want
+							// a different error msg for (matching user, wrong pw) vs. username doesn't exist.
+			}
+		}
+		throw new AuthException("Invalid credentials");
 	}
 
     public boolean loadFromFile(String customerInfoFileName)
     {
         Scanner customerInputStream = null;
+        
+        // TODO add checks for end of file whitespace.
+        // with an extra empty line in file, it gets appended to the last user's password
+        //and will result in mismatch when authenticating
 
         try
         {
-            customerInputStream = new Scanner(new File(customerInfoFileName));
+        	File f = new File(getClass().getResource("../users/"+customerInfoFileName).getFile());
+            customerInputStream = new Scanner(f);
             customerInputStream.useDelimiter(",");
         }
         catch (FileNotFoundException e)
@@ -200,5 +270,15 @@ public class SystemDriver
         }
         customerInputStream.close();
         return true;
+    }
+    
+    public void setAuthUser(User user)
+    {
+    	authUser = user;
+    }
+    
+    public User getAuthUser()
+    {
+    	return authUser;
     }
 }
