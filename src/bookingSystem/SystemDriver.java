@@ -1,7 +1,6 @@
 package bookingSystem;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -12,7 +11,7 @@ import users.User;
 public class SystemDriver
 {
 	private Scanner keyboard = new Scanner(System.in);
-    private String customerInfoFileName = "src/users/customerinfo";
+    private String customerInfoFileName = "src/users/customerinfo.dat";
 
     /** list to hold user data (may use one list for all 
      * people type objects customer/owner/employee and differentiate with a field) */
@@ -202,6 +201,7 @@ public class SystemDriver
 		// Prevent duplicate registrations, check for existing username entries
 		
 		String username, password = null;
+		boolean savedToFile = false;
 		System.out.println("======================\n"
 				 + "Enter username: ");
 		username = keyboard.nextLine();
@@ -209,27 +209,37 @@ public class SystemDriver
 		System.out.println("\nEnter password: ");
 		password = keyboard.nextLine();
 		
-		User newUser = new User(username, password);
 		User userCheck = null;
 		boolean invalid = false;
 		
 		for (int index = 0; !invalid && index < userList.size(); ++index)
 		{
 			userCheck = userList.get(index);
-			invalid = userCheck.getName().equals(newUser.getName());
+			invalid = userCheck.getName().equals(username);
 		}
 		if (invalid)
 		{
 			System.out.println("Username taken");
 		}
-		else
+		else try
 		{
+			User newUser = new User(username, password);
 			userList.add(newUser);
-			System.out.println("User Registered. Welcome " + newUser.getName());
-			customerMenu();
+			savedToFile = writeToFile(username + "," + password + "\n", "src/users/customerinfo.dat");
+			if (savedToFile)
+			{
+				System.out.println("User Registered. Welcome " + newUser.getName());
+				customerMenu();
+			}
+			else
+			{
+				throw new IOException("Error saving new user to file.");
+			}
 		}
-		
-
+		catch (IOException e)
+		{
+			System.out.println(e.getMessage());
+		}
 	}
 
 	private void login()
@@ -290,9 +300,11 @@ public class SystemDriver
     {
         Scanner customerInputStream = null;
         
-        // TODO add checks for end of file whitespace.
-        // with an extra empty line in file, it gets appended to the last user's password
-        //and will result in mismatch when authenticating
+        /* TODO add checks for end of file whitespace.
+        with an extra empty line in file, it gets appended to the last user's password
+        and will result in mismatch when authenticating
+        EDIT: This seems to be working? logging in with the last username in file appears to work
+        keep an eye on this, may need a fix if it plays up		*/
 
         try
         {
@@ -313,11 +325,30 @@ public class SystemDriver
             User newUser = new User(customerName, customerPassword);
 
             userList.add(newUser);
-            System.out.println(newUser.getName() + newUser.getPassword());
-
+            //System.out.println(newUser.getName() + "," + newUser.getPassword());
         }
         customerInputStream.close();
         return true;
+    }
+    
+    private boolean writeToFile(String text, String fileName) // (, boolean append)
+    {
+    	try // Possibly add an arg switch for append/override? If needed later in project
+    		// to write whole files at once, we can reuse this method
+    	{
+    		File f = new File(fileName);
+    		FileWriter fw = new FileWriter(f.getAbsoluteFile(), true); // true = append to file
+    		BufferedWriter bw = new BufferedWriter(fw);
+    		
+    		bw.write(text);
+    		bw.close();
+    		return true;
+    	}
+    	catch (IOException e) { // Possibly can be chucked back to calling function and dealt with there..
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	return false;
     }
     
     public void setAuthUser(User user)
