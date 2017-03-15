@@ -8,10 +8,14 @@ import java.util.Scanner;
 
 import users.User;
 
+/** System driver class - contains menus and functions used to run the system */
 public class SystemDriver
 {
 	private Scanner keyboard = new Scanner(System.in);
-	
+    private String customerInfoFileName = "src/users/customerinfo";
+
+    /** list to hold user data (may use one list for all 
+     * people type objects customer/owner/employee and differentiate with a field) */
 	List<User> userList = new ArrayList<User>();
 	
 	User authUser = null;	// TODO Add logout options to menus?
@@ -21,12 +25,20 @@ public class SystemDriver
 		
 	}
 	
+	/** loads the system at start up, call functions to load users currently
+	 *  will be used to load all data
+	 */
+    public void loadSystem()
+    {
+        loadFromFile(customerInfoFileName);
+        registerAndLogin();
+    }
+	
+    /** boolean running keeps menus looping until quit is selected */
 	static Boolean running = true;
 	
 	public void registerAndLogin()
 	{
-		loadFromFile("customerinfo");
-		
 		while (running)
 		{
 			System.out.println("======================\n"
@@ -51,7 +63,6 @@ public class SystemDriver
 			}
 		}
 	}
-
 	
 	private void printCurrentUser()
 	{
@@ -66,6 +77,7 @@ public class SystemDriver
 		System.out.println("NONE\n");
 	}
 	
+  /** Customer specific menu, user sent here when valid customer account used*/
 	private void customerMenu()
 	{
 		while (running)
@@ -91,6 +103,7 @@ public class SystemDriver
 		}
 	}
 
+	/** Owner specific menu - only accessible with owner user name and password */
 	private void ownerMenu()
 	{
 		while (running)
@@ -122,6 +135,7 @@ public class SystemDriver
 		}
 	}
 
+	/** super secret menu... 'nuff said */
 	private void superSecretMenu()
 	{
 		while (running)
@@ -185,10 +199,37 @@ public class SystemDriver
 
 	private void register()
 	{
-		// TODO Auto-generated method stub
-		
 		// Prevent duplicate registrations, check for existing username entries
 		
+		String username, password = null;
+		System.out.println("======================\n"
+				 + "Enter username: ");
+		username = keyboard.nextLine();
+		
+		System.out.println("\nEnter password: ");
+		password = keyboard.nextLine();
+		
+		User newUser = new User(username, password);
+		User userCheck = null;
+		boolean invalid = false;
+		
+		for (int index = 0; !invalid && index < userList.size(); ++index)
+		{
+			userCheck = userList.get(index);
+			invalid = userCheck.getName().equals(newUser.getName());
+		}
+		if (invalid)
+		{
+			System.out.println("Username taken");
+		}
+		else
+		{
+			userList.add(newUser);
+			System.out.println("User Registered. Welcome " + newUser.getName());
+			customerMenu();
+		}
+		
+
 	}
 
 	private void login()
@@ -206,6 +247,15 @@ public class SystemDriver
 		{
 			authUser = auth(username,password);
 			System.out.println("\nSuccessfully logged in as " + authUser.getName() + ".\n");
+			if (authUser.getName().equals("Owner"))
+			{
+				System.out.println("Directing to Owners menu.");
+				ownerMenu();
+			}
+			else
+			{
+				customerMenu();
+			}
 			// Should this check be moved to the menu code, and login() changed to boolean return to check for success?
 		}
 		catch(AuthException e)
@@ -235,6 +285,7 @@ public class SystemDriver
 		throw new AuthException("Invalid credentials");
 	}
 
+	/** load data from file - currently loads customer data only, will be refactored to be more general */
     public boolean loadFromFile(String customerInfoFileName)
     {
         Scanner customerInputStream = null;
@@ -245,8 +296,7 @@ public class SystemDriver
 
         try
         {
-        	File f = new File(getClass().getResource("../users/"+customerInfoFileName).getFile());
-            customerInputStream = new Scanner(f);
+            customerInputStream = new Scanner(new File(customerInfoFileName));
             customerInputStream.useDelimiter(",");
         }
         catch (FileNotFoundException e)
@@ -258,9 +308,12 @@ public class SystemDriver
         while (customerInputStream.hasNextLine())
         {
             String customerName = customerInputStream.next();
-            String customerPassword = customerInputStream.next();
+            String customerPassword = customerInputStream.nextLine();
+            customerPassword = customerPassword.substring(1);
             User newUser = new User(customerName, customerPassword);
+
             userList.add(newUser);
+            System.out.println(newUser.getName() + newUser.getPassword());
 
         }
         customerInputStream.close();
@@ -276,4 +329,5 @@ public class SystemDriver
     {
     	return authUser;
     }
+
 }
