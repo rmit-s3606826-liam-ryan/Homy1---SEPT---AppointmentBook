@@ -46,7 +46,8 @@ public class SystemDriver
 							 + "3. Quit\n"
 							 + "4. owner menu (testing)\n"
 							 + "5. customer menu (testing)\n"
-							 + "6. show currently authenticated user (testing)\n");
+							 + "6. show currently authenticated user (testing)\n"
+							 + "7. Logout\n");
 			
 			int answer = Integer.parseInt(keyboard.nextLine());
 			
@@ -58,6 +59,7 @@ public class SystemDriver
 			case 4: ownerMenu();               break;
 			case 5: customerMenu();            break;
 			case 6: printCurrentUser();        break;
+			case 7: logout();                  break;
 			default: System.out.println("no"); break;
 			}
 		}
@@ -92,7 +94,7 @@ public class SystemDriver
 			
 			switch (answer)
 			{
-			case 1: viewCoustomerBooking();    break;
+			case 1: viewCustomerBooking();     break;
 			case 2: addBooking();              break;
 			case 3: running = false;           break;
 			case 4: registerAndLogin();        break;
@@ -167,7 +169,7 @@ public class SystemDriver
 		
 	}
 
-	private void viewCoustomerBooking()
+	private void viewCustomerBooking()
 	{
 		// TODO Auto-generated method stub
 		
@@ -197,12 +199,35 @@ public class SystemDriver
 		
 	}
 
+	public User addUser(User newUser) throws DuplicateUserException, IOException
+	{
+		User userCheck = null;
+		boolean invalid = false;
+		
+		for (int index = 0; !invalid && index < userList.size(); ++index)
+		{
+			userCheck = userList.get(index);
+			invalid = userCheck.getName().equals(newUser.getName());
+		}
+		if (invalid)
+		{
+			throw new DuplicateUserException("Username already exists!");
+		}
+		else
+		{
+			userList.add(newUser);
+			writeToFile(newUser.getName() + "," + newUser.getPassword() + "\n", "src/users/customerinfo.dat");
+			System.out.println("User Registered. Welcome " + newUser.getName());
+			return newUser;
+		}
+	}
+	
 	public void register()
 	{
 		// Prevent duplicate registrations, check for existing username entries
 		
 		String username, password = null;
-		boolean savedToFile = false;
+		User newUser = null;
 		System.out.println("======================\n"
 				 + "Enter username: ");
 		username = keyboard.nextLine();
@@ -210,33 +235,16 @@ public class SystemDriver
 		System.out.println("\nEnter password: ");
 		password = keyboard.nextLine();
 		
-		User userCheck = null;
-		boolean invalid = false;
-		
-		for (int index = 0; !invalid && index < userList.size(); ++index)
+		newUser = new User(username, password);
+		try
 		{
-			userCheck = userList.get(index);
-			invalid = userCheck.getName().equals(username);
+			addUser(newUser);
+			setAuthUser(newUser);
+			customerMenu();
 		}
-		if (invalid)
+		catch (DuplicateUserException e)
 		{
-			System.out.println("Username taken");
-		}
-		else try
-		{
-			User newUser = new User(username, password);
-			userList.add(newUser);
-			savedToFile = writeToFile(username + "," + password + "\n", "src/users/customerinfo.dat");
-			if (savedToFile)
-			{
-				System.out.println("User Registered. Welcome " + newUser.getName());
-		        setAuthUser(newUser);
-				customerMenu();
-			}
-			else
-			{
-				throw new IOException("Error saving new user to file.");
-			}
+			System.out.println(e.getMessage());
 		}
 		catch (IOException e)
 		{
@@ -297,6 +305,11 @@ public class SystemDriver
 		}
 		throw new AuthException("Invalid credentials");
 	}
+	
+	public void logout()
+	{
+		setAuthUser(null);
+	}
 
 	/** load data from file - currently loads customer data only, will be refactored to be more general */
     public boolean loadFromFile(String customerInfoFileName)
@@ -334,10 +347,9 @@ public class SystemDriver
         return true;
     }
     
-    public boolean writeToFile(String text, String fileName) // (, boolean append)
-    {
-    	try // Possibly add an arg switch for append/override? If needed later in project
-    		// to write whole files at once, we can reuse this method
+    public void writeToFile(String text, String fileName) throws IOException // (, boolean append)
+    {    		// Possibly add an arg switch for append/override? If needed later in project
+				// to write whole files at once, we can reuse this method
     	{
     		File f = new File(fileName);
     		FileWriter fw = new FileWriter(f.getAbsoluteFile(), true); // true = append to file
@@ -345,13 +357,7 @@ public class SystemDriver
     		
     		bw.write(text);
     		bw.close();
-    		return true;
     	}
-    	catch (IOException e) { // Possibly can be chucked back to calling function and dealt with there..
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-    	return false;
     }
     
     public void setAuthUser(User user)
