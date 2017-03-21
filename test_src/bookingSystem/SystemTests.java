@@ -5,12 +5,7 @@ import static org.junit.contrib.java.lang.system.TextFromStandardInputStream.*;
 
 import java.io.IOException;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.contrib.java.lang.system.TextFromStandardInputStream;
 import org.junit.rules.TemporaryFolder;
 
@@ -66,6 +61,27 @@ public class SystemTests
         assertEquals(testSystem.authUser.getPassword(), testUser.getPassword());      
     }
     
+    @Test (expected = DuplicateUserException.class)
+    public void testRegisterDuplicateUsername_fail() throws DuplicateUserException
+    {
+    	String duplicateUsername = "testUser";
+    	User user1 = new User(duplicateUsername, "pw1");
+    	User user2 = new User(duplicateUsername, "pw2");
+    	try
+    	{
+    		testSystem.addUser(user1);
+        	
+        	User user = testSystem.userList.get(0);
+        	assertEquals(user.getName(), duplicateUsername); // check that a user exists in the system with username "testUser"
+        	//int sizeBeforeTest = testSystem.userList.size();
+        	
+        	testSystem.addUser(user2);						// attempt to add account with duplicate username
+        	//int sizeAfterTest = testSystem.userList.size();
+        	//assertEquals(sizeBeforeTest, sizeAfterTest); // check that the userList array has not increased in size
+    	} // TODO ***prevent registration tests from spamming our customerinfo.dat with test user accounts***
+    	catch (IOException e) {}
+    }
+    
     @Test
     public void testingLoginFunction()
     {
@@ -83,9 +99,16 @@ public class SystemTests
     }
 
     @Test
-    public void testingWriteToFile() throws Exception
+    public void testWriteToFile() // TODO NEEDS EXPANSION!! a lot of different cases of input
     {
-        assertTrue(testSystem.writeToFile("username,password\n", "testFile.dat"));
+    	try
+    	{
+    		testSystem.writeToFile("username,password\n", "testFile.dat");
+    	}
+    	catch (IOException e)
+    	{
+    		Assert.fail(); // fail the test if writeToFile() throws IOException
+    	}
     }
     
     @Test
@@ -100,5 +123,15 @@ public class SystemTests
         assertEquals(userFromFile.getName(), testUser.getName());
         assertEquals(userFromFile.getPassword(), testUser.getPassword());      
     }
-
+    
+    @Test
+    public void testLogout()
+    {
+    	User testUser = new User("testUsername","testPW");
+    	testSystem.setAuthUser(testUser);
+    	
+    	assertEquals(testSystem.getAuthUser(), testUser); // Check that authorised user is set
+    	testSystem.logout();
+    	assertEquals(testSystem.getAuthUser(), null); // Now check that logout() removed the authorised user
+    }
 }
