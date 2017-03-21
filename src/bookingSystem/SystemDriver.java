@@ -97,6 +97,7 @@ public class SystemDriver
 			case 3: running = false;           break;
 			case 4: registerAndLogin();        break;
 			case 5: customerMenu();            break;
+            case 6: printCurrentUser();        break;
 			default: System.out.println("no"); break;
 			}
 		}
@@ -196,7 +197,7 @@ public class SystemDriver
 		
 	}
 
-	private void register()
+	public void register()
 	{
 		// Prevent duplicate registrations, check for existing username entries
 		
@@ -229,6 +230,7 @@ public class SystemDriver
 			if (savedToFile)
 			{
 				System.out.println("User Registered. Welcome " + newUser.getName());
+		        setAuthUser(newUser);
 				customerMenu();
 			}
 			else
@@ -242,7 +244,7 @@ public class SystemDriver
 		}
 	}
 
-	private void login()
+	public void login()
 	{
 		User authUser = null;
 		String username, password = null;
@@ -257,15 +259,6 @@ public class SystemDriver
 		{
 			authUser = auth(username,password);
 			System.out.println("\nSuccessfully logged in as " + authUser.getName() + ".\n");
-			if (authUser.getName().equals("Owner"))
-			{
-				System.out.println("Directing to Owners menu.");
-				ownerMenu();
-			}
-			else
-			{
-				customerMenu();
-			}
 			// Should this check be moved to the menu code, and login() changed to boolean return to check for success?
 		}
 		catch(AuthException e)
@@ -274,6 +267,16 @@ public class SystemDriver
 		}
 		
 		setAuthUser(authUser);
+
+		if (authUser.getName().equals("Owner"))
+        {
+            System.out.println("Directing to Owners menu.");
+            ownerMenu();
+        }
+        else
+        {
+            customerMenu();
+        }
 	}
 	
 	private User auth(String username, String password) throws AuthException
@@ -331,7 +334,7 @@ public class SystemDriver
         return true;
     }
     
-    private boolean writeToFile(String text, String fileName) // (, boolean append)
+    public boolean writeToFile(String text, String fileName) // (, boolean append)
     {
     	try // Possibly add an arg switch for append/override? If needed later in project
     		// to write whole files at once, we can reuse this method
