@@ -331,7 +331,7 @@ public class SystemDriver
         return true;
     }
     
-    private boolean writeToFile(String text, String fileName) // (, boolean append)
+    public boolean writeToFile(String text, String fileName) // (, boolean append)
     {
     	try // Possibly add an arg switch for append/override? If needed later in project
     		// to write whole files at once, we can reuse this method
