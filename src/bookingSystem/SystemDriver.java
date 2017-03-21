@@ -84,26 +84,29 @@ public class SystemDriver
 		while (running)
 		{
 			System.out.println("======================\n"
-							 + "1. View Bookings\n"
-							 + "2. Make Booking\n"
-							 + "3. Quit\n"
-							 + "4. register/login menu (testing)\n"
-							 + "5. owner menu (testing)\n");
+							 + "1. View 'My' Bookings\n"
+							 + "2. View Available Bookings\n"
+							 + "3. Make Booking\n"
+							 + "4. Quit\n"
+							 + "5. register/login menu (testing)\n"
+							 + "6. owner menu (testing)\n");
 			
 			int answer = Integer.parseInt(keyboard.nextLine());
 			
 			switch (answer)
 			{
 			case 1: viewCustomerBooking();     break;
-			case 2: addBooking();              break;
-			case 3: running = false;           break;
-			case 4: registerAndLogin();        break;
-			case 5: customerMenu();            break;
-            case 6: printCurrentUser();        break;
+			case 2: viewAvailableBooking();    break;
+			case 3: addBooking();              break;
+			case 4: running = false;           break;
+			case 5: registerAndLogin();        break;
+			case 6: customerMenu();            break;
+            case 7: printCurrentUser();        break;
 			default: System.out.println("no"); break;
 			}
 		}
 	}
+
 
 	/** Owner specific menu - only accessible with owner user name and password */
 	private void ownerMenu()
@@ -169,10 +172,31 @@ public class SystemDriver
 		
 	}
 
+	// TODO mock up function - not yet implemented
+	private void viewAvailableBooking()
+	{
+		System.out.println("=================================================\n"
+						 + "Available Bookings\n"
+						 + "=================================================\n"
+						 + "|     |Mon  |Tue  |Wed  |Thu  |Fri  |Sat  |Sun  |\n"
+						 + "|9-10 |     |     |     |     |     |     |     |\n"
+						 + "|10-11|     |     |     |     |     |     |     |\n"
+						 + "|11-12|     |     |     |     |     |     |     |\n"
+						 + "|12-1 |     |     |     |     |     |     |     |\n"
+						 + "|1-2  |     |     |     |     |     |     |     |\n"
+						 + "|2-3  |     |     |     |     |     |     |     |\n"
+						 + "|3-4  |     |     |     |     |     |     |     |\n"
+						 + "|4-5  |     |     |     |     |     |     |     |\n");
+	}
+
+	// TODO mock up function - not yet implemented
 	private void viewCustomerBooking()
 	{
-		// TODO Auto-generated method stub
-		
+		System.out.println("Welcome " + getAuthUser().getName());
+		System.out.println("You Have a booking with us at:\n"
+						 + "4-5pm Thurday 23/3\n"
+						 + "And At:\n"
+						 + "1-2pm Friday 24/3\n");
 	}
 
 	private void removeEmployee()
