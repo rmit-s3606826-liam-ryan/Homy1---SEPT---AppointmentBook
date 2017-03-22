@@ -38,31 +38,42 @@ public class SystemDriver
 	
 	public void registerAndLogin()
 	{
-		while (running)
-		{
-			System.out.println("======================\n"
-							 + "1. Log In\n"
-							 + "2. Register\n"
-							 + "3. Quit\n"
-							 + "4. owner menu (testing)\n"
-							 + "5. customer menu (testing)\n"
-							 + "6. show currently authenticated user (testing)\n"
-							 + "7. Logout\n");
-			
-			int answer = Integer.parseInt(keyboard.nextLine());
-			
-			switch (answer)
-			{
-			case 1: login();                   break;
-			case 2: register();                break;
-			case 3: running = false;           break;
-			case 4: ownerMenu();               break;
-			case 5: customerMenu();            break;
-			case 6: printCurrentUser();        break;
-			case 7: logout();                  break;
-			default: System.out.println("no"); break;
-			}
-		}
+	    try
+	    {
+    		while (running)
+    		{
+    			System.out.println("======================\n"
+    							 + "1. Log In\n"
+    							 + "2. Register\n"
+    							 + "3. Quit\n"
+    							 + "4. owner menu (testing)\n"
+    							 + "5. customer menu (testing)\n"
+    							 + "6. show currently authenticated user (testing)\n"
+    							 + "7. Logout\n");
+    			
+    			int answer = Integer.parseInt(keyboard.nextLine());
+    			
+    			switch (answer)
+    			{
+    			case 1: login();                   break;
+    			case 2: register();                break;
+    			case 3: running = false;           break;
+    			case 4: ownerMenu();               break;
+    			case 5: customerMenu();            break;
+    			case 6: printCurrentUser();        break;
+    			case 7: logout();                  break;
+    			default: System.out.println("no"); break;
+    			}
+    		}
+	    }
+	    catch (NumberFormatException e)
+	    {
+	        System.out.println("Please Enter a valid number");
+	    }
+	    finally
+	    {
+	        registerAndLogin();
+	    }
 	}
 	
 	private void printCurrentUser()
@@ -81,63 +92,86 @@ public class SystemDriver
   /** Customer specific menu, user sent here when valid customer account used*/
 	private void customerMenu()
 	{
-		while (running)
+		try
 		{
-			System.out.println("======================\n"
-							 + "1. View 'My' Bookings\n"
-							 + "2. View Available Bookings\n"
-							 + "3. Make Booking\n"
-							 + "4. Quit\n"
-							 + "5. register/login menu (testing)\n"
-							 + "6. owner menu (testing)\n");
-			
-			int answer = Integer.parseInt(keyboard.nextLine());
-			
-			switch (answer)
-			{
-			case 1: viewCustomerBooking();     break;
-			case 2: viewAvailableBooking();    break;
-			case 3: addBooking();              break;
-			case 4: running = false;           break;
-			case 5: registerAndLogin();        break;
-			case 6: customerMenu();            break;
-            case 7: printCurrentUser();        break;
-			default: System.out.println("no"); break;
-			}
-		}
+    	    while (running)
+    		{
+    			System.out.println("======================\n"
+    							 + "1. View 'My' Bookings\n"
+    							 + "2. View Available Bookings\n"
+    							 + "3. Make Booking\n"
+    							 + "4. Quit\n"
+    							 + "5. register/login menu (testing)\n"
+    							 + "6. owner menu (testing)\n");
+    			
+    			int answer = Integer.parseInt(keyboard.nextLine());
+    			
+    			switch (answer)
+    			{
+    			case 1: viewCustomerBooking();     break;
+    			case 2: viewAvailableBooking();    break;
+    			case 3: addBooking();              break;
+    			case 4: running = false;           break;
+    			case 5: registerAndLogin();        break;
+    			case 6: customerMenu();            break;
+                case 7: printCurrentUser();        break;
+    			default: System.out.println("no"); break;
+    			}
+    		}
+        }
+        catch (NumberFormatException e)
+        {
+            System.out.println("Please Enter a valid number");
+        }
+        finally
+        {
+            customerMenu();
+        }
 	}
 
 
 	/** Owner specific menu - only accessible with owner user name and password */
 	private void ownerMenu()
 	{
-		while (running)
-		{
-			System.out.println("======================\n"
-							 + "1. View Bookings\n"
-							 + "2. View Employees\n"
-							 + "3. Add Employee\n"
-							 + "4. Remove Employee\n"
-							 + "5. Quit\n"
-							 + "6. ...\n"
-							 + "7. register/login menu (testing)\n"
-							 + "8. customer menu (testing)\n");
-			
-			int answer = Integer.parseInt(keyboard.nextLine());
-			
-			switch (answer)
-			{
-			case 1: viewBooking();             break;
-			case 2: viewEmployee();            break;
-			case 3: addEmployee();             break;
-			case 4: removeEmployee();          break;
-			case 5: running = false;           break;
-			case 6: superSecretMenu();         break;
-			case 7: registerAndLogin();        break;
-			case 8: customerMenu();            break;
-			default: System.out.println("no"); break;
-			}
-		}
+	    try
+	    {
+    		while (running)
+    		{
+    			System.out.println("======================\n"
+    							 + "1. View Bookings\n"
+    							 + "2. View Employees\n"
+    							 + "3. Add Employee\n"
+    							 + "4. Remove Employee\n"
+    							 + "5. Quit\n"
+    							 + "6. ...\n"
+    							 + "7. register/login menu (testing)\n"
+    							 + "8. customer menu (testing)\n");
+    			
+    			int answer = Integer.parseInt(keyboard.nextLine());
+    			
+    			switch (answer)
+    			{
+    			case 1: viewBooking();             break;
+    			case 2: viewEmployee();            break;
+    			case 3: addEmployee();             break;
+    			case 4: removeEmployee();          break;
+    			case 5: running = false;           break;
+    			case 6: superSecretMenu();         break;
+    			case 7: registerAndLogin();        break;
+    			case 8: customerMenu();            break;
+    			default: System.out.println("no"); break;
+    			}
+    		}
+        }
+        catch (NumberFormatException e)
+        {
+            System.out.println("Please Enter a valid number");
+        }
+        finally
+        {
+            ownerMenu();
+        }
+
 	}
 
 	/** super secret menu... 'nuff said */
