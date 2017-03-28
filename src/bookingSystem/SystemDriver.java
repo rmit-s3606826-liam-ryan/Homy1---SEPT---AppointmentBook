@@ -7,14 +7,18 @@ import java.util.Scanner;
 
 import users.User;
 
-/** System driver class - contains menus and functions used to run the system */
+/**
+ * System driver class - contains menus and functions used to run the system 
+ **/
 public class SystemDriver
 {
 	private Scanner keyboard = new Scanner(System.in);
     private String customerInfoFileName = "src/users/customerinfo.dat";
 
-    /** list to hold user data (may use one list for all 
-     * people type objects customer/owner/employee and differentiate with a field) */
+    /** 
+     * list to hold user data (may use one list for all 
+     * people type objects customer/owner/employee and differentiate with a field) 
+     **/
 	List<User> userList = new ArrayList<User>();
 	
 	User authUser = null;	// TODO Add logout options to menus?
@@ -24,16 +28,19 @@ public class SystemDriver
 		
 	}
 	
-	/** loads the system at start up, call functions to load users currently
-	 *  will be used to load all data
-	 */
+	/** 
+	 * loads the system at start up, call functions to load users currently
+	 * will be used to load all data
+	 **/
     public void loadSystem()
     {
         loadFromFile(customerInfoFileName);
         registerAndLogin();
     }
 	
-    /** boolean running keeps menus looping until quit is selected */
+    /**
+     * boolean running keeps menus looping until quit is selected 
+     **/
 	static Boolean running = true;
 	
 	public void registerAndLogin()
@@ -89,7 +96,9 @@ public class SystemDriver
 		System.out.println("NONE\n");
 	}
 	
-  /** Customer specific menu, user sent here when valid customer account used*/
+    /**
+     * Customer specific menu, user sent here when valid customer account used
+     **/
 	private void customerMenu()
 	{
 		try
@@ -100,9 +109,11 @@ public class SystemDriver
     							 + "1. View 'My' Bookings\n"
     							 + "2. View Available Bookings\n"
     							 + "3. Make Booking\n"
-    							 + "4. Quit\n"
-    							 + "5. register/login menu (testing)\n"
-    							 + "6. owner menu (testing)\n");
+    							 + "4. Log out"
+    							 + "5. Quit\n"
+    							 + "6. register/login menu (testing)\n"
+    							 + "7. owner menu (testing)\n"
+    							 + "8. print current user (testing)");
     			
     			int answer = Integer.parseInt(keyboard.nextLine());
     			
@@ -110,11 +121,13 @@ public class SystemDriver
     			{
     			case 1: viewCustomerBooking();     break;
     			case 2: viewAvailableBooking();    break;
-    			case 3: addBooking();              break;
-    			case 4: running = false;           break;
-    			case 5: registerAndLogin();        break;
-    			case 6: customerMenu();            break;
-                case 7: printCurrentUser();        break;
+                case 3: addBooking();              break;
+                case 4: logout();
+                        registerAndLogin();        break;
+    			case 5: running = false;           break;
+    			case 6: registerAndLogin();        break;
+    			case 7: ownerMenu();               break;
+                case 8: printCurrentUser();        break;
     			default: System.out.println("no"); break;
     			}
     		}
@@ -143,7 +156,7 @@ public class SystemDriver
     							 + "3. Add Employee\n"
     							 + "4. Remove Employee\n"
     							 + "5. Quit\n"
-    							 + "6. ...\n"
+    							 + "6. Log Out\n"
     							 + "7. register/login menu (testing)\n"
     							 + "8. customer menu (testing)\n");
     			
@@ -156,7 +169,8 @@ public class SystemDriver
     			case 3: addEmployee();             break;
     			case 4: removeEmployee();          break;
     			case 5: running = false;           break;
-    			case 6: superSecretMenu();         break;
+    			case 6: logout();
+    			        registerAndLogin();        break;
     			case 7: registerAndLogin();        break;
     			case 8: customerMenu();            break;
     			default: System.out.println("no"); break;
@@ -172,32 +186,6 @@ public class SystemDriver
             ownerMenu();
         }
 
-	}
-
-	/** super secret menu... 'nuff said */
-	private void superSecretMenu()
-	{
-		while (running)
-		{
-			System.out.println("======================\n"
-							 + "1. Quit\n"
-							 + "2. ...\n"
-							 + "3. Profit\n"
-							 + "4. owner menu (testing)"
-							 + "5. register/login menu (testing)\n"
-							 + "6. customer menu (testing)\n");
-			
-			int answer = Integer.parseInt(keyboard.nextLine());
-			
-			switch (answer)
-			{
-			case 1: running = false;           break;
-			case 4: ownerMenu();               break;
-			case 5: registerAndLogin();        break;
-			case 6: customerMenu();            break;
-			default: System.out.println("no"); break;
-			}
-		}
 	}
 
 	private void addBooking()
@@ -427,5 +415,31 @@ public class SystemDriver
     {
     	return authUser;
     }
+    
+    /** 
+     * used to keep looping until enough employees/time slots have
+     * been added 
+     **/
+    private boolean promptToContinue()
+    {
+        System.out.println("Any more transactions (y/n)?");
+        String response = keyboard.nextLine();
+        return response.equalsIgnoreCase("y") || response.equalsIgnoreCase("yes");
+    }
 
+    /** 
+     * used to get user string input - names/ID/password whenever required
+     * throws exception when e or exit are entered at any prompt, allows user
+     * to quit to main menu at any time
+     **/
+    private String promptAndGetString(final String PROMPT)throws UserRequestsExitException
+    {
+        System.out.println(PROMPT);
+        String answer = keyboard.nextLine();
+        if (answer.equalsIgnoreCase("e") || answer.equalsIgnoreCase("exit"))
+        {
+            throw new UserRequestsExitException();
+        }
+        return answer;
+    }
 }
