@@ -2,9 +2,14 @@ package bookingSystem;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Scanner;
 
+import Bookings.booking;
+import Bookings.timeSlots;
 import users.User;
 
 /**
@@ -20,6 +25,7 @@ public class SystemDriver
      * people type objects customer/owner/employee and differentiate with a field) 
      **/
 	List<User> userList = new ArrayList<User>();
+	List<timeSlots> timeSlot = new ArrayList<timeSlots>();
 	
 	User authUser = null;	// TODO Add logout options to menus?
 	
@@ -177,17 +183,31 @@ public class SystemDriver
         }
 	}
 
-	private void addBooking()
+	private void addBooking(int year, int month, int day, int startHour, String Customer)
 	{
-		// TODO Auto-generated method stub
+		Calendar calendar = new GregorianCalendar(year,month,day,startHour,00,00);
+		for (int x = 0; x < timeSlot.size(); x++){
+			if(timeSlot.get(x).getDate().compareTo(calendar)==0){
+				new booking(calendar,Customer); 
+			}
+			else{
+				System.out.println("Sorry, no timeslot available for your chosen time"); 
+			}
+		}
 		
 	}
-
+	
+	private void addTimeSlots(int year, int month, int day, int startHour,int endHour){
+		for ( int start = startHour; start< endHour; start ++){
+			timeSlot.add(new timeSlots( year, month, day, start));
+		}
+	}	
+	
 	// TODO mock up function - not yet implemented
 	private void viewAvailableBooking()
 	{
 		System.out.println("=================================================\n"
-						 + "Available Bookings\n"
+						 + "Available Bookings for" +" \n"
 						 + "=================================================\n"
 						 + "|     |Mon  |Tue  |Wed  |Thu  |Fri  |Sat  |Sun  |\n"
 						 + "|9-10 |     |     |     |     |     |     |     |\n"
