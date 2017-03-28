@@ -51,14 +51,14 @@ public class SystemTests
     {
         System.out.println("---Tear down class");
     }
-    
+       
     @Test
     public void testingRegisterFunction()
     {
         User testUser = new User("username", "password");
         
     	// provides mocked user input for next called function
-        systemInMock.provideLines("username", "password", "3");
+        systemInMock.provideLines("username", "password", "5");
         testSystem.register();
         
         assertEquals(testSystem.authUser.getName(), testUser.getName());

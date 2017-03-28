@@ -45,10 +45,10 @@ public class SystemDriver
 	
 	public void registerAndLogin()
 	{
-	    try
-	    {
-    		while (running)
-    		{
+        while (running)
+        {
+            try
+            {
     			System.out.println("======================\n"
     							 + "1. Log In\n"
     							 + "2. Register\n"
@@ -72,15 +72,12 @@ public class SystemDriver
     			default: System.out.println("no"); break;
     			}
     		}
-	    }
-	    catch (NumberFormatException e)
-	    {
-	        System.out.println("Please Enter a valid number");
-	    }
-	    finally
-	    {
-	        registerAndLogin();
-	    }
+	    
+            catch (NumberFormatException e)
+            {
+                System.out.println("Please Enter a valid number");
+            }
+        }
 	}
 	
 	private void printCurrentUser()
@@ -101,10 +98,10 @@ public class SystemDriver
      **/
 	private void customerMenu()
 	{
-		try
-		{
-    	    while (running)
-    		{
+        while (running)
+        {
+            try
+            {
     			System.out.println("======================\n"
     							 + "1. View 'My' Bookings\n"
     							 + "2. View Available Bookings\n"
@@ -131,14 +128,10 @@ public class SystemDriver
     			default: System.out.println("no"); break;
     			}
     		}
-        }
-        catch (NumberFormatException e)
-        {
-            System.out.println("Please Enter a valid number");
-        }
-        finally
-        {
-            customerMenu();
+            catch (NumberFormatException e)
+            {
+                System.out.println("Please Enter a valid number");
+            }
         }
 	}
 
@@ -146,10 +139,10 @@ public class SystemDriver
 	/** Owner specific menu - only accessible with owner user name and password */
 	private void ownerMenu()
 	{
-	    try
-	    {
-    		while (running)
-    		{
+        while (running)
+        {
+            try
+            {
     			System.out.println("======================\n"
     							 + "1. View Bookings\n"
     							 + "2. View Employees\n"
@@ -176,16 +169,12 @@ public class SystemDriver
     			default: System.out.println("no"); break;
     			}
     		}
+        
+            catch (NumberFormatException e)
+            {
+                System.out.println("Please Enter a valid number");
+            }
         }
-        catch (NumberFormatException e)
-        {
-            System.out.println("Please Enter a valid number");
-        }
-        finally
-        {
-            ownerMenu();
-        }
-
 	}
 
 	private void addBooking()
@@ -422,7 +411,7 @@ public class SystemDriver
      **/
     private boolean promptToContinue()
     {
-        System.out.println("Any more transactions (y/n)?");
+        System.out.println("Any more Inputs (y/n)?");
         String response = keyboard.nextLine();
         return response.equalsIgnoreCase("y") || response.equalsIgnoreCase("yes");
     }
