@@ -7,6 +7,11 @@ import java.util.Scanner;
 
 import users.User;
 
+import org.h2.jdbcx.JdbcDataSource;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
 /** System driver class - contains menus and functions used to run the system */
 public class SystemDriver
 {
@@ -19,6 +24,11 @@ public class SystemDriver
 	
 	User authUser = null;	// TODO Add logout options to menus?
 	
+	private static final String DB_DRIVER = "org.h2.Driver";
+	private static final String DB_CONNECTION = "jdbc:h2:./db/database";
+	private static final String DB_USER = "notSEPTadmin";
+	private static final String DB_PASSWORD = "XxX_Pr0-d4nk-passw0rd_XxX";
+	
 	public SystemDriver()
 	{
 		
@@ -29,12 +39,73 @@ public class SystemDriver
 	 */
     public void loadSystem()
     {
+    	initiateDB();
         loadFromFile(customerInfoFileName);
         registerAndLogin();
     }
 	
     /** boolean running keeps menus looping until quit is selected */
 	static Boolean running = true;
+	
+	public void initiateDB()
+	{
+		Connection c = getDBConnection();
+		System.out.println("db done..");
+		try
+		{
+			throw new SQLException("test");
+		}
+		catch (SQLException e)
+		{
+			
+		}
+	}
+	
+	
+
+	// http://www.javatips.net/blog/h2-database-example
+	 private static Connection getDBConnection() {
+	        Connection dbConnection = null;
+	        try
+	        {
+	            Class.forName(DB_DRIVER);
+	        }
+	        catch (ClassNotFoundException e)
+	        {
+	            System.out.println(e.getMessage());
+	        }
+	        try
+	        {
+	            dbConnection = DriverManager.getConnection(DB_CONNECTION, DB_USER, DB_PASSWORD);
+	            return dbConnection;
+	        }
+	        catch (SQLException e)
+	        {
+	            System.out.println(e.getMessage());
+	        }
+	        return dbConnection;
+	    }
+	 
+	 private static void insertWithPreparedStatement() throws SQLException {
+	        Connection c = getDBConnection();
+	        try
+	        {
+	           // TODO
+	        }
+	        /*catch (SQLException e)
+	        {
+	            System.out.println(e.getMessage());
+	        }*/
+	        catch (Exception e)
+	        {
+	            e.printStackTrace();
+	        }
+	        finally
+	        {
+	            c.close();
+	        }
+	    }
+	
 	
 	public void registerAndLogin()
 	{

@@ -83,19 +83,18 @@ public class SystemTests
     }
     
     @Test
-    public void testingLoginFunction()
+    public void testingLoginFunction() // TODO-Adam http://www.h2database.com/html/features.html#in_memory_databases
     {
         User testUser = new User("username", "password");
         
-        systemInMock.provideLines("username", "password", "3");
+        systemInMock.provideLines("username", "password");
         testSystem.loadFromFile("testFile.dat");
         System.out.println(testSystem.userList.get(0).getName());
         testSystem.login();
         
         User loggedInAs = testSystem.getAuthUser();
         
-        assertEquals(loggedInAs.getName(), testUser.getName());
-        assertEquals(loggedInAs.getPassword(), testUser.getPassword());      
+        assertEquals(loggedInAs, testUser); 
     }
 
     @Test
