@@ -422,7 +422,7 @@ public class SystemDriver
      **/
     private boolean promptToContinue()
     {
-        System.out.println("Any more transactions (y/n)?");
+        System.out.println("Any more Inputs? (y/n)?");
         String response = keyboard.nextLine();
         return response.equalsIgnoreCase("y") || response.equalsIgnoreCase("yes");
     }
