@@ -7,19 +7,25 @@ import java.util.Scanner;
 
 import users.User;
 
+
 import org.h2.jdbcx.JdbcDataSource;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-/** System driver class - contains menus and functions used to run the system */
+/**
+ * System driver class - contains menus and functions used to run the system 
+ **/
+
 public class SystemDriver
 {
 	private Scanner keyboard = new Scanner(System.in);
     private String customerInfoFileName = "src/users/customerinfo.dat";
 
-    /** list to hold user data (may use one list for all 
-     * people type objects customer/owner/employee and differentiate with a field) */
+    /** 
+     * list to hold user data (may use one list for all 
+     * people type objects customer/owner/employee and differentiate with a field) 
+     **/
 	List<User> userList = new ArrayList<User>();
 	
 	User authUser = null;	// TODO Add logout options to menus?
@@ -34,9 +40,10 @@ public class SystemDriver
 		
 	}
 	
-	/** loads the system at start up, call functions to load users currently
-	 *  will be used to load all data
-	 */
+	/** 
+	 * loads the system at start up, call functions to load users currently
+	 * will be used to load all data
+	 **/
     public void loadSystem()
     {
     	initiateDB();
@@ -44,7 +51,9 @@ public class SystemDriver
         registerAndLogin();
     }
 	
-    /** boolean running keeps menus looping until quit is selected */
+    /**
+     * boolean running keeps menus looping until quit is selected 
+     **/
 	static Boolean running = true;
 	
 	public void initiateDB()
@@ -109,31 +118,39 @@ public class SystemDriver
 	
 	public void registerAndLogin()
 	{
-		while (running)
-		{
-			System.out.println("======================\n"
-							 + "1. Log In\n"
-							 + "2. Register\n"
-							 + "3. Quit\n"
-							 + "4. owner menu (testing)\n"
-							 + "5. customer menu (testing)\n"
-							 + "6. show currently authenticated user (testing)\n"
-							 + "7. Logout\n");
-			
-			int answer = Integer.parseInt(keyboard.nextLine());
-			
-			switch (answer)
-			{
-			case 1: login();                   break;
-			case 2: register();                break;
-			case 3: running = false;           break;
-			case 4: ownerMenu();               break;
-			case 5: customerMenu();            break;
-			case 6: printCurrentUser();        break;
-			case 7: logout();                  break;
-			default: System.out.println("no"); break;
-			}
-		}
+        while (running)
+        {
+            try
+            {
+    			System.out.println("======================\n"
+    							 + "1. Log In\n"
+    							 + "2. Register\n"
+    							 + "3. Quit\n"
+    							 + "4. owner menu (testing)\n"
+    							 + "5. customer menu (testing)\n"
+    							 + "6. show currently authenticated user (testing)\n"
+    							 + "7. Logout\n");
+    			
+    			int answer = Integer.parseInt(keyboard.nextLine());
+    			
+    			switch (answer)
+    			{
+    			case 1: login();                   break;
+    			case 2: register();                break;
+    			case 3: running = false;           break;
+    			case 4: ownerMenu();               break;
+    			case 5: customerMenu();            break;
+    			case 6: printCurrentUser();        break;
+    			case 7: logout();                  break;
+    			default: System.out.println("no"); break;
+    			}
+    		}
+	    
+            catch (NumberFormatException e)
+            {
+                System.out.println("Please Enter a valid number");
+            }
+        }
 	}
 	
 	private void printCurrentUser()
@@ -149,89 +166,88 @@ public class SystemDriver
 		System.out.println("NONE\n");
 	}
 	
-  /** Customer specific menu, user sent here when valid customer account used*/
+    /**
+     * Customer specific menu, user sent here when valid customer account used
+     **/
 	private void customerMenu()
 	{
-		while (running)
-		{
-			System.out.println("======================\n"
-							 + "1. View Bookings\n"
-							 + "2. Make Booking\n"
-							 + "3. Quit\n"
-							 + "4. register/login menu (testing)\n"
-							 + "5. owner menu (testing)\n");
-			
-			int answer = Integer.parseInt(keyboard.nextLine());
-			
-			switch (answer)
-			{
-			case 1: viewCustomerBooking();     break;
-			case 2: addBooking();              break;
-			case 3: running = false;           break;
-			case 4: registerAndLogin();        break;
-			case 5: customerMenu();            break;
-            case 6: printCurrentUser();        break;
-			default: System.out.println("no"); break;
-			}
-		}
+        while (running)
+        {
+            try
+            {
+    			System.out.println("======================\n"
+    							 + "1. View 'My' Bookings\n"
+    							 + "2. View Available Bookings\n"
+    							 + "3. Make Booking\n"
+    							 + "4. Log out"
+    							 + "5. Quit\n"
+    							 + "6. register/login menu (testing)\n"
+    							 + "7. owner menu (testing)\n"
+    							 + "8. print current user (testing)");
+    			
+    			int answer = Integer.parseInt(keyboard.nextLine());
+    			
+    			switch (answer)
+    			{
+    			case 1: viewCustomerBooking();     break;
+    			case 2: viewAvailableBooking();    break;
+                case 3: addBooking();              break;
+                case 4: logout();
+                        registerAndLogin();        break;
+    			case 5: running = false;           break;
+    			case 6: registerAndLogin();        break;
+    			case 7: ownerMenu();               break;
+                case 8: printCurrentUser();        break;
+    			default: System.out.println("no"); break;
+    			}
+    		}
+            catch (NumberFormatException e)
+            {
+                System.out.println("Please Enter a valid number");
+            }
+        }
 	}
+
 
 	/** Owner specific menu - only accessible with owner user name and password */
 	private void ownerMenu()
 	{
-		while (running)
-		{
-			System.out.println("======================\n"
-							 + "1. View Bookings\n"
-							 + "2. View Employees\n"
-							 + "3. Add Employee\n"
-							 + "4. Remove Employee\n"
-							 + "5. Quit\n"
-							 + "6. ...\n"
-							 + "7. register/login menu (testing)\n"
-							 + "8. customer menu (testing)\n");
-			
-			int answer = Integer.parseInt(keyboard.nextLine());
-			
-			switch (answer)
-			{
-			case 1: viewBooking();             break;
-			case 2: viewEmployee();            break;
-			case 3: addEmployee();             break;
-			case 4: removeEmployee();          break;
-			case 5: running = false;           break;
-			case 6: superSecretMenu();         break;
-			case 7: registerAndLogin();        break;
-			case 8: customerMenu();            break;
-			default: System.out.println("no"); break;
-			}
-		}
-	}
-
-	/** super secret menu... 'nuff said */
-	private void superSecretMenu()
-	{
-		while (running)
-		{
-			System.out.println("======================\n"
-							 + "1. Quit\n"
-							 + "2. ...\n"
-							 + "3. Profit\n"
-							 + "4. owner menu (testing)"
-							 + "5. register/login menu (testing)\n"
-							 + "6. customer menu (testing)\n");
-			
-			int answer = Integer.parseInt(keyboard.nextLine());
-			
-			switch (answer)
-			{
-			case 1: running = false;           break;
-			case 4: ownerMenu();               break;
-			case 5: registerAndLogin();        break;
-			case 6: customerMenu();            break;
-			default: System.out.println("no"); break;
-			}
-		}
+        while (running)
+        {
+            try
+            {
+    			System.out.println("======================\n"
+    							 + "1. View Bookings\n"
+    							 + "2. View Employees\n"
+    							 + "3. Add Employee\n"
+    							 + "4. Remove Employee\n"
+    							 + "5. Quit\n"
+    							 + "6. Log Out\n"
+    							 + "7. register/login menu (testing)\n"
+    							 + "8. customer menu (testing)\n");
+    			
+    			int answer = Integer.parseInt(keyboard.nextLine());
+    			
+    			switch (answer)
+    			{
+    			case 1: viewBooking();             break;
+    			case 2: viewEmployee();            break;
+    			case 3: addEmployee();             break;
+    			case 4: removeEmployee();          break;
+    			case 5: running = false;           break;
+    			case 6: logout();
+    			        registerAndLogin();        break;
+    			case 7: registerAndLogin();        break;
+    			case 8: customerMenu();            break;
+    			default: System.out.println("no"); break;
+    			}
+    		}
+        
+            catch (NumberFormatException e)
+            {
+                System.out.println("Please Enter a valid number");
+            }
+        }
 	}
 
 	private void addBooking()
@@ -240,10 +256,31 @@ public class SystemDriver
 		
 	}
 
+	// TODO mock up function - not yet implemented
+	private void viewAvailableBooking()
+	{
+		System.out.println("=================================================\n"
+						 + "Available Bookings\n"
+						 + "=================================================\n"
+						 + "|     |Mon  |Tue  |Wed  |Thu  |Fri  |Sat  |Sun  |\n"
+						 + "|9-10 |     |     |     |     |     |     |     |\n"
+						 + "|10-11|     |     |     |     |     |     |     |\n"
+						 + "|11-12|     |     |     |     |     |     |     |\n"
+						 + "|12-1 |     |     |     |     |     |     |     |\n"
+						 + "|1-2  |     |     |     |     |     |     |     |\n"
+						 + "|2-3  |     |     |     |     |     |     |     |\n"
+						 + "|3-4  |     |     |     |     |     |     |     |\n"
+						 + "|4-5  |     |     |     |     |     |     |     |\n");
+	}
+
+	// TODO mock up function - not yet implemented
 	private void viewCustomerBooking()
 	{
-		// TODO Auto-generated method stub
-		
+		System.out.println("Welcome " + getAuthUser().getName());
+		System.out.println("You Have a booking with us at:\n"
+						 + "4-5pm Thurday 23/3\n"
+						 + "And At:\n"
+						 + "1-2pm Friday 24/3\n");
 	}
 
 	private void removeEmployee()
@@ -440,5 +477,31 @@ public class SystemDriver
     {
     	return authUser;
     }
+    
+    /** 
+     * used to keep looping until enough employees/time slots have
+     * been added 
+     **/
+    private boolean promptToContinue()
+    {
+        System.out.println("Any more Inputs (y/n)?");
+        String response = keyboard.nextLine();
+        return response.equalsIgnoreCase("y") || response.equalsIgnoreCase("yes");
+    }
 
+    /** 
+     * used to get user string input - names/ID/password whenever required
+     * throws exception when e or exit are entered at any prompt, allows user
+     * to quit to main menu at any time
+     **/
+    private String promptAndGetString(final String PROMPT)throws UserRequestsExitException
+    {
+        System.out.println(PROMPT);
+        String answer = keyboard.nextLine();
+        if (answer.equalsIgnoreCase("e") || answer.equalsIgnoreCase("exit"))
+        {
+            throw new UserRequestsExitException();
+        }
+        return answer;
+    }
 }
