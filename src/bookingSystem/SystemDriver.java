@@ -278,7 +278,19 @@ public class SystemDriver
 
 	private void removeEmployee()
 	{
-		// TODO Auto-generated method stub
+		System.out.println("Please enter employee ID\n");
+		String ID = keyboard.nextLine();
+		for (int x = 0 ; x < employeeList.size();x ++ ){
+			if(employeeList.get(x).getID().equals(ID)){
+				System.out.println("Are you sure you wish to remove"+ employeeList.get(x).getName() +" from the system? Y/N\n");
+				
+				if(keyboard.nextLine().equals("Y")){
+					employeeList.remove(x);
+					System.out.println("Sucessfully removed");
+				}
+				
+			}
+		}
 		
 	}
 
@@ -296,9 +308,27 @@ public class SystemDriver
 
 	private void viewEmployee()
 	{
-		// TODO Auto-generated method stub
-		
+		System.out.println("1. View all employees/n"+ "2. Search an employee\n");
+		if(keyboard.nextLine().equals("1")){
+			for (int x = 0 ; x < employeeList.size();x ++ ){
+				System.out.println(employeeList.get(x).getID() + "-" + employeeList.get(x).getName() + "/n");
+					
+				}
+		}
+		else if(keyboard.nextLine().equals("2")){
+			System.out.println("Enter ID\n");
+			String ID = keyboard.nextLine(); 
+			for (int x = 0 ; x < employeeList.size();x ++ ){
+				if(employeeList.get(x).getID().equals(ID)){
+					System.out.println(employeeList.get(x).getID() + "-" + employeeList.get(x).getName() + "/n");
+				}	
+			}
+		}
 	}
+	
+		
+		
+	
 
 	private void viewBooking()
 	{
