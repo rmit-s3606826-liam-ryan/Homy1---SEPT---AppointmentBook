@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Scanner;
+import java.util.StringTokenizer;
 
 import Bookings.booking;
 import Bookings.timeSlots;
@@ -124,7 +125,7 @@ public class SystemDriver
     			{
     			case 1: viewCustomerBooking();     break;
     			case 2: viewAvailableBooking();    break;
-                case 3: addBooking();              break;
+                case 3: addBookingMenu();          break;
                 case 4: logout();
                         registerAndLogin();        break;
     			case 5: running = false;           break;
@@ -183,6 +184,48 @@ public class SystemDriver
         }
 	}
 
+	private void addBookingMenu(){
+		int answer = Integer.parseInt(keyboard.nextLine());
+
+		System.out.println("1. View available bookingtimes/n"
+				+ "2. Check if a time and date are available");
+		switch(answer){
+		case 1:
+			displayTimeSlots();
+		case 2:
+			System.out.println("Please enter the date in yyyy-mm-dd format");
+			//need to add a check 
+		default: 
+			System.out.println("Not an option, try again");
+		}
+		
+		
+	
+	
+	}
+	//need to fix this
+	private void searchTimeSlots(String date){
+		Calendar calendar = new GregorianCalendar(0000,0,00,00,00,00);
+		int Array[] = null; 
+		StringTokenizer st = new StringTokenizer(date, "-");
+		int x = 0;
+		while (st.hasMoreTokens()){
+			Array[x]= Integer.parseInt(st.nextToken());
+			x++;
+			System.out.println(Array[x]);
+		}
+		
+		//calendar.set(z, Array[1] ,Array[2]);
+		
+	}
+	
+	private void displayTimeSlots(){
+		for (int x = 0; x < timeSlot.size(); x++){
+			System.out.println(timeSlot.get(x).getDate()+"/n");
+			
+		}
+		
+	}
 	private void addBooking(int year, int month, int day, int startHour, String Customer)
 	{
 		Calendar calendar = new GregorianCalendar(year,month,day,startHour,00,00);
