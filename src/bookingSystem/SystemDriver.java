@@ -11,6 +11,7 @@ import java.util.StringTokenizer;
 
 import Bookings.booking;
 import Bookings.timeSlots;
+import users.Employee;
 import users.User;
 
 /**
@@ -26,6 +27,8 @@ public class SystemDriver
      * people type objects customer/owner/employee and differentiate with a field) 
      **/
 	List<User> userList = new ArrayList<User>();
+	List<Employee> employeeList = new ArrayList<Employee>();
+
 	List<timeSlots> timeSlot = new ArrayList<timeSlots>();
 	
 	User authUser = null;	// TODO Add logout options to menus?
@@ -281,8 +284,14 @@ public class SystemDriver
 
 	private void addEmployee()
 	{
-		// TODO Auto-generated method stub
+		System.out.println("Please enter new Employees name\n");
+		String name = keyboard.nextLine();
+		System.out.println("Please enter employee ID\n");
+		String ID = keyboard.nextLine();
+
 		
+		employeeList.add(new Employee(name,ID));
+		System.out.println(name + "has sucessfully been created");
 	}
 
 	private void viewEmployee()
