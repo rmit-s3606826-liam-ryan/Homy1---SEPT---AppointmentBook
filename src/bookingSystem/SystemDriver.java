@@ -2,9 +2,16 @@ package bookingSystem;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Scanner;
+import java.util.StringTokenizer;
 
+import Bookings.booking;
+import Bookings.timeSlots;
+import users.Employee;
 import users.User;
 
 
@@ -27,6 +34,9 @@ public class SystemDriver
      * people type objects customer/owner/employee and differentiate with a field) 
      **/
 	List<User> userList = new ArrayList<User>();
+	List<Employee> employeeList = new ArrayList<Employee>();
+
+	List<timeSlots> timeSlot = new ArrayList<timeSlots>();
 	
 	User authUser = null;	// TODO Add logout options to menus?
 	
@@ -191,7 +201,7 @@ public class SystemDriver
     			{
     			case 1: viewCustomerBooking();     break;
     			case 2: viewAvailableBooking();    break;
-                case 3: addBooking();              break;
+                case 3: addBookingMenu();          break;
                 case 4: logout();
                         registerAndLogin();        break;
     			case 5: running = false;           break;
@@ -250,17 +260,73 @@ public class SystemDriver
         }
 	}
 
-	private void addBooking()
-	{
-		// TODO Auto-generated method stub
+	private void addBookingMenu(){
+		int answer = Integer.parseInt(keyboard.nextLine());
+
+		System.out.println("1. View available bookingtimes/n"
+				+ "2. Check if a time and date are available");
+		switch(answer){
+		case 1:
+			displayTimeSlots();
+		case 2:
+			System.out.println("Please enter the date in yyyy-mm-dd format");
+			//need to add a check 
+		default: 
+			System.out.println("Not an option, try again");
+		}
+		
+		
+	
+	
+	}
+	//need to fix this
+	private void searchTimeSlots(String date){
+		Calendar calendar = new GregorianCalendar(0000,0,00,00,00,00);
+		int Array[] = null; 
+		StringTokenizer st = new StringTokenizer(date, "-");
+		int x = 0;
+		while (st.hasMoreTokens()){
+			Array[x]= Integer.parseInt(st.nextToken());
+			x++;
+			System.out.println(Array[x]);
+		}
+		
+		//calendar.set(z, Array[1] ,Array[2]);
 		
 	}
-
+	
+	private void displayTimeSlots(){
+		for (int x = 0; x < timeSlot.size(); x++){
+			System.out.println(timeSlot.get(x).getDate()+"/n");
+			
+		}
+		
+	}
+	private void addBooking(int year, int month, int day, int startHour, String Customer)
+	{
+		Calendar calendar = new GregorianCalendar(year,month,day,startHour,00,00);
+		for (int x = 0; x < timeSlot.size(); x++){
+			if(timeSlot.get(x).getDate().compareTo(calendar)==0){
+				new booking(calendar,Customer); 
+			}
+			else{
+				System.out.println("Sorry, no timeslot available for your chosen time"); 
+			}
+		}
+		
+	}
+	
+	private void addTimeSlots(int year, int month, int day, int startHour,int endHour){
+		for ( int start = startHour; start< endHour; start ++){
+			timeSlot.add(new timeSlots( year, month, day, start));
+		}
+	}	
+	
 	// TODO mock up function - not yet implemented
 	private void viewAvailableBooking()
 	{
 		System.out.println("=================================================\n"
-						 + "Available Bookings\n"
+						 + "Available Bookings for" +" \n"
 						 + "=================================================\n"
 						 + "|     |Mon  |Tue  |Wed  |Thu  |Fri  |Sat  |Sun  |\n"
 						 + "|9-10 |     |     |     |     |     |     |     |\n"
@@ -285,21 +351,57 @@ public class SystemDriver
 
 	private void removeEmployee()
 	{
-		// TODO Auto-generated method stub
+		System.out.println("Please enter employee ID\n");
+		String ID = keyboard.nextLine();
+		for (int x = 0 ; x < employeeList.size();x ++ ){
+			if(employeeList.get(x).getID().equals(ID)){
+				System.out.println("Are you sure you wish to remove"+ employeeList.get(x).getName() +" from the system? Y/N\n");
+				
+				if(keyboard.nextLine().equals("Y")){
+					employeeList.remove(x);
+					System.out.println("Sucessfully removed");
+				}
+				
+			}
+		}
 		
 	}
 
 	private void addEmployee()
 	{
-		// TODO Auto-generated method stub
+		System.out.println("Please enter new Employees name\n");
+		String name = keyboard.nextLine();
+		System.out.println("Please enter employee ID\n");
+		String ID = keyboard.nextLine();
+
 		
+		employeeList.add(new Employee(name,ID));
+		System.out.println(name + "has sucessfully been created");
 	}
 
 	private void viewEmployee()
 	{
-		// TODO Auto-generated method stub
-		
+		System.out.println("1. View all employees/n"+ "2. Search an employee\n");
+		if(keyboard.nextLine().equals("1")){
+			for (int x = 0 ; x < employeeList.size();x ++ ){
+				System.out.println(employeeList.get(x).getID() + "-" + employeeList.get(x).getName() + "/n");
+					
+				}
+		}
+		else if(keyboard.nextLine().equals("2")){
+			System.out.println("Enter ID\n");
+			String ID = keyboard.nextLine(); 
+			for (int x = 0 ; x < employeeList.size();x ++ ){
+				if(employeeList.get(x).getID().equals(ID)){
+					System.out.println(employeeList.get(x).getID() + "-" + employeeList.get(x).getName() + "/n");
+				}	
+			}
+		}
 	}
+	
+		
+		
+	
 
 	private void viewBooking()
 	{
