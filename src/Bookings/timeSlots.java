@@ -1,23 +1,28 @@
 package Bookings;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
+import java.util.GregorianCalendar;
+
 public class timeSlots {
-	private String Date; 
-	private String time; 
+	SimpleDateFormat sdf = new SimpleDateFormat("yyyy MMM dd HH:mm:ss");
+	Calendar calendar = new GregorianCalendar(0000,0,00,00,00,00);
 	private String employee; 
 	private boolean booked = false; 
 	
-	timeSlots(String Date, String time, String employee){
-		this.Date=Date; 
-		this.time= time; 
-		this.employee=employee;
+	public timeSlots( int year, int month, int day, int hour){
+		
+		//this.employee=employee;
+		
+		calendar.set(year, month, day, hour, 00, 00);
+		
 	}
 	
-	String getDate(){
-		return Date; 
-	}
 	
-	String getTime(){
-		return time; 
+
+	public Calendar getDate(){
+		return calendar; 
 	}
 	
 	String getEmployee(){
