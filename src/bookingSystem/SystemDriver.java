@@ -5,6 +5,9 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.regex.*;
+
+import com.sun.xml.internal.ws.util.StringUtils;
 
 import users.User;
 
@@ -201,15 +204,152 @@ public class SystemDriver
 	{
 		// Prevent duplicate registrations, check for existing username entries
 		
-		String username, password = null;
-		System.out.println("======================\n"
-				 + "Enter username: ");
+		String username, password, email, fullName, phoneNumber, DOB, confirmPassword = null;
+		System.out.println("======================");
+		boolean validUsername = false;
+		do{
+		System.out.println("Enter Username: ");
 		username = keyboard.nextLine();
+			if (username.matches("[a-zA-Z0-9]+")) //need a regex that accepts only alphanumeric only
+			{
+				validUsername = true;
+		}
+			else{
+				System.out.println("invalid character, please insert only letters and numbers");
+				validUsername = false;	
+			}
+		}
+		while (validUsername == false);
 		
+		/////////////
+		boolean samePassword = false;
+		do{
 		System.out.println("\nEnter password: ");
 		password = keyboard.nextLine();
 		
-		User newUser = new User(username, password);
+		System.out.println("\nConfirm password: ");
+		confirmPassword = keyboard.nextLine();
+		
+		if (password.equals(confirmPassword))
+		{
+			samePassword = true;
+		}
+		else{ 
+			System.out.println("Passwords do not match");
+			samePassword = false;
+		}
+		}
+		while (samePassword == false);
+		///////////////	
+		boolean validEmail = false;
+	/*	do{ 
+		System.out.println("\nEnter email address: ");
+		email = keyboard.nextLine();
+		if (email.matches("[a-zA-Z0-9]+")) //need a regex that accepts  alphanumeric + a few special characters
+		{
+			validEmail = true;
+	}
+		else{
+			System.out.println("invalid email address");
+		}
+			validEmail = false;
+		}
+		while (validEmail == false); */
+		///////////
+		email = "ok"; //temporary 
+		boolean validName = false; 
+		do{
+		System.out.println("\nEnter full name: ");
+		fullName = keyboard.nextLine();
+		if (fullName.matches("[a-zA-Z]+")){
+			validName = true;
+			System.out.println("debug1");
+		}
+		else
+		{
+			System.out.println("Please use only alphabetical letters in your name");
+			validName = false;			
+		}
+		}
+		while (validName == false);
+		////////////
+		boolean invalidNumber = false;
+		do{
+		System.out.println("\nEnter phone number: ");
+		phoneNumber = keyboard.nextLine();
+		if (phoneNumber.matches("[0-9]+") == false || phoneNumber.length() < 6){
+			System.out.println("Please enter a valid phone number!");
+			System.out.println(phoneNumber.matches("[0-9]+"));
+			invalidNumber = false;
+		}
+		else
+		{
+			invalidNumber = true;
+		}
+		}
+		while (invalidNumber == false);
+		////////////
+		boolean invalidDate = false;
+		do{
+		int day = 0, month = 0, year = 0;
+		boolean invalidDay = false;
+		boolean invalidMonth = false;
+		boolean invalidYear = false;
+		System.out.println("\nEnter date of birth in the order day, month, year: ");
+		do{
+		System.out.println("day:");
+
+		if (keyboard.hasNextInt() == true)
+		{
+		day = keyboard.nextInt();
+		if( day < 32 && day > 0)
+		{
+			invalidDay = true;
+		}
+		else {
+			System.out.println("Please insert a value equal to or lower than 31");
+			invalidDay = false;
+		}
+		}
+		else {
+			System.out.println("Please insert a number");
+			day = keyboard.nextInt();
+			
+		}
+		}
+		while(invalidDay == false);
+		do{
+			System.out.println("month: ");
+			month = keyboard.nextInt();
+			if (month < 13 && month > 0){
+				invalidMonth = true;
+			}
+			else {
+				System.out.println("Please insert a value equal to or lower than 12");
+				invalidMonth = false;
+				year = 4000;
+			}
+		}
+		while(invalidMonth == false);
+		do{
+			System.out.println("year: " );
+			year = keyboard.nextInt();
+			if(year < 2018 && year > 0){
+				invalidYear = true;
+			}
+			else {
+				System.out.println("Please insert a value equal to or lower than 2018");
+				invalidYear = false;
+		  	}
+		}
+		while(invalidYear == false);
+		
+		DOB = day + "/" + month + "/" + year; 
+		invalidDate = true;
+		}
+		while (invalidDate == false);
+
+		User newUser = new User(username, password, email, fullName, phoneNumber, DOB);
 		User userCheck = null;
 		boolean invalid = false;
 		
@@ -310,7 +450,7 @@ public class SystemDriver
             String customerName = customerInputStream.next();
             String customerPassword = customerInputStream.nextLine();
             customerPassword = customerPassword.substring(1);
-            User newUser = new User(customerName, customerPassword);
+            User newUser = new User(customerName, customerPassword, null, null, null, null);
 
             userList.add(newUser);
             System.out.println(newUser.getName() + newUser.getPassword());

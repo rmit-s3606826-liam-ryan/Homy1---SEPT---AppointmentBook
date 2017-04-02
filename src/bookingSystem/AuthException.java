@@ -11,4 +11,5 @@ public class AuthException extends Exception {
 	{
 		super(error);
 	}
+	
 }
