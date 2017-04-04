@@ -151,16 +151,35 @@ public class SystemDriver
                   + "email varchar(255), " 
                   + "phoneno varchar(255)," 
                   + "DOB varchar(255))");
+            stmt.execute("CREATE TABLE BOOKINGS(" 
+                    + "date varchar(255),"
+                    + "username varchar(255),"
+                    + "employee varchar(255),"
+                    + "service varchar(255),"
+                    + "duration double,"
+                    + "FOREIGN KEY (username) REFERENCES USER(username))");
+            stmt.execute("CREATE TABLE TIMESLOTS("
+                       + "date varchar(255),"
+                       + "employee varchar(255),"
+                       + "booked varchar(255))");
+            
+            
+            stmt.execute("INSERT INTO TIMESLOTS(date, employee, booked) "
+                    + "VALUES('2017 03 26 13:00:00', 'Hooch', 'false')");
+            stmt.execute("INSERT INTO TIMESLOTS(date, employee, booked) "
+                    + "VALUES('2017 03 26 14:00:00', 'Hooch', 'false')");
+            stmt.execute("INSERT INTO TIMESLOTS(date, employee, booked) "
+                    + "VALUES('2017 03 26 15:00:00', 'Hooch', 'true')");
+            stmt.execute("INSERT INTO TIMESLOTS(date, employee, booked) "
+                    + "VALUES('2017 03 26 16:00:00', 'Hooch', 'false')");
+            stmt.execute("INSERT INTO TIMESLOTS(date, employee, booked) "
+                    + "VALUES('2017 03 26 17:00:00', 'Hooch', 'true')");
+            
             stmt.execute("INSERT INTO USER(username, password, email, phoneNo, DOB) "
                        + "VALUES('Jimbob', 'password', 'jim@bob.com', '0400000001', '07/07/1907')");
             stmt.execute("INSERT INTO USER(username, password, email, phoneNo, DOB)"
                        + "VALUES('notJimbob', 'notpassword', 'notjim@bob.com', '0400000002', '08/08/1908')");
-            stmt.execute("CREATE TABLE BOOKINGS(" + "date varchar(255),"
-                       + "username varchar(255),"
-                       + "employee varchar(255),"
-                       + "service varchar(255),"
-                       + "duration double,"
-                       + "FOREIGN KEY (username) REFERENCES USER(username))");
+            
             stmt.execute("INSERT INTO BOOKINGS(date, username, employee, service, duration)"
                        + "VALUES('2017 04 02 13:00:00','Jimbob', 'Hooch', 'Service 1', '.5')");
             stmt.execute("INSERT INTO BOOKINGS(date, username, employee, service, duration)"
@@ -201,16 +220,20 @@ public class SystemDriver
         {
             try
             {
-                System.out.println("======================\n" + "1. Log In\n" + "2. Register\n" + "3. Quit\n"
-                        + "4. owner menu (testing)\n" + "5. customer menu (testing)\n"
-                        + "6. show currently authenticated user (testing)\n" + "7. Logout\n");
+                System.out.println("======================\n" 
+                                 + "1. Log In\n" 
+                                 + "2. Register\n" + "3. Quit\n"
+                                 + "4. owner menu (testing)\n" 
+                                 + "5. customer menu (testing)\n"
+                                 + "6. show currently authenticated user (testing)\n" 
+                                 + "7. Logout\n");
 
                 int answer = Integer.parseInt(keyboard.nextLine());
 
                 switch (answer)
                 {
                 case 1:  login();                  break;
-                case 2:  register();               break;
+                case 2:  register2();              break;
                 case 3:  running = false;          break;
                 case 4:  ownerMenu();              break;
                 case 5:  customerMenu();           break;
@@ -248,10 +271,14 @@ public class SystemDriver
         {
             try
             {
-                System.out.println("======================\n" + "1. View 'My' Bookings\n"
-                        + "2. View Available Bookings\n" + "3. Make Booking\n" + "4. Log out" + "5. Quit\n"
-                        + "6. register/login menu (testing)\n" + "7. owner menu (testing)\n"
-                        + "8. print current user (testing)");
+                System.out.println("======================\n" 
+                                 + "1. View 'My' Bookings\n"
+                                 + "2. View Available Bookings\n" 
+                                 + "3. Make Booking\n" + "4. Log out\n" 
+                                 + "5. Quit\n"
+                                 + "6. register/login menu (testing)\n" 
+                                 + "7. owner menu (testing)\n"
+                                 + "8. print current user (testing)");
 
                 int answer = Integer.parseInt(keyboard.nextLine());
 
@@ -285,24 +312,34 @@ public class SystemDriver
         {
             try
             {
-                System.out.println("======================\n" + "1. View Bookings\n" + "2. View Employees\n"
-                        + "3. Add Employee\n" + "4. Remove Employee\n" + "5. Quit\n" + "6. Log Out\n"
-                        + "7. register/login menu (testing)\n" + "8. customer menu (testing)\n");
+                System.out.println("======================\n" 
+                                 + "1. View Bookings\n" 
+                                 + "2. View Employees\n"
+                                 + "3. Add Working Times\n"
+                                 + "4. Add Employee\n" 
+                                 + "5. Remove Employee\n"
+                                 + "6. View employee working times\n"
+                                 + "7. Quit\n" 
+                                 + "8. Log Out\n"
+                                 + "9. register/login menu (testing)\n" 
+                                 + "10. customer menu (testing)\n");
 
                 int answer = Integer.parseInt(keyboard.nextLine());
 
                 switch (answer)
                 {
-                case 1:  viewBooking();             break;
-                case 2:  viewEmployee();            break;
-                case 3:  addEmployee();             break;
-                case 4:  removeEmployee();          break;
-                case 5:  running = false;           break;
-                case 6:  logout();
-                         registerAndLogin();        break;
-                case 7:  registerAndLogin();        break;
-                case 8:  customerMenu();            break;
-                default: System.out.println("no");  break;
+                case 1:  viewBooking();              break;
+                case 2:  viewEmployee();             break;
+                case 3:  addWorkingTimes();          break;
+                case 4:  addEmployee();              break;
+                case 5:  removeEmployee();           break;
+                case 6:  viewEmployeeAvailability(); break;
+                case 7:  running = false;            break;
+                case 8:  logout();
+                         registerAndLogin();         break;
+                case 9:  registerAndLogin();         break;
+                case 10: customerMenu();             break;
+                default: System.out.println("no");   break;
                 }
             }
 
@@ -313,11 +350,46 @@ public class SystemDriver
         }
     }
 
+    private void viewEmployeeAvailability()
+    {
+        Connection c = getDBConnection();
+        Statement stmt = null;
+        try
+        {
+            stmt = c.createStatement();
+            
+            System.out.println("======================\n"
+                             + "Employee Availability\n"
+                             + "======================\n"
+                             + "Enter employee name:\n");
+            String employee = keyboard.nextLine();
+            System.out.println(employee + " is available for the following times:\n");
+            
+            ResultSet rs = stmt.executeQuery("SELECT * FROM TIMESLOTS WHERE employee ='" + employee + "' AND booked = 'false'");
+            while (rs.next())
+            {
+                System.out.println(rs.getString("date"));
+            }
+            c.close();
+            
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    private void addWorkingTimes()
+    {
+        // TODO Auto-generated method stub
+        
+    }
+
     private void addBookingMenu()
     {
         int answer = Integer.parseInt(keyboard.nextLine());
 
-        System.out.println("1. View available bookingtimes/n" + "2. Check if a time and date are available");
+        System.out.println("1. View available bookingtimes\n" + "2. Check if a time and date are available");
         switch (answer)
         {
         case 1:
@@ -382,17 +454,18 @@ public class SystemDriver
     // TODO mock up function - not yet implemented
     private void viewAvailableBooking()
     {
-        System.out.println("=================================================\n" + "Available Bookings for" + " \n"
-                + "=================================================\n"
-                + "|     |Mon  |Tue  |Wed  |Thu  |Fri  |Sat  |Sun  |\n"
-                + "|9-10 |     |     |     |     |     |     |     |\n"
-                + "|10-11|     |     |     |     |     |     |     |\n"
-                + "|11-12|     |     |     |     |     |     |     |\n"
-                + "|12-1 |     |     |     |     |     |     |     |\n"
-                + "|1-2  |     |     |     |     |     |     |     |\n"
-                + "|2-3  |     |     |     |     |     |     |     |\n"
-                + "|3-4  |     |     |     |     |     |     |     |\n"
-                + "|4-5  |     |     |     |     |     |     |     |\n");
+        System.out.println("=================================================\n" 
+                         + "Available Bookings for" + " \n"
+                         + "=================================================\n"
+                         + "|     |Mon  |Tue  |Wed  |Thu  |Fri  |Sat  |Sun  |\n"
+                         + "|9-10 |     |     |     |     |     |     |     |\n"
+                         + "|10-11|     |     |     |     |     |     |     |\n"
+                         + "|11-12|     |     |     |     |     |     |     |\n"
+                         + "|12-1 |     |     |     |     |     |     |     |\n"
+                         + "|1-2  |     |     |     |     |     |     |     |\n"
+                         + "|2-3  |     |     |     |     |     |     |     |\n"
+                         + "|3-4  |     |     |     |     |     |     |     |\n"
+                         + "|4-5  |     |     |     |     |     |     |     |\n");
     }
 
     private void viewCustomerBooking()
@@ -412,6 +485,7 @@ public class SystemDriver
             {
                 System.out.println(rs.getString("date") + " at " + " with " + rs.getString("employee"));
             }
+            c.close();
         }
         catch (SQLException e)
         {
@@ -582,7 +656,7 @@ public class SystemDriver
         System.out.println("\nEnter password: ");
         password = keyboard.nextLine();
 
-        newUser = new User(username, password);
+        newUser = new User(username, password, null, null, null, null);
         try
         {
             addUser(newUser);
@@ -661,10 +735,6 @@ public class SystemDriver
         setAuthUser(null);
     }
 
-    /**
-     * load data from file - currently loads customer data only, will be
-     * refactored to be more general
-     */
 
 	private void register2()
 	{
@@ -838,6 +908,10 @@ public class SystemDriver
 
 	}
 
+    /**
+     * load data from file - currently loads customer data only, will be
+     * refactored to be more general
+     */
     public boolean loadFromFile(String customerInfoFileName)
     {
         Scanner customerInputStream = null;
