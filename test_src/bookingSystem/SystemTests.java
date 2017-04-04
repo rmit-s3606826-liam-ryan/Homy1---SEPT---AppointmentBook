@@ -8,6 +8,9 @@ import java.io.IOException;
 import org.junit.*;
 import org.junit.contrib.java.lang.system.TextFromStandardInputStream;
 import org.junit.rules.TemporaryFolder;
+
+import Bookings.timeSlots;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,7 +58,7 @@ public class SystemTests
     @Test
     public void testingRegisterFunction()
     {
-        User testUser = new User("username", "password");
+        User testUser = new User("username", "password", null);
         
     	// provides mocked user input for next called function
         systemInMock.provideLines("username", "password", "5");
@@ -69,8 +72,8 @@ public class SystemTests
     public void testRegisterDuplicateUsername_fail() throws DuplicateUserException
     {
     	String duplicateUsername = "testUser";
-    	User user1 = new User(duplicateUsername, "pw1");
-    	User user2 = new User(duplicateUsername, "pw2");
+    	User user1 = new User(duplicateUsername, "pw1", null);
+    	User user2 = new User(duplicateUsername, "pw2", null);
     	try
     	{
     		testSystem.addUser(user1);
@@ -89,7 +92,7 @@ public class SystemTests
     @Test
     public void testingLoginFunction() // TODO-Adam http://www.h2database.com/html/features.html#in_memory_databases
     {
-        User testUser = new User("username", "password");
+        User testUser = new User("username", "password", null);
         
       	// provides mocked user input for next called function
         systemInMock.provideLines("username", "password");
@@ -121,7 +124,7 @@ public class SystemTests
         String testFileName = "testFile.dat";
         
         assertTrue(testSystem.loadFromFile(testFileName));
-        User testUser = new User("username", "password");
+        User testUser = new User("username", "password", null);
         User userFromFile = testSystem.userList.get(0);
 
         assertEquals(userFromFile.getName(), testUser.getName());
@@ -131,7 +134,7 @@ public class SystemTests
     @Test
     public void testLogout()
     {
-    	User testUser = new User("testUsername","testPW");
+    	User testUser = new User("testUsername","testPW", null);
     	testSystem.setAuthUser(testUser);
     	
     	assertEquals(testSystem.getAuthUser(), testUser); // Check that authorised user is set
@@ -142,7 +145,7 @@ public class SystemTests
     @Test
     public void testThatBookingCorrectlyAssignedToCustomer()
     {
-    	List<timeSlots> testBookingList = new ArrayList<timeslots>();
+    	List<timeSlots> testBookingList = new ArrayList<timeSlots>();
     	User testUser = new User("username", "password", testBookingList);
     	timeSlots testBooking = new timeSlots("24/4/17", "1:00", "Hooch");
     	testBookingList.add(testBooking);
@@ -159,7 +162,7 @@ public class SystemTests
     @Test
     public void testThatAvailableBookingCorrectlyAddedToList()
     {
-    	List<timeSlots> testAvailableBooking = new ArrayList<timeslots>();
+    	List<timeSlots> testAvailableBooking = new ArrayList<timeSlots>();
     	timeSlots testBooking = new timeSlots("24/3/17", "1:00", "Hooch");
     	testAvailableBooking.add(testBooking);
    	
