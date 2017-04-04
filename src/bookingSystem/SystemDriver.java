@@ -153,6 +153,7 @@ public class SystemDriver
 	                            + "FOREIGN KEY (username) REFERENCES USER(username))");
                 stmt.execute("INSERT INTO BOOKINGS(date, time, username, employee, service, duration) VALUES('4/4/2017', '10:00','Jimbob', 'Hooch', 'Service 1', '.5')");
                 stmt.execute("INSERT INTO BOOKINGS(date, time, username, employee, service, duration) VALUES('7/4/2017', '13:00', 'Jimbob', 'Hooch', 'Service 2', '1.0')");
+                stmt.execute("INSERT INTO BOOKINGS(date, time, username, employee, service, duration) VALUES('4/4/2017', '10:00','notJimbob', 'notHooch', 'Service 3', '2.0')");
 
 	            ResultSet rs = stmt.executeQuery("SELECT * FROM USER");
 	            while (rs.next())
@@ -349,7 +350,7 @@ public class SystemDriver
 	
 	private void displayTimeSlots(){
 		for (int x = 0; x < timeSlot.size(); x++){
-			System.out.println(timeSlot.get(x).getDate()+"/n");
+			System.out.println(timeSlot.get(x).getDate()+"\n");
 			
 		}
 		
@@ -471,8 +472,34 @@ public class SystemDriver
 
 	private void viewBooking()
 	{
-		// TODO Auto-generated method stub
-		
+        Connection c = getDBConnection();
+        Statement stmt = null;
+        try
+        {
+            Calendar cal = Calendar.getInstance();
+            cal.add(Calendar.DATE, -7);
+            System.out.println("Date = "+ cal.getTime());
+            
+            stmt = c.createStatement();
+   
+            String currentUser = getAuthUser().getName();
+            System.out.println("Welcome " + currentUser);
+            System.out.println("There are booking(s)on:\n");
+            
+            ResultSet rs = stmt.executeQuery("SELECT * FROM BOOKINGS");
+            while (rs.next())
+            {
+                System.out.println(rs.getString("date") 
+                                 + " at " + rs.getString("time") 
+                                 + " Under the name " 
+                                 + rs.getString("username") 
+                                 + " with " + rs.getString("employee"));
+            }
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }   
 	}
 
 	public User addUser(User newUser) throws DuplicateUserException, IOException
