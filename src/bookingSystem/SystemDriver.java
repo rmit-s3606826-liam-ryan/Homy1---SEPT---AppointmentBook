@@ -350,7 +350,7 @@ public class SystemDriver
 	
 	private void displayTimeSlots(){
 		for (int x = 0; x < timeSlot.size(); x++){
-			System.out.println(timeSlot.get(x).getDate()+"/n");
+			System.out.println(timeSlot.get(x).getDate()+"\n");
 			
 		}
 		
@@ -476,6 +476,10 @@ public class SystemDriver
         Statement stmt = null;
         try
         {
+            Calendar cal = Calendar.getInstance();
+            cal.add(Calendar.DATE, -7);
+            System.out.println("Date = "+ cal.getTime());
+            
             stmt = c.createStatement();
    
             String currentUser = getAuthUser().getName();
