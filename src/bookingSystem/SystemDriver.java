@@ -8,6 +8,7 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Scanner;
 import java.util.StringTokenizer;
+import java.util.logging.*;
 
 import Bookings.booking;
 import Bookings.timeSlots;
@@ -16,9 +17,13 @@ import users.User;
 
 
 import org.h2.jdbcx.JdbcDataSource;
+import org.h2.tools.DeleteDbFiles;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
  * System driver class - contains menus and functions used to run the system 
@@ -28,6 +33,7 @@ public class SystemDriver
 {
 	private Scanner keyboard = new Scanner(System.in);
     private String customerInfoFileName = "src/users/customerinfo.dat";
+    private static final Logger logger = Logger.getLogger("SystemDriver");
 
     /** 
      * list to hold user data (may use one list for all 
@@ -56,7 +62,24 @@ public class SystemDriver
 	 **/
     public void loadSystem()
     {
+        try
+        {
+            DeleteDbFiles.execute("./db", "database", true);
+            insertWithPreparedStatement();
+            //NotSeptLogger.setup();
+        }
+//        catch (IOException e)
+//        {
+//            e.printStackTrace();
+//            throw new RuntimeException("Probelms with log file");
+//        }
+        catch (SQLException e)
+        {
+            System.out.println(e.getMessage());
+        }
+
     	initiateDB();
+    	
         loadFromFile(customerInfoFileName);
         registerAndLogin();
     }
@@ -78,6 +101,7 @@ public class SystemDriver
 		{
 			
 		}
+        //logger.info("Database Initialised");
 	}
 	
 	
@@ -107,14 +131,42 @@ public class SystemDriver
 	 
 	 private static void insertWithPreparedStatement() throws SQLException {
 	        Connection c = getDBConnection();
+	        Statement stmt = null;
 	        try
 	        {
-	           // TODO
+	            c.setAutoCommit(false);
+	            stmt = c.createStatement();
+	            stmt.execute("CREATE TABLE USER(username varchar(255) primary key,"
+	                                             + "password varchar(255),"
+	                                             + "email varchar(255), "
+	                                             + "phoneno varchar(255),"
+	                                             + "DOB varchar(255))");
+	            stmt.execute("INSERT INTO USER(username, password, email, phoneNo, DOB) VALUES('Jimbob', 'password', 'jim@bob.com', '0400000001', '07/07/1907')");
+	            stmt.execute("INSERT INTO USER(username, password, email, phoneNo, DOB) VALUES('notJimbob', 'notpassword', 'notjim@bob.com', '0400000002', '08/08/1908')");
+	            stmt.execute("CREATE TABLE BOOKINGS("
+	                            + "date varchar(255),"
+	                            + "time varchar(255),"
+	                            + "username varchar(255),"
+	                            + "employee varchar(255),"
+	                            + "service varchar(255),"
+	                            + "duration double,"
+	                            + "FOREIGN KEY (username) REFERENCES USER(username))");
+                stmt.execute("INSERT INTO BOOKINGS(date, time, username, employee, service, duration) VALUES('4/4/2017', '10:00','Jimbob', 'Hooch', 'Service 1', '.5')");
+                stmt.execute("INSERT INTO BOOKINGS(date, time, username, employee, service, duration) VALUES('7/4/2017', '13:00', 'Jimbob', 'Hooch', 'Service 2', '1.0')");
+
+	            ResultSet rs = stmt.executeQuery("SELECT * FROM USER");
+	            while (rs.next())
+	            {
+	                System.out.println("Username " + rs.getString("username") + " password " + rs.getString("password"));
+	            }
+	            
+	            stmt.close();
+                c.commit();
 	        }
-	        /*catch (SQLException e)
+	        catch (SQLException e)
 	        {
 	            System.out.println(e.getMessage());
-	        }*/
+	        }
 	        catch (Exception e)
 	        {
 	            e.printStackTrace();
@@ -339,14 +391,28 @@ public class SystemDriver
 						 + "|4-5  |     |     |     |     |     |     |     |\n");
 	}
 
-	// TODO mock up function - not yet implemented
 	private void viewCustomerBooking()
 	{
-		System.out.println("Welcome " + getAuthUser().getName());
-		System.out.println("You Have a booking with us at:\n"
-						 + "4-5pm Thurday 23/3\n"
-						 + "And At:\n"
-						 + "1-2pm Friday 24/3\n");
+	    Connection c = getDBConnection();
+        Statement stmt = null;
+        try
+        {
+            stmt = c.createStatement();
+   
+            String currentUser = getAuthUser().getName();
+            System.out.println("Welcome " + currentUser);
+            System.out.println("You Have a booking(s) with us on:\n");
+            
+            ResultSet rs = stmt.executeQuery("SELECT * FROM BOOKINGS WHERE username ='" + currentUser + "'");
+            while (rs.next())
+            {
+                System.out.println(rs.getString("date") + " at " + rs.getString("time") + " with " + rs.getString("employee"));
+            }
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }	
 	}
 
 	private void removeEmployee()
@@ -381,10 +447,10 @@ public class SystemDriver
 
 	private void viewEmployee()
 	{
-		System.out.println("1. View all employees/n"+ "2. Search an employee\n");
+		System.out.println("1. View all employees\n"+ "2. Search an employee\n");
 		if(keyboard.nextLine().equals("1")){
 			for (int x = 0 ; x < employeeList.size();x ++ ){
-				System.out.println(employeeList.get(x).getID() + "-" + employeeList.get(x).getName() + "/n");
+				System.out.println(employeeList.get(x).getID() + "-" + employeeList.get(x).getName() + "\n");
 					
 				}
 		}
@@ -393,7 +459,7 @@ public class SystemDriver
 			String ID = keyboard.nextLine(); 
 			for (int x = 0 ; x < employeeList.size();x ++ ){
 				if(employeeList.get(x).getID().equals(ID)){
-					System.out.println(employeeList.get(x).getID() + "-" + employeeList.get(x).getName() + "/n");
+					System.out.println(employeeList.get(x).getID() + "-" + employeeList.get(x).getName() + "\n");
 				}	
 			}
 		}
