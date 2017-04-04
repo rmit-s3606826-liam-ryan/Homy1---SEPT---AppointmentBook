@@ -12,4 +12,5 @@ public class AuthException extends Exception {
 	{
 		super(message);
 	}
+	
 }
