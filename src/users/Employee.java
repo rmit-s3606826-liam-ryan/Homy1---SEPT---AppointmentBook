@@ -1,5 +1,10 @@
 package users;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import Bookings.timeSlots;
+
 public class Employee
 {
     private String ID;

@@ -233,7 +233,7 @@ public class SystemDriver
                 switch (answer)
                 {
                 case 1:  login();                  break;
-                case 2:  register2();              break;
+                case 2:  register();               break;
                 case 3:  running = false;          break;
                 case 4:  ownerMenu();              break;
                 case 5:  customerMenu();           break;
@@ -246,6 +246,10 @@ public class SystemDriver
             catch (NumberFormatException e)
             {
                 System.out.println("Please Enter a valid number");
+            }
+            catch (UserRequestsExitException e)
+            {
+                System.out.println("User requested exit. Returning to menu...");
             }
         }
     }
@@ -527,7 +531,8 @@ public class SystemDriver
     private void viewEmployee()
     {
         System.out.println("1. View all employees\n" + "2. Search an employee\n");
-        if (keyboard.nextLine().equals("1"))
+        String input = keyboard.nextLine();
+        if (input.equals("1"))
         {
             for (int x = 0; x < employeeList.size(); x++)
             {
@@ -535,7 +540,7 @@ public class SystemDriver
 
             }
         }
-        else if (keyboard.nextLine().equals("2"))
+        else if (input.equals("2"))
         {
             System.out.println("Enter ID\n");
             String ID = keyboard.nextLine();
@@ -644,35 +649,6 @@ public class SystemDriver
         }
     }
 
-    public void register()
-    {
-        // Prevent duplicate registrations, check for existing username entries
-
-        String username, password = null;
-        User newUser = null;
-        System.out.println("======================\n" + "Enter username: ");
-        username = keyboard.nextLine();
-
-        System.out.println("\nEnter password: ");
-        password = keyboard.nextLine();
-
-        newUser = new User(username, password, null, null, null, null);
-        try
-        {
-            addUser(newUser);
-            setAuthUser(newUser);
-            customerMenu();
-        }
-        catch (DuplicateUserException e)
-        {
-            System.out.println(e.getMessage());
-        }
-        catch (IOException e)
-        {
-            System.out.println(e.getMessage());
-        }
-    }
-
     public void login()
     {
         User authUser = null;
@@ -735,177 +711,112 @@ public class SystemDriver
         setAuthUser(null);
     }
 
-
-	private void register2()
+    /**
+     * Registration function with simple validation
+     * makes calls to validation functions within RegistrationValidation 
+     * object
+     * @throws UserRequestsExitException
+     */
+	private void register() throws UserRequestsExitException
 	{
-		// Prevent duplicate registrations, check for existing username entries
-		
-		String username, password, email, fullName, phoneNumber, DOB, confirmPassword = null;
-		System.out.println("======================");
-		boolean validUsername = false;
-		do{
-		System.out.println("Enter Username: ");
-		username = keyboard.nextLine();
-			if (username.matches("[a-zA-Z0-9]+")) //need a regex that accepts only alphanumeric only
-			{
-				validUsername = true;
-		}
-			else{
-				System.out.println("invalid character, please insert only letters and numbers");
-				validUsername = false;	
-			}
-		}
-		while (validUsername == false);
-		
-		/////////////
-		boolean samePassword = false;
-		do{
-		System.out.println("\nEnter password: ");
-		password = keyboard.nextLine();
-		
-		System.out.println("\nConfirm password: ");
-		confirmPassword = keyboard.nextLine();
-		
-		if (password.equals(confirmPassword))
-		{
-			samePassword = true;
-		}
-		else{ 
-			System.out.println("Passwords do not match");
-			samePassword = false;
-		}
-		}
-		while (samePassword == false);
-		///////////////	
-		boolean validEmail = false;
-	/*	do{ 
-		System.out.println("\nEnter email address: ");
-		email = keyboard.nextLine();
-		if (email.matches("[a-zA-Z0-9]+")) //need a regex that accepts  alphanumeric + a few special characters
-		{
-			validEmail = true;
-	}
-		else{
-			System.out.println("invalid email address");
-		}
-			validEmail = false;
-		}
-		while (validEmail == false); */
-		///////////
-		email = "ok"; //temporary 
-		boolean validName = false; 
-		do{
-		System.out.println("\nEnter full name: ");
-		fullName = keyboard.nextLine();
-		if (fullName.matches("[a-zA-Z]+")){
-			validName = true;
-			System.out.println("debug1");
-		}
-		else
-		{
-			System.out.println("Please use only alphabetical letters in your name");
-			validName = false;			
-		}
-		}
-		while (validName == false);
-		////////////
-		boolean invalidNumber = false;
-		do{
-		System.out.println("\nEnter phone number: ");
-		phoneNumber = keyboard.nextLine();
-		if (phoneNumber.matches("[0-9]+") == false || phoneNumber.length() < 6){
-			System.out.println("Please enter a valid phone number!");
-			System.out.println(phoneNumber.matches("[0-9]+"));
-			invalidNumber = false;
-		}
-		else
-		{
-			invalidNumber = true;
-		}
-		}
-		while (invalidNumber == false);
-		////////////
-		boolean invalidDate = false;
-		do{
-		int day = 0, month = 0, year = 0;
-		boolean invalidDay = false;
-		boolean invalidMonth = false;
-		boolean invalidYear = false;
-		System.out.println("\nEnter date of birth in the order day, month, year: ");
-		do{
-		System.out.println("day:");
+        String username = null, password = null, email = null, 
+               fullName = null, phoneNumber = null, DOB = null, 
+               confirmPassword = null;
+        RegistrationValidation validateCurrent = new RegistrationValidation();
+        User newUser = null;
 
-		if (keyboard.hasNextInt() == true)
-		{
-		day = keyboard.nextInt();
-		if( day < 32 && day > 0)
-		{
-			invalidDay = true;
-		}
-		else {
-			System.out.println("Please insert a value equal to or lower than 31");
-			invalidDay = false;
-		}
-		}
-		else {
-			System.out.println("Please insert a number");
-			day = keyboard.nextInt();
-			
-		}
-		}
-		while(invalidDay == false);
-		do{
-			System.out.println("month: ");
-			month = keyboard.nextInt();
-			if (month < 13 && month > 0){
-				invalidMonth = true;
-			}
-			else {
-				System.out.println("Please insert a value equal to or lower than 12");
-				invalidMonth = false;
-				year = 4000;
-			}
-		}
-		while(invalidMonth == false);
-		do{
-			System.out.println("year: " );
-			year = keyboard.nextInt();
-			if(year < 2018 && year > 0){
-				invalidYear = true;
-			}
-			else {
-				System.out.println("Please insert a value equal to or lower than 2018");
-				invalidYear = false;
-		  	}
-		}
-		while(invalidYear == false);
-		
-		DOB = day + "/" + month + "/" + year; 
-		invalidDate = true;
-		}
-		while (invalidDate == false);
+        System.out.println("======================\n");
 
-		User newUser = new User(username, password, email, fullName, phoneNumber, DOB);
-		User userCheck = null;
-		boolean invalid = false;
-		
-		for (int index = 0; !invalid && index < userList.size(); ++index)
-		{
-			userCheck = userList.get(index);
-			invalid = userCheck.getName().equals(newUser.getName());
-		}
-		if (invalid)
-		{
-			System.out.println("Username taken");
-		}
-		else
-		{
-			userList.add(newUser);
-			System.out.println("User Registered. Welcome " + newUser.getName());
-			customerMenu();
-		}
-		
+        // valid set to false after each field is correctly entered
+        // only single boolean instead of 6
+        // prompt and get username
+        boolean valid = false;
+        while (valid == false)
+        {
+            username = promptAndGetString("Enter username: ");
+            valid = validateCurrent.validateUserName(username);
+            for (int index = 0; index < userList.size(); ++index)
+            {
+                User user = userList.get(index);
+                if (user.getName().equals(username))
+                {
+                    System.out.println("Username Taken, Try Again");
+                    valid = false;
+                }
+            }
+        }
 
+        // prompt and get password
+        valid = false;
+        while (valid == false)
+        {
+            password = promptAndGetString("Enter password: ");
+            confirmPassword = promptAndGetString("Confirm password: ");
+            valid = validateCurrent.validatePassword(password, confirmPassword);
+        }
+
+        // prompt and get email
+        valid = false;
+        while (valid == false)
+        {
+            email = promptAndGetString("Enter email address: ");
+            valid = validateCurrent.validateEmail(email);
+        }
+
+        // prompt and get full name
+        valid = false;
+        while (valid == false)
+        {
+            fullName = promptAndGetString("Enter full name: ");
+            valid = validateCurrent.validateName(fullName);
+        }
+
+        // prompt and get phone number
+        valid = false;
+        while (valid == false)
+        {
+            phoneNumber = promptAndGetString("Enter phone number: ");
+            valid = validateCurrent.validatePhone(phoneNumber);
+        }
+
+        // prompt and get date of birth
+        valid = false;
+        while(valid == false)
+        {
+            try
+            {
+                System.out.println("Enter date of birth, Use separate lines for each - day, month, year: ");
+                System.out.println("Please enter the day: ");
+                int day = Integer.parseInt(keyboard.nextLine());
+                System.out.println("Please enter the month: ");
+                int month = Integer.parseInt(keyboard.nextLine());
+                System.out.println("Please enter the year: ");
+                int year = Integer.parseInt(keyboard.nextLine());
+                DOB = day + "/" + month + "/" + year;
+                valid = validateCurrent.validateDOB(day, month, year);
+            }
+            catch (NumberFormatException e)
+            {
+                System.out.println("Please only enter numbers");
+            }
+        }
+        
+        // if user hasn't quit registation and all fields are valid, assign to user
+        try
+        {
+            newUser = new User(username, password, email, fullName, phoneNumber, DOB);
+            addUser(newUser);
+            setAuthUser(newUser);
+            customerMenu();
+        }
+        catch (DuplicateUserException e)
+        {
+            System.out.println(e.getMessage());
+        }
+        catch (IOException e)
+        {
+            System.out.println(e.getMessage());
+        }
 	}
 
     /**
