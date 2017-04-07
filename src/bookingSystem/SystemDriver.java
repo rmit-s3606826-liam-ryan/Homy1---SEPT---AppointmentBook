@@ -2,6 +2,7 @@ package bookingSystem;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.time.*;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -15,14 +16,14 @@ import java.util.regex.*;
 
 import com.sun.xml.internal.ws.util.StringUtils;
 
-
-import Bookings.booking;
-import Bookings.timeSlots;
+import Bookings.Booking;
+import Bookings.Timeslot;
+import Bookings.Booking;
+import Bookings.Timeslot;
 import users.Employee;
 import users.User;
 
 import org.h2.jdbcx.JdbcDataSource;
-import org.h2.tools.DeleteDbFiles;
 
 import com.sun.org.apache.xerces.internal.impl.xpath.regex.ParseException;
 
@@ -47,17 +48,9 @@ public class SystemDriver
      * list to hold user data (may use one list for all people type objects
      * customer/owner/employee and differentiate with a field)
      **/
-    List<User> userList = new ArrayList<User>();
-    List<Employee> employeeList = new ArrayList<Employee>();
 
-    List<timeSlots> timeSlot = new ArrayList<timeSlots>();
 
     User authUser = null; // TODO Add logout options to menus?
-
-    private static final String DB_DRIVER = "org.h2.Driver";
-    private static final String DB_CONNECTION = "jdbc:h2:./db/database";
-    private static final String DB_USER = "notSEPTadmin";
-    private static final String DB_PASSWORD = "XxX_Pr0-d4nk-passw0rd_XxX";
 
     public SystemDriver()
     {
@@ -70,23 +63,7 @@ public class SystemDriver
      **/
     public void loadSystem()
     {
-        try
-        {
-            DeleteDbFiles.execute("./db", "database", true);
-            insertWithPreparedStatement();
-            // NotSeptLogger.setup();
-        }
-        // catch (IOException e)
-        // {
-        // e.printStackTrace();
-        // throw new RuntimeException("Probelms with log file");
-        // }
-        catch (SQLException e)
-        {
-            System.out.println(e.getMessage());
-        }
-
-        initiateDB();
+    	Database.loadFromDB();
 
         loadFromFile(customerInfoFileName);
         registerAndLogin();
@@ -98,121 +75,6 @@ public class SystemDriver
      **/
     static Boolean running = true;
 
-    public void initiateDB()
-    {
-        Connection c = getDBConnection();
-        System.out.println("db done..");
-        try
-        {
-            throw new SQLException("test");
-        }
-        catch (SQLException e)
-        {
-
-        }
-        // logger.info("Database Initialised");
-    }
-
-    // http://www.javatips.net/blog/h2-database-example
-    private static Connection getDBConnection()
-    {
-        Connection dbConnection = null;
-        try
-        {
-            Class.forName(DB_DRIVER);
-        }
-        catch (ClassNotFoundException e)
-        {
-            System.out.println(e.getMessage());
-        }
-        try
-        {
-            dbConnection = DriverManager.getConnection(DB_CONNECTION, DB_USER, DB_PASSWORD);
-            return dbConnection;
-        }
-        catch (SQLException e)
-        {
-            System.out.println(e.getMessage());
-        }
-        return dbConnection;
-    }
-
-    private static void insertWithPreparedStatement() throws SQLException
-    {
-        Connection c = getDBConnection();
-        Statement stmt = null;
-        try
-        {
-            c.setAutoCommit(false);
-            stmt = c.createStatement();
-            stmt.execute(
-                    "CREATE TABLE USER(username varchar(255) primary key," 
-                  + "password varchar(255),"
-                  + "email varchar(255), " 
-                  + "phoneno varchar(255)," 
-                  + "DOB varchar(255))");
-            stmt.execute("CREATE TABLE BOOKINGS(" 
-                    + "date varchar(255),"
-                    + "username varchar(255),"
-                    + "employee varchar(255),"
-                    + "service varchar(255),"
-                    + "duration double,"
-                    + "FOREIGN KEY (username) REFERENCES USER(username))");
-            stmt.execute("CREATE TABLE TIMESLOTS("
-                       + "date varchar(255),"
-                       + "employee varchar(255),"
-                       + "booked varchar(255))");
-            
-            
-            stmt.execute("INSERT INTO TIMESLOTS(date, employee, booked) "
-                    + "VALUES('2017 03 26 13:00:00', 'Hooch', 'false')");
-            stmt.execute("INSERT INTO TIMESLOTS(date, employee, booked) "
-                    + "VALUES('2017 03 26 14:00:00', 'Hooch', 'false')");
-            stmt.execute("INSERT INTO TIMESLOTS(date, employee, booked) "
-                    + "VALUES('2017 03 26 15:00:00', 'Hooch', 'true')");
-            stmt.execute("INSERT INTO TIMESLOTS(date, employee, booked) "
-                    + "VALUES('2017 03 26 16:00:00', 'Hooch', 'false')");
-            stmt.execute("INSERT INTO TIMESLOTS(date, employee, booked) "
-                    + "VALUES('2017 03 26 17:00:00', 'Hooch', 'true')");
-            
-            stmt.execute("INSERT INTO USER(username, password, email, phoneNo, DOB) "
-                       + "VALUES('Jimbob', 'password', 'jim@bob.com', '0400000001', '07/07/1907')");
-            stmt.execute("INSERT INTO USER(username, password, email, phoneNo, DOB)"
-                       + "VALUES('notJimbob', 'notpassword', 'notjim@bob.com', '0400000002', '08/08/1908')");
-            
-            stmt.execute("INSERT INTO BOOKINGS(date, username, employee, service, duration)"
-                       + "VALUES('2017 04 02 13:00:00','Jimbob', 'Hooch', 'Service 1', '.5')");
-            stmt.execute("INSERT INTO BOOKINGS(date, username, employee, service, duration)"
-                       + "VALUES('2017 03 30 10:30:00', 'Jimbob', 'Hooch', 'Service 2', '1.0')");
-            stmt.execute("INSERT INTO BOOKINGS(date, username, employee, service, duration)"
-                       + "VALUES('2017 03 31 13:00:00', 'notJimbob', 'notHooch', 'Service 3', '2.0')");
-            stmt.execute("INSERT INTO BOOKINGS(date, username, employee, service, duration)"
-                       + "VALUES('2017 04 10 13:00:00', 'notJimbob', 'notHooch', 'Service 3', '2.0')");
-            stmt.execute("INSERT INTO BOOKINGS(date, username, employee, service, duration)"
-                       + "VALUES('2017 03 29 10:30:00', 'Jimbob', 'Hooch', 'Service 2', '1.0')");
-            stmt.execute("INSERT INTO BOOKINGS(date, username, employee, service, duration)"
-                       + "VALUES('2017 03 26 13:00:00', 'notJimbob', 'notHooch', 'Service 3', '2.0')");
-            stmt.execute("INSERT INTO BOOKINGS(date, username, employee, service, duration)"
-                       + "VALUES('2017 04 09 13:00:00', 'notJimbob', 'notHooch', 'Service 3', '2.0')");
-            stmt.execute("INSERT INTO BOOKINGS(date, username, employee, service, duration)"
-                       + "VALUES('2017 04 15 13:00:00', 'notJimbob', 'notHooch', 'Service 3', '2.0')");
-
-            stmt.close();
-            c.commit();
-        }
-        catch (SQLException e)
-        {
-            System.out.println(e.getMessage());
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-        finally
-        {
-            c.close();
-        }
-    }
 
     public void registerAndLogin()
     {
@@ -356,7 +218,7 @@ public class SystemDriver
 
     private void viewEmployeeAvailability()
     {
-        Connection c = getDBConnection();
+        Connection c = Database.getDBConnection();
         Statement stmt = null;
         try
         {
@@ -410,7 +272,7 @@ public class SystemDriver
     private void searchTimeSlots(String date)
     {
         Calendar calendar = new GregorianCalendar(0000, 0, 00, 00, 00, 00);
-        int Array[] = null;
+        int Array[] = null; // init new Array(int) instead of null reference?
         StringTokenizer st = new StringTokenizer(date, "-");
         int x = 0;
         while (st.hasMoreTokens())
@@ -424,9 +286,9 @@ public class SystemDriver
 
     private void displayTimeSlots()
     {
-        for (int x = 0; x < timeSlot.size(); x++)
+        for (int x = 0; x < Database.timeslotList.size(); x++)
         {
-            System.out.println(timeSlot.get(x).getDate() + "\n");
+            System.out.println(Database.timeslotList.get(x).getDate() + "\n");
 
         }
     }
@@ -434,11 +296,11 @@ public class SystemDriver
     private void addBooking(int year, int month, int day, int startHour, String Customer)
     {
         Calendar calendar = new GregorianCalendar(year, month, day, startHour, 00, 00);
-        for (int x = 0; x < timeSlot.size(); x++)
+        for (int x = 0; x < Database.timeslotList.size(); x++)
         {
-            if (timeSlot.get(x).getDate().compareTo(calendar) == 0)
+            if (Database.timeslotList.get(x).getDate().compareTo(calendar) == 0)
             {
-                new booking(calendar, Customer);
+                new Booking(calendar, Customer);
             }
             else
             {
@@ -451,7 +313,7 @@ public class SystemDriver
     {
         for (int start = startHour; start < endHour; start++)
         {
-            timeSlot.add(new timeSlots(year, month, day, start));
+            Database.timeslotList.add(new Timeslot(year, month, day, start));
         }
     }
 
@@ -474,7 +336,7 @@ public class SystemDriver
 
     private void viewCustomerBooking()
     {
-        Connection c = getDBConnection();
+        Connection c = Database.getDBConnection();
         Statement stmt = null;
         try
         {
@@ -501,16 +363,16 @@ public class SystemDriver
     {
         System.out.println("Please enter employee ID\n");
         String ID = keyboard.nextLine();
-        for (int x = 0; x < employeeList.size(); x++)
+        for (int x = 0; x < Database.employeeList.size(); x++)
         {
-            if (employeeList.get(x).getID().equals(ID))
+            if (Database.employeeList.get(x).getID().equals(ID))
             {
                 System.out.println(
-                        "Are you sure you wish to remove" + employeeList.get(x).getName() + " from the system? Y/N\n");
+                        "Are you sure you wish to remove" + Database.employeeList.get(x).getName() + " from the system? Y/N\n");
 
                 if (keyboard.nextLine().equals("Y"))
                 {
-                    employeeList.remove(x);
+                    Database.employeeList.remove(x);
                     System.out.println("Sucessfully removed");
                 }
             }
@@ -522,9 +384,10 @@ public class SystemDriver
         System.out.println("Please enter new Employees name\n");
         String name = keyboard.nextLine();
         System.out.println("Please enter employee ID\n");
-        String ID = keyboard.nextLine();
+        int id = keyboard.nextInt();
+        keyboard.nextLine();
 
-        employeeList.add(new Employee(name, ID));
+        Database.employeeList.add(new Employee(name, id));
         System.out.println(name + "has sucessfully been created");
     }
 
@@ -534,9 +397,9 @@ public class SystemDriver
         String input = keyboard.nextLine();
         if (input.equals("1"))
         {
-            for (int x = 0; x < employeeList.size(); x++)
+            for (int x = 0; x < Database.employeeList.size(); x++)
             {
-                System.out.println(employeeList.get(x).getID() + "-" + employeeList.get(x).getName() + "\n");
+                System.out.println(Database.employeeList.get(x).getID() + "-" + Database.employeeList.get(x).getName() + "\n");
 
             }
         }
@@ -544,11 +407,11 @@ public class SystemDriver
         {
             System.out.println("Enter ID\n");
             String ID = keyboard.nextLine();
-            for (int x = 0; x < employeeList.size(); x++)
+            for (int x = 0; x < Database.employeeList.size(); x++)
             {
-                if (employeeList.get(x).getID().equals(ID))
+                if (Database.employeeList.get(x).getID().equals(ID))
                 {
-                    System.out.println(employeeList.get(x).getID() + "-" + employeeList.get(x).getName() + "\n");
+                    System.out.println(Database.employeeList.get(x).getID() + "-" + Database.employeeList.get(x).getName() + "\n");
                 }
             }
         }
@@ -556,7 +419,7 @@ public class SystemDriver
 
     private void viewBooking()
     {
-        Connection c = getDBConnection();
+        Connection c = Database.getDBConnection();
         Statement stmt = null;
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy MM dd HH:mm:ss");
         sdf.setLenient(true);
@@ -631,9 +494,9 @@ public class SystemDriver
         User userCheck = null;
         boolean invalid = false;
 
-        for (int index = 0; !invalid && index < userList.size(); ++index)
+        for (int index = 0; !invalid && index < Database.userList.size(); ++index)
         {
-            userCheck = userList.get(index);
+            userCheck = Database.userList.get(index);
             invalid = userCheck.getName().equals(newUser.getName());
         }
         if (invalid)
@@ -642,7 +505,7 @@ public class SystemDriver
         }
         else
         {
-            userList.add(newUser);
+            Database.userList.add(newUser);
             writeToFile(newUser.getName() + "," + newUser.getPassword() + "\n", "src/users/customerinfo.dat");
             System.out.println("User Registered. Welcome " + newUser.getName());
             return newUser;
@@ -688,9 +551,9 @@ public class SystemDriver
     {
         User user = null;
 
-        for (int i = 0; i < userList.size(); i++)
+        for (int i = 0; i < Database.userList.size(); i++)
         {
-            user = userList.get(i);
+            user = Database.userList.get(i);
             if (user.getName().equals(username))
             {
                 if (user.getPassword().equals(password))
@@ -735,9 +598,9 @@ public class SystemDriver
         {
             username = promptAndGetString("Enter username: ");
             valid = validateCurrent.validateUserName(username);
-            for (int index = 0; index < userList.size(); ++index)
+            for (int index = 0; index < Database.userList.size(); ++index)
             {
-                User user = userList.get(index);
+                User user = Database.userList.get(index);
                 if (user.getName().equals(username))
                 {
                     System.out.println("Username Taken, Try Again");
@@ -804,7 +667,8 @@ public class SystemDriver
         // if user hasn't quit registation and all fields are valid, assign to user
         try
         {
-            newUser = new User(username, password, email, fullName, phoneNumber, DOB);
+            newUser = new User(username, password, email, fullName, phoneNumber, null);
+            //newUser = new User(username, password, email, fullName, phoneNumber, DOB); //TODO !!! FIX DOB CONSTRUCTOR. need to create appropriate date object.
             addUser(newUser);
             setAuthUser(newUser);
             customerMenu();
@@ -853,7 +717,7 @@ public class SystemDriver
             customerPassword = customerPassword.substring(1);
             User newUser = new User(customerName, customerPassword, null, null, null, null);
 
-            userList.add(newUser);
+            Database.userList.add(newUser);
             // System.out.println(newUser.getName() + "," +
             // newUser.getPassword());
         }

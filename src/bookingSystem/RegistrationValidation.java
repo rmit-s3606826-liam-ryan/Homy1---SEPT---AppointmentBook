@@ -7,7 +7,7 @@ package bookingSystem;
 public class RegistrationValidation
 {
     /**
-     * Username does not allow special charaters
+     * Username does not allow special characters
      * Alphanumeric and punctuation
      **/
     boolean validateUserName(String username)
