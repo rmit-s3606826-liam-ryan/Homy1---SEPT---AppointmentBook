@@ -1,5 +1,7 @@
 package users;
 
+import java.sql.Date;
+
 public class User
 {
     private String username;
@@ -7,9 +9,9 @@ public class User
     private String email;
     private String fullName;
     private String phoneNumber;
-    private String DOB;
+    private Date DOB;
     
-    public User(String username, String password, String email, String fullName, String phoneNumber, String DOB)
+    public User(String username, String password, String email, String fullName, String phoneNumber, Date DOB)
     {
         this.username = username;
         this.password = password;
@@ -28,11 +30,12 @@ public class User
     {
         return password;
     }
+    
     public String getEmail()
     {
     	return email;
     }
- 
+    
     public String getFullName()
     {
     	return fullName;
@@ -42,9 +45,9 @@ public class User
     {
     	return phoneNumber;
     }
-    public String getDOB()
+    
+    public Date getDOB()
     {
     	return DOB;
     }
-
 }

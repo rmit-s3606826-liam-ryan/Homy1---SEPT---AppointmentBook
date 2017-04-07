@@ -5,13 +5,13 @@ import java.util.Calendar;
 
 import java.util.GregorianCalendar;
 
-public class timeSlots {
+public class Timeslot {
 	SimpleDateFormat sdf = new SimpleDateFormat("yyyy MMM dd HH:mm:ss");
 	Calendar calendar = new GregorianCalendar(0000,0,00,00,00,00);
-	private String employee; 
-	private boolean booked = false; 
+	private String employee;
+	private boolean booked = false;
 	
-	public timeSlots( int year, int month, int day, int hour){
+	public Timeslot( int year, int month, int day, int hour){
 		
 		//this.employee=employee;
 		
