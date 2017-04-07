@@ -735,6 +735,15 @@ public class SystemDriver
         {
             username = promptAndGetString("Enter username: ");
             valid = validateCurrent.validateUserName(username);
+            for (int index = 0; index < userList.size(); ++index)
+            {
+                User user = userList.get(index);
+                if (user.getName().equals(username))
+                {
+                    System.out.println("Username Taken, Try Again");
+                    valid = false;
+                }
+            }
         }
 
         // prompt and get password
