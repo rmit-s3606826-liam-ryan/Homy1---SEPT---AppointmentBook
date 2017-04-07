@@ -321,17 +321,15 @@ public class SystemDriver
     private void viewAvailableBooking()
     {
         System.out.println("=================================================\n" 
-                         + "Available Bookings for" + " \n"
-                         + "=================================================\n"
-                         + "|     |Mon  |Tue  |Wed  |Thu  |Fri  |Sat  |Sun  |\n"
-                         + "|9-10 |     |     |     |     |     |     |     |\n"
-                         + "|10-11|     |     |     |     |     |     |     |\n"
-                         + "|11-12|     |     |     |     |     |     |     |\n"
-                         + "|12-1 |     |     |     |     |     |     |     |\n"
-                         + "|1-2  |     |     |     |     |     |     |     |\n"
-                         + "|2-3  |     |     |     |     |     |     |     |\n"
-                         + "|3-4  |     |     |     |     |     |     |     |\n"
-                         + "|4-5  |     |     |     |     |     |     |     |\n");
+                         + "Available Bookings:\n"
+                         + "=================================================\n");
+        for (int index = 0; index < Database.timeslotList.size(); ++index)
+        {
+            if (Database.timeslotList.get(index).returnStatus() == false)
+            {
+                System.out.println(Database.timeslotList.get(index).getDate() + "-" + Database.timeslotList.get(index).getEmployee() + "\n");
+            }
+        }
     }
 
     private void viewCustomerBooking()
