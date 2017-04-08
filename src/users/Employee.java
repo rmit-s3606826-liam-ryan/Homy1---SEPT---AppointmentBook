@@ -7,18 +7,18 @@ import bookings.Timeslot;
 
 public class Employee
 {
-    private int ID;
+    private int id;
     private String name;
 
-    public Employee(String name, int ID)
+    public Employee(int id, String name)
     {
+        this.id = id;
         this.name = name;
-        this.ID = ID;
     }
 
-    public Object getID()
+    public int getID()
     {
-        return ID;
+        return id;
     }
 
     public String getName()
