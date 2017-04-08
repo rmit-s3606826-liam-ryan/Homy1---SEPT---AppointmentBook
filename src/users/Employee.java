@@ -3,7 +3,7 @@ package users;
 import java.util.ArrayList;
 import java.util.List;
 
-import Bookings.Timeslot;
+import bookings.Timeslot;
 
 public class Employee
 {

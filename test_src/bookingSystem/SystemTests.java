@@ -9,7 +9,7 @@ import org.junit.*;
 import org.junit.contrib.java.lang.system.TextFromStandardInputStream;
 import org.junit.rules.TemporaryFolder;
 
-import Bookings.timeSlots;
+import bookings.timeSlots;
 
 import java.util.ArrayList;
 import java.util.List;

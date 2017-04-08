@@ -1,4 +1,4 @@
-package Bookings;
+package bookings;
 
 //import java.text.SimpleDateFormat;
 import java.time.LocalDate;

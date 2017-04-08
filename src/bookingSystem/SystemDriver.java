@@ -1,31 +1,25 @@
 package bookingSystem;
 
 import java.io.*;
-import java.util.ArrayList;
 import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.List;
 import java.util.Scanner;
 
 import java.util.StringTokenizer;
 import java.util.logging.*;
 
-import java.util.regex.*;
-
-import com.sun.xml.internal.ws.util.StringUtils;
-
-import Bookings.Booking;
-import Bookings.Timeslot;
-import Bookings.Booking;
-import Bookings.Timeslot;
 import users.Employee;
 import users.User;
 
 import org.h2.jdbcx.JdbcDataSource;
 
 import com.sun.org.apache.xerces.internal.impl.xpath.regex.ParseException;
+
+import bookings.Booking;
+import bookings.Timeslot;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -65,7 +59,6 @@ public class SystemDriver
     {
     	Database.loadFromDB();
 
-        loadFromFile(customerInfoFileName);
         registerAndLogin();
     }
 
@@ -88,7 +81,8 @@ public class SystemDriver
                                  + "4. owner menu (testing)\n" 
                                  + "5. customer menu (testing)\n"
                                  + "6. show currently authenticated user (testing)\n" 
-                                 + "7. Logout\n");
+                                 + "7. Logout\n"
+                                 + "8. Adam's test hut\n");
 
                 int answer = Integer.parseInt(keyboard.nextLine());
 
@@ -101,6 +95,7 @@ public class SystemDriver
                 case 5:  customerMenu();           break;
                 case 6:  printCurrentUser();       break;
                 case 7:  logout();                 break;
+                case 8: adamTest();                break;
                 default: System.out.println("no"); break;
                 }
             }
@@ -115,14 +110,38 @@ public class SystemDriver
             }
         }
     }
+    
+    public void adamTest()
+    {
+        System.out.println("Enter date of birth: ");
+        String dobString = keyboard.nextLine();
+        DateTimeFormatter slashFormat = DateTimeFormatter.ofPattern("dd/MM/uuuu");
+        DateTimeFormatter hyphenFormat = DateTimeFormatter.ofPattern("dd-MM-uuuu");
+        DateTimeFormatter dotFormat = DateTimeFormatter.ofPattern("dd.MM.uuuu");
+        LocalDate dob = null;
+        
+        if (dobString.contains("/"))
+        {
+        	dob = LocalDate.parse(dobString, slashFormat);
+        }
+        else if (dobString.contains("-"))
+        {
+        	dob = LocalDate.parse(dobString, hyphenFormat);
+        }
+        else
+        {
+        	dob = LocalDate.parse(dobString, dotFormat);
+        }
+        System.out.println("dob as LocalDate is: "+dob.toString());
+    }
 
     private void printCurrentUser()
     {
-        User u = getAuthUser();
+        User user = getAuthUser();
         System.out.println("======================\n" + "Current User: ");
-        if (u != null)
+        if (user != null)
         {
-            System.out.println(u.getName() + "\n");
+            System.out.println(user.getUsername() + "\n");
         }
         else
             System.out.println("NONE\n");
@@ -294,7 +313,7 @@ public class SystemDriver
     }
     
     private void addBooking(int customer_id, int employee_id, int timeslot_id, String service, int duration)
-    { //TODO: all "add" functions require callbacks from DB as they need to add a new entry, auto-generate an ID, then read this back to java
+    {/* //TODO: all "add" functions require callbacks from DB as they need to add a new entry, auto-generate an ID, then read this back to java
     	// so that we can enter it into the HashMap as the key. A bit fiddly, but manually generating ID is lazy and crappy. I will add this code shortly -Adam
         for (int x = 0; x < Database.timeslotMap.size(); x++)
         {
@@ -314,12 +333,12 @@ public class SystemDriver
         for (int start = startHour; start < endHour; start++)
         {
             Database.timeslotMap.add(new Timeslot(year, month, day, start));
-        }
+        }*/
     }
 
     // TODO mock up function - not yet implemented
     private void viewAvailableBooking()
-    {
+    {/*
         System.out.println("=================================================\n" 
                          + "Available Bookings:\n"
                          + "=================================================\n");
@@ -329,12 +348,12 @@ public class SystemDriver
             {
                 System.out.println(Database.timeslotMap.get(index).getDate() + "-" + Database.timeslotMap.get(index).getEmployee() + "\n");
             }
-        }
+        }*/
     }
 
     private void viewCustomerBooking()
     {
-        Connection c = Database.getDBConnection();
+        /*Connection c = Database.getDBConnection();
         Statement stmt = null;
         try
         {
@@ -354,7 +373,7 @@ public class SystemDriver
         catch (SQLException e)
         {
             e.printStackTrace();
-        }
+        }*/
     }
 
     private void removeEmployee()
@@ -435,7 +454,7 @@ public class SystemDriver
 
             stmt = c.createStatement();
 
-            String currentUser = getAuthUser().getName();
+            String currentUser = getAuthUser().getUsername();
             System.out.println("Welcome " + currentUser);
             System.out.println("1. View last weeks bookings\n2. View this weeks bookings");
             String input = keyboard.nextLine();
@@ -495,7 +514,7 @@ public class SystemDriver
         for (int index = 0; !invalid && index < Database.userMap.size(); ++index)
         {
             userCheck = Database.userMap.get(index);
-            invalid = userCheck.getName().equals(newUser.getName());
+            invalid = userCheck.getUsername().equals(newUser.getUsername());
         }
         if (invalid)
         {
@@ -504,8 +523,8 @@ public class SystemDriver
         else
         {
             Database.userMap.put(null, newUser); //TODO
-            writeToFile(newUser.getName() + "," + newUser.getPassword() + "\n", "src/users/customerinfo.dat");
-            System.out.println("User Registered. Welcome " + newUser.getName());
+            writeToFile(newUser.getUsername() + "," + newUser.getPassword() + "\n", "src/users/customerinfo.dat");
+            System.out.println("User Registered. Welcome " + newUser.getUsername());
             return newUser;
         }
     }
@@ -523,12 +542,11 @@ public class SystemDriver
         try
         {
             authUser = auth(username, password);
-            System.out.println("\nSuccessfully logged in as " + authUser.getName() + ".\n");
-            // Should this check be moved to the menu code, and login() changed
-            // to boolean return to check for success?
             setAuthUser(authUser);
+            System.out.println("\nSuccessfully logged in as " + authUser.getUsername() + ".\n");
 
-            if (authUser.getName().equals("Owner"))
+
+            if (authUser.getUsername().equals("Owner"))
             {
                 System.out.println("Directing to Owners menu.");
                 ownerMenu();
@@ -547,24 +565,25 @@ public class SystemDriver
 
     private User auth(String username, String password) throws AuthException
     {
-        User user = null;
-
-        for (int i = 0; i < Database.userMap.size(); i++)
+        User user = getUser(username);
+        
+        if (user.getPassword().equals(password))
         {
-            user = Database.userMap.get(i);
-            if (user.getName().equals(username))
-            {
-                if (user.getPassword().equals(password))
-                    return user;
-                break; // break regardless of correct or incorrect creds, since
-                       // there won't be another matching
-                       // username in the userMap with a different p/w. We can
-                       // split this up if we want
-                       // a different error msg for (matching user, wrong pw)
-                       // vs. username doesn't exist.
-            }
+        	return user; // matching username and password, return user object.
         }
         throw new AuthException("Invalid credentials");
+    }
+    
+    public User getUser(String username)
+    {
+    	for (User user : Database.userMap.values())
+    	{
+    		if (user.getUsername() == username)
+    		{
+    			return user;
+    		}
+    	}
+    	return null; // no matching user found
     }
 
     public void logout()
@@ -581,8 +600,8 @@ public class SystemDriver
 	private void register() throws UserRequestsExitException
 	{
         String username = null, password = null, email = null, 
-               fullName = null, phoneNumber = null, DOB = null, 
-               confirmPassword = null;
+               fullName = null, phoneNumber = null, confirmPassword = null;
+        LocalDate dob = null;
         RegistrationValidation validateCurrent = new RegistrationValidation();
         User newUser = null;
 
@@ -599,7 +618,7 @@ public class SystemDriver
             for (int index = 0; index < Database.userMap.size(); ++index)
             {
                 User user = Database.userMap.get(index);
-                if (user.getName().equals(username))
+                if (user.getUsername().equals(username))
                 {
                     System.out.println("Username Taken, Try Again");
                     valid = false;
@@ -646,15 +665,26 @@ public class SystemDriver
         {
             try
             {
-                System.out.println("Enter date of birth, Use separate lines for each - day, month, year: ");
-                System.out.println("Please enter the day: ");
-                int day = Integer.parseInt(keyboard.nextLine());
-                System.out.println("Please enter the month: ");
-                int month = Integer.parseInt(keyboard.nextLine());
-                System.out.println("Please enter the year: ");
-                int year = Integer.parseInt(keyboard.nextLine());
-                DOB = day + "/" + month + "/" + year;
-                valid = validateCurrent.validateDOB(day, month, year);
+                System.out.println("Enter date of birth: ");
+                String dobString = keyboard.nextLine();
+                DateTimeFormatter slashFormat = DateTimeFormatter.ofPattern("dd/MM/uuuu");
+                DateTimeFormatter hyphenFormat = DateTimeFormatter.ofPattern("dd-MM-uuuu");
+                DateTimeFormatter dotFormat = DateTimeFormatter.ofPattern("dd.MM.uuuu");
+                
+                if (dobString.contains("/"))
+                {
+                	dob = LocalDate.parse(dobString, slashFormat);
+                }
+                else if (dobString.contains("-"))
+                {
+                	dob = LocalDate.parse(dobString, hyphenFormat);
+                }
+                else
+                {
+                	dob = LocalDate.parse(dobString, dotFormat);
+                }
+                valid = true;	// won't reach here unless one of the above three calls parses the string successfully,
+                				// in which case the date is valid.
             }
             catch (NumberFormatException e)
             {
@@ -680,22 +710,11 @@ public class SystemDriver
             System.out.println(e.getMessage());
         }
 	}
-
-    /**
-     * load data from file - currently loads customer data only, will be
-     * refactored to be more general
-     */
+	
+	/*
     public boolean loadFromFile(String customerInfoFileName)
     {
         Scanner customerInputStream = null;
-
-        /*
-         * TODO add checks for end of file whitespace. with an extra empty line
-         * in file, it gets appended to the last user's password and will result
-         * in mismatch when authenticating EDIT: This seems to be working?
-         * logging in with the last username in file appears to work keep an eye
-         * on this, may need a fix if it plays up
-         */
 
         try
         {
@@ -722,6 +741,8 @@ public class SystemDriver
         customerInputStream.close();
         return true;
     }
+    
+    */
 
     public void writeToFile(String text, String fileName) throws IOException // (,
                                                                              // boolean
