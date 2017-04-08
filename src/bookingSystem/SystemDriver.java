@@ -526,23 +526,23 @@ public class SystemDriver
             System.out.println("\nSuccessfully logged in as " + authUser.getName() + ".\n");
             // Should this check be moved to the menu code, and login() changed
             // to boolean return to check for success?
+            setAuthUser(authUser);
+
+            if (authUser.getName().equals("Owner"))
+            {
+                System.out.println("Directing to Owners menu.");
+                ownerMenu();
+            }
+            else
+            {
+                customerMenu();
+            }
         }
         catch (AuthException e)
         {
             System.out.println("\nAuthorisation error - " + e.getMessage() + ".\n");
         }
 
-        setAuthUser(authUser);
-
-        if (authUser.getName().equals("Owner"))
-        {
-            System.out.println("Directing to Owners menu.");
-            ownerMenu();
-        }
-        else
-        {
-            customerMenu();
-        }
     }
 
     private User auth(String username, String password) throws AuthException
