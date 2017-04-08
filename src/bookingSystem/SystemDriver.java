@@ -1,28 +1,20 @@
 package bookingSystem;
 
-import java.io.*;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Scanner;
-
 import java.util.StringTokenizer;
 import java.util.logging.*;
 
 import users.Employee;
 import users.User;
 
-import org.h2.jdbcx.JdbcDataSource;
-
 import com.sun.org.apache.xerces.internal.impl.xpath.regex.ParseException;
 
-import bookings.Booking;
-import bookings.Timeslot;
-
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -35,7 +27,6 @@ import java.text.SimpleDateFormat;
 public class SystemDriver
 {
     private Scanner keyboard = new Scanner(System.in);
-    private String customerInfoFileName = "src/users/customerinfo.dat";
     private static final Logger logger = Logger.getLogger("SystemDriver");
 
     /**
@@ -113,26 +104,14 @@ public class SystemDriver
     
     public void adamTest()
     {
-        System.out.println("Enter date of birth: ");
-        String dobString = keyboard.nextLine();
-        DateTimeFormatter slashFormat = DateTimeFormatter.ofPattern("dd/MM/uuuu");
-        DateTimeFormatter hyphenFormat = DateTimeFormatter.ofPattern("dd-MM-uuuu");
-        DateTimeFormatter dotFormat = DateTimeFormatter.ofPattern("dd.MM.uuuu");
-        LocalDate dob = null;
-        
-        if (dobString.contains("/"))
-        {
-        	dob = LocalDate.parse(dobString, slashFormat);
-        }
-        else if (dobString.contains("-"))
-        {
-        	dob = LocalDate.parse(dobString, hyphenFormat);
-        }
-        else
-        {
-        	dob = LocalDate.parse(dobString, dotFormat);
-        }
-        System.out.println("dob as LocalDate is: "+dob.toString());
+    	try
+    	{
+    		Database.addUserToDB("Ownera", "anything", "anything", "lol", "asdasd", LocalDate.of(1990, 12, 11));
+    	}
+    	catch (SQLException e)
+    	{
+    		
+    	}
     }
 
     private void printCurrentUser()
@@ -506,27 +485,10 @@ public class SystemDriver
         }
     }
 
-    public User addUser(User newUser) throws DuplicateUserException, IOException
+    public void addUser(User newUser)
     {
-        User userCheck = null;
-        boolean invalid = false;
-
-        for (int index = 0; !invalid && index < Database.userMap.size(); ++index)
-        {
-            userCheck = Database.userMap.get(index);
-            invalid = userCheck.getUsername().equals(newUser.getUsername());
-        }
-        if (invalid)
-        {
-            throw new DuplicateUserException("Username already exists!");
-        }
-        else
-        {
-            Database.userMap.put(null, newUser); //TODO
-            writeToFile(newUser.getUsername() + "," + newUser.getPassword() + "\n", "src/users/customerinfo.dat");
-            System.out.println("User Registered. Welcome " + newUser.getUsername());
-            return newUser;
-        }
+    	Database.userMap.put(newUser.getID(), newUser);
+    	System.out.println("User Registered. Welcome " + newUser.getUsername());
     }
 
     public void login()
@@ -578,7 +540,7 @@ public class SystemDriver
     {
     	for (User user : Database.userMap.values())
     	{
-    		if (user.getUsername() == username)
+    		if (user.getUsername().equals(username))
     		{
     			return user;
     		}
@@ -602,7 +564,6 @@ public class SystemDriver
         String username = null, password = null, email = null, 
                fullName = null, phoneNumber = null, confirmPassword = null;
         LocalDate dob = null;
-        RegistrationValidation validateCurrent = new RegistrationValidation();
         User newUser = null;
 
         System.out.println("======================\n");
@@ -614,14 +575,16 @@ public class SystemDriver
         while (valid == false)
         {
             username = promptAndGetString("Enter username: ");
-            valid = validateCurrent.validateUserName(username);
-            for (int index = 0; index < Database.userMap.size(); ++index)
+            valid = RegistrationValidation.validateUserName(username);
+            if (valid)
             {
-                User user = Database.userMap.get(index);
-                if (user.getUsername().equals(username))
+            	for (User user : Database.userMap.values())
                 {
-                    System.out.println("Username Taken, Try Again");
-                    valid = false;
+                	if (user.getUsername().equals(username))
+                	{
+                		System.out.println("Username Taken, Try Again");
+                		valid = false;
+                	}
                 }
             }
         }
@@ -632,7 +595,7 @@ public class SystemDriver
         {
             password = promptAndGetString("Enter password: ");
             confirmPassword = promptAndGetString("Confirm password: ");
-            valid = validateCurrent.validatePassword(password, confirmPassword);
+            valid = RegistrationValidation.validatePassword(password, confirmPassword);
         }
 
         // prompt and get email
@@ -640,7 +603,7 @@ public class SystemDriver
         while (valid == false)
         {
             email = promptAndGetString("Enter email address: ");
-            valid = validateCurrent.validateEmail(email);
+            valid = RegistrationValidation.validateEmail(email);
         }
 
         // prompt and get full name
@@ -648,7 +611,7 @@ public class SystemDriver
         while (valid == false)
         {
             fullName = promptAndGetString("Enter full name: ");
-            valid = validateCurrent.validateName(fullName);
+            valid = RegistrationValidation.validateName(fullName);
         }
 
         // prompt and get phone number
@@ -656,7 +619,7 @@ public class SystemDriver
         while (valid == false)
         {
             phoneNumber = promptAndGetString("Enter phone number: ");
-            valid = validateCurrent.validatePhone(phoneNumber);
+            valid = RegistrationValidation.validatePhone(phoneNumber);
         }
 
         // prompt and get date of birth
@@ -695,74 +658,18 @@ public class SystemDriver
         // if user hasn't quit registation and all fields are valid, assign to user
         try
         {
-            newUser = new User(username, password, email, fullName, phoneNumber, null);
-            //newUser = new User(username, password, email, fullName, phoneNumber, DOB); //TODO !!! FIX DOB CONSTRUCTOR. need to create appropriate date object.
+        	int id = Database.addUserToDB(username, password, email, fullName, phoneNumber, dob);
+            newUser = new User(id, username, password, email, fullName, phoneNumber, dob);
             addUser(newUser);
             setAuthUser(newUser);
             customerMenu();
         }
-        catch (DuplicateUserException e)
+        catch (SQLException e)
         {
-            System.out.println(e.getMessage());
-        }
-        catch (IOException e)
-        {
-            System.out.println(e.getMessage());
+        	System.out.println(e.getMessage());
         }
 	}
 	
-	/*
-    public boolean loadFromFile(String customerInfoFileName)
-    {
-        Scanner customerInputStream = null;
-
-        try
-        {
-            customerInputStream = new Scanner(new File(customerInfoFileName));
-            customerInputStream.useDelimiter(",");
-        }
-        catch (FileNotFoundException e)
-        {
-            System.out.println("Error opening " + customerInfoFileName);
-            return false;
-        }
-
-        while (customerInputStream.hasNextLine())
-        {
-            String customerName = customerInputStream.next();
-            String customerPassword = customerInputStream.nextLine();
-            customerPassword = customerPassword.substring(1);
-            User newUser = new User(customerName, customerPassword, null, null, null, null);
-
-            Database.userMap.put(null, newUser); // TODO
-            // System.out.println(newUser.getName() + "," +
-            // newUser.getPassword());
-        }
-        customerInputStream.close();
-        return true;
-    }
-    
-    */
-
-    public void writeToFile(String text, String fileName) throws IOException // (,
-                                                                             // boolean
-                                                                             // append)
-    { // Possibly add an arg switch for append/override? If needed later in
-      // project
-      // to write whole files at once, we can reuse this method
-        {
-            File f = new File(fileName);
-            FileWriter fw = new FileWriter(f.getAbsoluteFile(), true); // true =
-                                                                       // append
-                                                                       // to
-                                                                       // file
-            BufferedWriter bw = new BufferedWriter(fw);
-
-            bw.write(text);
-            bw.close();
-        }
-    }
-
     public void setAuthUser(User user)
     {
         authUser = user;
