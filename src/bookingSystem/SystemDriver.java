@@ -286,21 +286,21 @@ public class SystemDriver
 
     private void displayTimeSlots()
     {
-        for (int x = 0; x < Database.timeslotList.size(); x++)
+        for (int x = 0; x < Database.timeslotMap.size(); x++)
         {
-            System.out.println(Database.timeslotList.get(x).getDate() + "\n");
+            System.out.println(Database.timeslotMap.get(x).getDate() + "\n");
 
         }
     }
-
-    private void addBooking(int year, int month, int day, int startHour, String Customer)
-    {
-        Calendar calendar = new GregorianCalendar(year, month, day, startHour, 00, 00);
-        for (int x = 0; x < Database.timeslotList.size(); x++)
+    
+    private void addBooking(int customer_id, int employee_id, int timeslot_id, String service, int duration)
+    { //TODO: all "add" functions require callbacks from DB as they need to add a new entry, auto-generate an ID, then read this back to java
+    	// so that we can enter it into the HashMap as the key. A bit fiddly, but manually generating ID is lazy and crappy. I will add this code shortly -Adam
+        for (int x = 0; x < Database.timeslotMap.size(); x++)
         {
-            if (Database.timeslotList.get(x).getDate().compareTo(calendar) == 0)
+            if (Database.timeslotMap.get(x).getDate().compareTo(calendar) == 0)
             {
-                new Booking(calendar, Customer);
+                new Booking(customer_id, employee_id, timeslot_id, service, duration);
             }
             else
             {
@@ -313,7 +313,7 @@ public class SystemDriver
     {
         for (int start = startHour; start < endHour; start++)
         {
-            Database.timeslotList.add(new Timeslot(year, month, day, start));
+            Database.timeslotMap.add(new Timeslot(year, month, day, start));
         }
     }
 
@@ -323,11 +323,11 @@ public class SystemDriver
         System.out.println("=================================================\n" 
                          + "Available Bookings:\n"
                          + "=================================================\n");
-        for (int index = 0; index < Database.timeslotList.size(); ++index)
+        for (int index = 0; index < Database.timeslotMap.size(); ++index)
         {
-            if (Database.timeslotList.get(index).returnStatus() == false)
+            if (Database.timeslotMap.get(index).returnStatus() == false)
             {
-                System.out.println(Database.timeslotList.get(index).getDate() + "-" + Database.timeslotList.get(index).getEmployee() + "\n");
+                System.out.println(Database.timeslotMap.get(index).getDate() + "-" + Database.timeslotMap.get(index).getEmployee() + "\n");
             }
         }
     }
@@ -361,16 +361,16 @@ public class SystemDriver
     {
         System.out.println("Please enter employee ID\n");
         String ID = keyboard.nextLine();
-        for (int x = 0; x < Database.employeeList.size(); x++)
+        for (int x = 0; x < Database.employeeMap.size(); x++)
         {
-            if (Database.employeeList.get(x).getID().equals(ID))
+            if (Database.employeeMap.get(x).getID().equals(ID))
             {
                 System.out.println(
-                        "Are you sure you wish to remove" + Database.employeeList.get(x).getName() + " from the system? Y/N\n");
+                        "Are you sure you wish to remove" + Database.employeeMap.get(x).getName() + " from the system? Y/N\n");
 
                 if (keyboard.nextLine().equals("Y"))
                 {
-                    Database.employeeList.remove(x);
+                    Database.employeeMap.remove(x);
                     System.out.println("Sucessfully removed");
                 }
             }
@@ -384,8 +384,8 @@ public class SystemDriver
         System.out.println("Please enter employee ID\n");
         int id = keyboard.nextInt();
         keyboard.nextLine();
-
-        Database.employeeList.add(new Employee(name, id));
+        Employee e = new Employee(name, id);
+        Database.employeeMap.put(id, e);
         System.out.println(name + "has sucessfully been created");
     }
 
@@ -395,9 +395,9 @@ public class SystemDriver
         String input = keyboard.nextLine();
         if (input.equals("1"))
         {
-            for (int x = 0; x < Database.employeeList.size(); x++)
+            for (int x = 0; x < Database.employeeMap.size(); x++)
             {
-                System.out.println(Database.employeeList.get(x).getID() + "-" + Database.employeeList.get(x).getName() + "\n");
+                System.out.println(Database.employeeMap.get(x).getID() + "-" + Database.employeeMap.get(x).getName() + "\n");
 
             }
         }
@@ -405,11 +405,11 @@ public class SystemDriver
         {
             System.out.println("Enter ID\n");
             String ID = keyboard.nextLine();
-            for (int x = 0; x < Database.employeeList.size(); x++)
+            for (int x = 0; x < Database.employeeMap.size(); x++)
             {
-                if (Database.employeeList.get(x).getID().equals(ID))
+                if (Database.employeeMap.get(x).getID().equals(ID))
                 {
-                    System.out.println(Database.employeeList.get(x).getID() + "-" + Database.employeeList.get(x).getName() + "\n");
+                    System.out.println(Database.employeeMap.get(x).getID() + "-" + Database.employeeMap.get(x).getName() + "\n");
                 }
             }
         }
@@ -492,9 +492,9 @@ public class SystemDriver
         User userCheck = null;
         boolean invalid = false;
 
-        for (int index = 0; !invalid && index < Database.userList.size(); ++index)
+        for (int index = 0; !invalid && index < Database.userMap.size(); ++index)
         {
-            userCheck = Database.userList.get(index);
+            userCheck = Database.userMap.get(index);
             invalid = userCheck.getName().equals(newUser.getName());
         }
         if (invalid)
@@ -503,7 +503,7 @@ public class SystemDriver
         }
         else
         {
-            Database.userList.add(newUser);
+            Database.userMap.put(null, newUser); //TODO
             writeToFile(newUser.getName() + "," + newUser.getPassword() + "\n", "src/users/customerinfo.dat");
             System.out.println("User Registered. Welcome " + newUser.getName());
             return newUser;
@@ -549,16 +549,16 @@ public class SystemDriver
     {
         User user = null;
 
-        for (int i = 0; i < Database.userList.size(); i++)
+        for (int i = 0; i < Database.userMap.size(); i++)
         {
-            user = Database.userList.get(i);
+            user = Database.userMap.get(i);
             if (user.getName().equals(username))
             {
                 if (user.getPassword().equals(password))
                     return user;
                 break; // break regardless of correct or incorrect creds, since
                        // there won't be another matching
-                       // username in the userlist with a different p/w. We can
+                       // username in the userMap with a different p/w. We can
                        // split this up if we want
                        // a different error msg for (matching user, wrong pw)
                        // vs. username doesn't exist.
@@ -596,9 +596,9 @@ public class SystemDriver
         {
             username = promptAndGetString("Enter username: ");
             valid = validateCurrent.validateUserName(username);
-            for (int index = 0; index < Database.userList.size(); ++index)
+            for (int index = 0; index < Database.userMap.size(); ++index)
             {
-                User user = Database.userList.get(index);
+                User user = Database.userMap.get(index);
                 if (user.getName().equals(username))
                 {
                     System.out.println("Username Taken, Try Again");
@@ -715,7 +715,7 @@ public class SystemDriver
             customerPassword = customerPassword.substring(1);
             User newUser = new User(customerName, customerPassword, null, null, null, null);
 
-            Database.userList.add(newUser);
+            Database.userMap.put(null, newUser); // TODO
             // System.out.println(newUser.getName() + "," +
             // newUser.getPassword());
         }
