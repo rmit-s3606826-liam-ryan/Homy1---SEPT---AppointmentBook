@@ -21,7 +21,7 @@ public class User
         this.dob = dob;
     }
     
-    public String getName()
+    public String getUsername()
     {
         return username;
     }

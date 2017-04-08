@@ -4,15 +4,13 @@ import java.sql.Connection;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Types;
 import java.util.HashMap;
 
-import Bookings.Booking;
-import Bookings.Timeslot;
+import bookings.Booking;
+import bookings.Timeslot;
 import users.Employee;
 import users.User;
 
@@ -27,7 +25,7 @@ public class Database
     // ***************************************************************
     // Database table column names:
     //
-    // USER Table
+    // USERS Table
     private static final String HEADER_USERS_ID = "USER_ID";
     private static final String HEADER_USERS_USERNAME = "USERNAME";
     private static final String HEADER_USERS_PASSWORD = "PASSWORD";
@@ -36,7 +34,7 @@ public class Database
     private static final String HEADER_USERS_DOB = "DOB";
     private static final String HEADER_USERS_NAME = "NAME";
     //
-    // EMPLOYEE Table
+    // EMPLOYEES Table
     private static final String HEADER_EMPLOYEES_ID = "EMPLOYEE_ID";
     private static final String HEADER_EMPLOYEES_NAME = "NAME";
     //
@@ -55,14 +53,13 @@ public class Database
     private static final String HEADER_BOOKINGS_DURATION = "DURATION";
     // ***************************************************************
     
-    static HashMap<Integer, User> userMap= new HashMap<Integer, User>();
-    static HashMap<Integer, Employee> employeeMap= new HashMap<Integer, Employee>();
-    static HashMap<Integer, Timeslot> timeslotMap= new HashMap<Integer, Timeslot>();
-    static HashMap<Integer, Booking> bookingMap= new HashMap<Integer, Booking>();
+    static HashMap<Integer, User> userMap = new HashMap<Integer, User>();
+    static HashMap<Integer, Employee> employeeMap = new HashMap<Integer, Employee>();
+    static HashMap<Integer, Timeslot> timeslotMap = new HashMap<Integer, Timeslot>();
+    static HashMap<Integer, Booking> bookingMap = new HashMap<Integer, Booking>();
     
-    
-	// http://www.javatips.net/blog/h2-database-example
 	static Connection getDBConnection()
+	
 	{
 	    Connection dbConnection = null;
 	    try
@@ -89,8 +86,8 @@ public class Database
 	{
 		try
 		{
-			getUsers();
-			getEmployees();
+			getUsers(); // MUST DO users and employee tables first,
+			getEmployees(); // so timeslots and bookings have objects to link to.
 			getTimeslots();
 			getBookings();
 		}
@@ -104,7 +101,7 @@ public class Database
 	{
 		Connection c = getDBConnection();
 		Statement stmt = null;
-		String getUsersQuery = "select * from USER";
+		String getUsersQuery = "select * from USERS";
 		try
 		{
 			c.setAutoCommit(false);
@@ -119,7 +116,7 @@ public class Database
 				String email = rs.getString(HEADER_USERS_EMAIL);
 				String phone = rs.getString(HEADER_USERS_PHONE);
 				String dobAsString = rs.getString(HEADER_USERS_DOB);
-				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("uuuu-MM-dd");
 				LocalDate dob = LocalDate.parse(dobAsString, formatter);
 				String name = rs.getString(HEADER_USERS_NAME);
 				User user = new User(username, password, email, name, phone, dob);
@@ -146,7 +143,7 @@ public class Database
 	{
 		Connection c = getDBConnection();
 		Statement stmt = null;
-		String getUsersQuery = "select * from EMPLOYEE";
+		String getUsersQuery = "select * from EMPLOYEES";
 		try
 		{
 			c.setAutoCommit(false);
@@ -195,12 +192,12 @@ public class Database
 				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 				LocalDate date = LocalDate.parse(dateAsString, formatter);
 				
-				// deprecated lib, only used to pull from DB, then convert to LocalTime
+				// deprecated lib - only used to pull from DB, then convert to LocalTime
 				java.sql.Time timeSQL = rs.getTime(HEADER_TIMESLOTS_TIME);
 				LocalTime time = timeSQL.toLocalTime();
 				Boolean booked = rs.getBoolean(HEADER_TIMESLOTS_BOOKED);
-				Timeslot ts = new Timeslot(date, time, booked);
-				timeslotMap.put(id, ts);
+				Timeslot timeslot = new Timeslot(date, time, booked);
+				timeslotMap.put(id, timeslot);
 			}
 			stmt.close();
 			c.commit();
@@ -233,12 +230,18 @@ public class Database
 			while (rs.next())
 			{
 				int id = rs.getInt(HEADER_BOOKINGS_ID);
+				
+				// Convert ID's to actual objects
 				int customer_id = rs.getInt(HEADER_BOOKINGS_CUSTOMER_ID);
 				int employee_id = rs.getInt(HEADER_BOOKINGS_EMPLOYEE_ID);
 				int timeslot_id = rs.getInt(HEADER_BOOKINGS_TIMESLOT_ID); // TODO linking.
+				
+				User customer = userMap.get(customer_id);
+				Employee employee = employeeMap.get(employee_id);
+				Timeslot timeslot = timeslotMap.get(timeslot_id);
 				String service = rs.getString(HEADER_BOOKINGS_SERVICE);
 				int duration = rs.getInt(HEADER_BOOKINGS_DURATION);
-				Booking booking = new Booking(customer_id, employee_id, timeslot_id, service, duration);
+				Booking booking = new Booking(id, customer, employee, timeslot, service, duration);
 				bookingMap.put(id, booking);
 			}
 			stmt.close();

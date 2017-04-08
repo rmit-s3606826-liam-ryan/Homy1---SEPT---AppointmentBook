@@ -1,5 +1,7 @@
 package bookingSystem;
 
+import java.time.LocalDate;
+
 /**
  * Class for validating user input from registration
  * returns boolean value if input is valid
@@ -77,9 +79,11 @@ public class RegistrationValidation
      * Validation of day may allow some invalid dates through currently
      * and anyone over the age of 118 is in trouble.
      **/
-    boolean validateDOB(int day, int month, int year)
+    /* not needed any more
+    boolean validateDOB(LocalDate date)
     {
         boolean validDate = false;
+        date
         if(day < 32 && day > 0)
         {
             if (month < 13 && month > 0)
@@ -96,4 +100,5 @@ public class RegistrationValidation
         }
         return validDate;
     }
+    */
 }
