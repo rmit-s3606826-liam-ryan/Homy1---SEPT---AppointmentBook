@@ -1,6 +1,6 @@
 package users;
 
-import java.sql.Date;
+import java.time.LocalDate;
 
 public class User
 {
@@ -9,16 +9,16 @@ public class User
     private String email;
     private String fullName;
     private String phoneNumber;
-    private Date DOB;
+    private LocalDate dob;
     
-    public User(String username, String password, String email, String fullName, String phoneNumber, Date DOB)
+    public User(String username, String password, String email, String fullName, String phoneNumber, LocalDate dob)
     {
         this.username = username;
         this.password = password;
         this.email = email;
         this.fullName = fullName;
         this.phoneNumber = phoneNumber;
-        this.DOB = DOB;
+        this.dob = dob;
     }
     
     public String getName()
@@ -46,8 +46,8 @@ public class User
     	return phoneNumber;
     }
     
-    public Date getDOB()
+    public LocalDate getDOB()
     {
-    	return DOB;
+    	return dob;
     }
 }

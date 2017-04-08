@@ -1,16 +1,15 @@
 package bookingSystem;
 
 import java.sql.Connection;
-import java.sql.Date;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 
 import Bookings.Booking;
 import Bookings.Timeslot;
@@ -29,35 +28,38 @@ public class Database
     // Database table column names:
     //
     // USER Table
-    private static final String HEADER_USER_USERNAME = "USERNAME";
-    private static final String HEADER_USER_PASSWORD = "PASSWORD";
-    private static final String HEADER_USER_EMAIL = "EMAIL";
-    private static final String HEADER_USER_PHONE = "PHONENO";
-    private static final String HEADER_USER_DOB = "DOB";
-    private static final String HEADER_USER_NAME = "NAME";
+    private static final String HEADER_USERS_ID = "USER_ID";
+    private static final String HEADER_USERS_USERNAME = "USERNAME";
+    private static final String HEADER_USERS_PASSWORD = "PASSWORD";
+    private static final String HEADER_USERS_EMAIL = "EMAIL";
+    private static final String HEADER_USERS_PHONE = "PHONE";
+    private static final String HEADER_USERS_DOB = "DOB";
+    private static final String HEADER_USERS_NAME = "NAME";
     //
     // EMPLOYEE Table
-    private static final String HEADER_EMPLOYEE_ID = "ID";
-    private static final String HEADER_EMPLOYEE_NAME = "NAME";
+    private static final String HEADER_EMPLOYEES_ID = "EMPLOYEE_ID";
+    private static final String HEADER_EMPLOYEES_NAME = "NAME";
     //
     // TIMESLOTS Table
+    private static final String HEADER_TIMESLOTS_ID = "TIMESLOT_ID";
     private static final String HEADER_TIMESLOTS_DATE = "DATE";
     private static final String HEADER_TIMESLOTS_TIME = "TIME";
-    private static final String HEADER_TIMESLOTS_EMPLOYEE_ID = "EMPLOYEE_ID";
     private static final String HEADER_TIMESLOTS_BOOKED = "BOOKED";
     //
     // BOOKINGS Table
+    private static final String HEADER_BOOKINGS_ID = "BOOKING_ID";
     private static final String HEADER_BOOKINGS_CUSTOMER_ID = "CUSTOMER_ID";
     private static final String HEADER_BOOKINGS_EMPLOYEE_ID = "EMPLOYEE_ID";
-    private static final String HEADER_BOOKINGS_TIMESLOT = "TIMESLOT";
+    private static final String HEADER_BOOKINGS_TIMESLOT_ID = "TIMESLOT_ID";
     private static final String HEADER_BOOKINGS_SERVICE = "SERVICE";
     private static final String HEADER_BOOKINGS_DURATION = "DURATION";
     // ***************************************************************
     
-    static List<User> userList = new ArrayList<User>();
-    static List<Employee> employeeList = new ArrayList<Employee>();
-    static List<Timeslot> timeslotList = new ArrayList<Timeslot>();
-    static List<Booking> bookingList = new ArrayList<Booking>();
+    static HashMap<Integer, User> userMap= new HashMap<Integer, User>();
+    static HashMap<Integer, Employee> employeeMap= new HashMap<Integer, Employee>();
+    static HashMap<Integer, Timeslot> timeslotMap= new HashMap<Integer, Timeslot>();
+    static HashMap<Integer, Booking> bookingMap= new HashMap<Integer, Booking>();
+    
     
 	// http://www.javatips.net/blog/h2-database-example
 	static Connection getDBConnection()
@@ -85,12 +87,6 @@ public class Database
 	
 	static void loadFromDB()
 	{
-		 
-
-
-		
-		//Connection c = getDBConnection();
-		
 		try
 		{
 			getUsers();
@@ -116,15 +112,18 @@ public class Database
 			ResultSet rs = stmt.executeQuery(getUsersQuery);
 			
 			while (rs.next())
-			{			
-				String username = rs.getString(HEADER_USER_USERNAME);
-				String password = rs.getString(HEADER_USER_PASSWORD);
-				String email = rs.getString(HEADER_USER_EMAIL);
-				String phone = rs.getString(HEADER_USER_PHONE);
-				Date dob = rs.getDate(HEADER_USER_DOB);
-				String name = rs.getString(HEADER_USER_NAME);
+			{
+				int id = rs.getInt(HEADER_USERS_ID);
+				String username = rs.getString(HEADER_USERS_USERNAME);
+				String password = rs.getString(HEADER_USERS_PASSWORD);
+				String email = rs.getString(HEADER_USERS_EMAIL);
+				String phone = rs.getString(HEADER_USERS_PHONE);
+				String dobAsString = rs.getString(HEADER_USERS_DOB);
+				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+				LocalDate dob = LocalDate.parse(dobAsString, formatter);
+				String name = rs.getString(HEADER_USERS_NAME);
 				User user = new User(username, password, email, name, phone, dob);
-				userList.add(user);
+				userMap.put(id, user);
 			}
 			stmt.close();
 			c.commit();
@@ -156,10 +155,10 @@ public class Database
 			
 			while (rs.next())
 			{			
-				int id = rs.getInt(HEADER_EMPLOYEE_ID);
-				String name = rs.getString(HEADER_EMPLOYEE_NAME);
+				int id = rs.getInt(HEADER_EMPLOYEES_ID);
+				String name = rs.getString(HEADER_EMPLOYEES_NAME);
 				Employee employee = new Employee(name, id);
-				employeeList.add(employee);
+				employeeMap.put(id,employee);
 			}
 			stmt.close();
 			c.commit();
@@ -190,14 +189,18 @@ public class Database
 			ResultSet rs = stmt.executeQuery(getTimeslotsQuery);
 			
 			while (rs.next())
-			{		
-				String employee_id = rs.getString(HEADER_TIMESLOTS_EMPLOYEE_ID);
-				Date date = rs.getDate(HEADER_TIMESLOTS_DATE);
-				int time = rs.getInt(HEADER_TIMESLOTS_TIME); //24HR time
+			{
+				int id = rs.getInt(HEADER_TIMESLOTS_ID);
+				String dateAsString = rs.getString(HEADER_TIMESLOTS_DATE);
+				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+				LocalDate date = LocalDate.parse(dateAsString, formatter);
+				
+				// deprecated lib, only used to pull from DB, then convert to LocalTime
+				java.sql.Time timeSQL = rs.getTime(HEADER_TIMESLOTS_TIME);
+				LocalTime time = timeSQL.toLocalTime();
 				Boolean booked = rs.getBoolean(HEADER_TIMESLOTS_BOOKED);
-				//Timeslot ts = new Timeslot();
-				Timeslot ts = null; //TODO
-				timeslotList.add(ts);
+				Timeslot ts = new Timeslot(date, time, booked);
+				timeslotMap.put(id, ts);
 			}
 			stmt.close();
 			c.commit();
@@ -229,13 +232,14 @@ public class Database
 			
 			while (rs.next())
 			{
-				String cust_username = rs.getString(HEADER_BOOKINGS_CUSTOMER_ID);
+				int id = rs.getInt(HEADER_BOOKINGS_ID);
+				int customer_id = rs.getInt(HEADER_BOOKINGS_CUSTOMER_ID);
 				int employee_id = rs.getInt(HEADER_BOOKINGS_EMPLOYEE_ID);
-				int timeslot = rs.getInt(HEADER_BOOKINGS_TIMESLOT); // TODO linking.
+				int timeslot_id = rs.getInt(HEADER_BOOKINGS_TIMESLOT_ID); // TODO linking.
 				String service = rs.getString(HEADER_BOOKINGS_SERVICE);
 				int duration = rs.getInt(HEADER_BOOKINGS_DURATION);
-				Booking booking = new Booking(null, cust_username); //TODO pass date as calendar obj?
-				bookingList.add(booking);
+				Booking booking = new Booking(customer_id, employee_id, timeslot_id, service, duration);
+				bookingMap.put(id, booking);
 			}
 			stmt.close();
 			c.commit();

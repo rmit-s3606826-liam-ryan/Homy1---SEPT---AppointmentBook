@@ -1,43 +1,51 @@
 package Bookings;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
+//import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalTime;
+//import java.util.Calendar;
 
-import java.util.GregorianCalendar;
+//import java.util.GregorianCalendar;
 
-public class Timeslot {
-	SimpleDateFormat sdf = new SimpleDateFormat("yyyy MMM dd HH:mm:ss");
+public class Timeslot
+{
+	/* SimpleDateFormat sdf = new SimpleDateFormat("yyyy MMM dd HH:mm:ss");
 	Calendar calendar = new GregorianCalendar(0000,0,00,00,00,00);
-	private String employee;
+	private String employee; */
 	private boolean booked = false;
+	private int id = 0;
+	private LocalDate date = null;
+	private LocalTime time = null;
 	
-	public Timeslot( int year, int month, int day, int hour){
-		
-		//this.employee=employee;
-		
-		calendar.set(year, month, day, hour, 00, 00);
-		
+	public Timeslot( LocalDate date, LocalTime time, boolean booked)
+	{
+		this.date = date;
+		this.time = time;
+		this.booked = booked;
 	}
 	
-	
-
-	public Calendar getDate(){
-		return calendar; 
+	public LocalDate getDate()
+	{
+		return date; 
 	}
 	
-	String getEmployee(){
-		return employee;
+	public LocalTime getTime()
+	{
+		return time;
 	}
 	
-	void cancelBooking(){
+	void cancelBooking()
+	{
 		booked = false;
 	}
 	
-	void book(){
+	void book()
+	{
 		booked = true;
 	}
 	
-	boolean returnStatus(){
+	boolean getStatus()
+	{
 		return booked; 
 	}
 }
