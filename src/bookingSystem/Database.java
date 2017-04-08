@@ -165,7 +165,7 @@ public class Database
 			{			
 				int id = rs.getInt(HEADER_EMPLOYEES_ID);
 				String name = rs.getString(HEADER_EMPLOYEES_NAME);
-				Employee employee = new Employee(name, id);
+				Employee employee = new Employee(id, name);
 				employeeMap.put(id,employee);
 			}
 			stmt.close();
@@ -274,6 +274,237 @@ public class Database
 	}
 	
 	static int addUserToDB(String username, String password, String email, String name, String phone, LocalDate dob) throws SQLException
+	{
+		Connection c = getDBConnection();
+		PreparedStatement insertStmt = null;
+		PreparedStatement selectStmt = null;
+		int id = 0;
+		
+		String insertStatement = "INSERT INTO " + TABLE_USERS + " ("
+									   + HEADER_USERS_USERNAME
+								+ ", " + HEADER_USERS_PASSWORD
+								+ ", " + HEADER_USERS_EMAIL
+								+ ", " + HEADER_USERS_PHONE
+								+ ", " + HEADER_USERS_DOB
+								+ ", " + HEADER_USERS_NAME
+								+ ") values (?, ?, ?, ?, ?, ?)";
+		try
+		{
+			c.setAutoCommit(false);
+			
+			insertStmt = c.prepareStatement(insertStatement);
+			
+			// fill in variables into sql statement
+			insertStmt.setString(1, username);
+			insertStmt.setString(2, password);
+			java.sql.Date date = java.sql.Date.valueOf(dob);
+			insertStmt.setDate(5, date);
+			insertStmt.setString(6, name);
+			
+			// take care of possible null entries
+			if (email != null)
+			{
+				insertStmt.setString(3, email);
+			}
+			else
+			{
+				insertStmt.setNull(3, Types.VARCHAR);
+			}
+			if (phone != null)
+			{
+				insertStmt.setString(4, phone);
+			}
+			else
+			{
+				insertStmt.setNull(4, Types.VARCHAR);
+			}
+			
+			insertStmt.executeUpdate();
+			insertStmt.close();
+            
+			selectStmt = c.prepareStatement("SELECT " + HEADER_USERS_ID
+											+ " FROM " + TABLE_USERS
+											+ " WHERE " + HEADER_USERS_USERNAME
+											+ "='" + username + "';");
+			
+			ResultSet rs = selectStmt.executeQuery();
+			rs.next();	// increment resultset to first result.
+						// should be only one result as userID is a primary key.
+			id = rs.getInt(HEADER_USERS_ID);
+			
+			selectStmt.close();
+			c.commit();
+		}
+		catch (SQLException e)
+		{
+			System.out.println("Exception Message " + e.getLocalizedMessage());
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		finally
+		{
+			c.close();
+		}
+		return id;
+	}
+	
+	static int addEmployeeToDB(String name) throws SQLException
+	{
+		Connection c = getDBConnection();
+		PreparedStatement insertStmt = null;
+		PreparedStatement selectStmt = null;
+		int id = 0;
+		
+		String insertStatement = "INSERT INTO " + TABLE_EMPLOYEES + " ("
+									   + HEADER_EMPLOYEES_NAME
+									   + ") values (?)";
+		try
+		{
+			c.setAutoCommit(false);
+			
+			insertStmt = c.prepareStatement(insertStatement);
+			
+			// fill in variables into sql statement
+			insertStmt.setString(1, name);
+			insertStmt.executeUpdate();
+			insertStmt.close();
+            
+			selectStmt = c.prepareStatement("SELECT " + HEADER_EMPLOYEES_ID
+											+ " FROM " + TABLE_EMPLOYEES
+											+ " WHERE " + HEADER_EMPLOYEES_NAME
+											+ "='" + name + "';");
+			
+			ResultSet rs = selectStmt.executeQuery();
+			rs.next();	// increment resultset to first result.
+						// should be only one result as userID is a primary key.
+			id = rs.getInt(HEADER_USERS_ID);
+			
+			selectStmt.close();
+			c.commit();
+		}
+		catch (SQLException e)
+		{
+			System.out.println("Exception Message " + e.getLocalizedMessage());
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		finally
+		{
+			c.close();
+		}
+		return id;
+	}
+	
+	static void removeEmployeeFromDB(int id) throws SQLException
+	{
+		Connection c = getDBConnection();
+		Statement stmt = null;
+		
+		String deleteStatement = "DELETE FROM " + TABLE_EMPLOYEES + "WHERE " + HEADER_EMPLOYEES_ID + "=" + id + ";";
+		try
+		{
+			c.setAutoCommit(false);
+			stmt = c.createStatement();
+			stmt.execute(deleteStatement);
+			stmt.close();
+			c.commit();
+		}
+		catch (SQLException e)
+		{
+			System.out.println("Exception Message " + e.getLocalizedMessage());
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		finally
+		{
+			c.close();
+		}
+	}
+	
+	static int addTimeslotToDB(String username, String password, String email, String name, String phone, LocalDate dob) throws SQLException
+	{
+		Connection c = getDBConnection();
+		PreparedStatement insertStmt = null;
+		PreparedStatement selectStmt = null;
+		int id = 0;
+		
+		String insertStatement = "INSERT INTO " + TABLE_USERS + " ("
+									   + HEADER_USERS_USERNAME
+								+ ", " + HEADER_USERS_PASSWORD
+								+ ", " + HEADER_USERS_EMAIL
+								+ ", " + HEADER_USERS_PHONE
+								+ ", " + HEADER_USERS_DOB
+								+ ", " + HEADER_USERS_NAME
+								+ ") values (?, ?, ?, ?, ?, ?)";
+		try
+		{
+			c.setAutoCommit(false);
+			
+			insertStmt = c.prepareStatement(insertStatement);
+			
+			// fill in variables into sql statement
+			insertStmt.setString(1, username);
+			insertStmt.setString(2, password);
+			java.sql.Date date = java.sql.Date.valueOf(dob);
+			insertStmt.setDate(5, date);
+			insertStmt.setString(6, name);
+			
+			// take care of possible null entries
+			if (email != null)
+			{
+				insertStmt.setString(3, email);
+			}
+			else
+			{
+				insertStmt.setNull(3, Types.VARCHAR);
+			}
+			if (phone != null)
+			{
+				insertStmt.setString(4, phone);
+			}
+			else
+			{
+				insertStmt.setNull(4, Types.VARCHAR);
+			}
+			
+			insertStmt.executeUpdate();
+			insertStmt.close();
+            
+			selectStmt = c.prepareStatement("SELECT " + HEADER_USERS_ID
+											+ " FROM " + TABLE_USERS
+											+ " WHERE " + HEADER_USERS_USERNAME
+											+ "='" + username + "';");
+			
+			ResultSet rs = selectStmt.executeQuery();
+			rs.next();	// increment resultset to first result.
+						// should be only one result as userID is a primary key.
+			id = rs.getInt(HEADER_USERS_ID);
+			
+			selectStmt.close();
+			c.commit();
+		}
+		catch (SQLException e)
+		{
+			System.out.println("Exception Message " + e.getLocalizedMessage());
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		finally
+		{
+			c.close();
+		}
+		return id;
+	}
+	
+	static int addBookingToDB(String username, String password, String email, String name, String phone, LocalDate dob) throws SQLException
 	{
 		Connection c = getDBConnection();
 		PreparedStatement insertStmt = null;

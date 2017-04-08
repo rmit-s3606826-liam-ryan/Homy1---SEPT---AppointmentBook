@@ -206,7 +206,11 @@ public class SystemDriver
                 default: System.out.println("no");   break;
                 }
             }
-
+            catch (UserRequestsExitException e)
+            {
+                System.out.println("User requested exit. Returning to menu...");
+            }
+            
             catch (NumberFormatException e)
             {
                 System.out.println("Please Enter a valid number");
@@ -358,33 +362,64 @@ public class SystemDriver
     private void removeEmployee()
     {
         System.out.println("Please enter employee ID\n");
-        String ID = keyboard.nextLine();
-        for (int x = 0; x < Database.employeeMap.size(); x++)
+        int id = keyboard.nextInt();
+        keyboard.nextLine();
+        
+        Employee employee = Database.employeeMap.get(id);
+        System.out.println(
+                "Are you sure you wish to remove" + employee.getName() + " from the system? Y/N\n");
+        
+        if (keyboard.nextLine().equalsIgnoreCase("Y"))
         {
-            if (Database.employeeMap.get(x).getID().equals(ID))
-            {
-                System.out.println(
-                        "Are you sure you wish to remove" + Database.employeeMap.get(x).getName() + " from the system? Y/N\n");
-
-                if (keyboard.nextLine().equals("Y"))
-                {
-                    Database.employeeMap.remove(x);
-                    System.out.println("Sucessfully removed");
-                }
-            }
+        	try
+        	{
+				Database.removeEmployeeFromDB(id);
+				Database.employeeMap.remove(id);
+	            System.out.println("Sucessfully removed \"" + employee.getName() + "\".");
+			}
+        	catch (SQLException e)
+        	{
+				System.out.println(e);
+			}
+            
         }
     }
 
-    private void addEmployee()
+    private void addEmployee() throws UserRequestsExitException
     {
-        System.out.println("Please enter new Employees name\n");
-        String name = keyboard.nextLine();
-        System.out.println("Please enter employee ID\n");
-        int id = keyboard.nextInt();
-        keyboard.nextLine();
-        Employee e = new Employee(name, id);
-        Database.employeeMap.put(id, e);
-        System.out.println(name + "has sucessfully been created");
+    	String name = null;
+    	Employee newEmployee = null;
+        boolean valid = false;
+        
+        while (valid == false)
+        {
+            name = promptAndGetString("Please enter new employee's name:\n");
+            valid = RegistrationValidation.validateName(name);
+            if (valid)
+            {
+            	for (Employee employee : Database.employeeMap.values())
+                {
+                	if (employee.getName().equals(name))
+                	{
+                		System.out.println("Employee already exists");;
+                		valid = false;
+                	}
+                }
+            }
+        }
+        
+        try
+        {
+        	int id = Database.addEmployeeToDB(name);
+            newEmployee = new Employee(id, name);
+        	Database.employeeMap.put(newEmployee.getID(), newEmployee);
+        	System.out.println("\"" + name + "\" has been added as a new employee.");
+            customerMenu();
+        }
+        catch (SQLException e)
+        {
+        	System.out.println(e.getMessage());
+        }
     }
 
     private void viewEmployee()
@@ -393,23 +428,19 @@ public class SystemDriver
         String input = keyboard.nextLine();
         if (input.equals("1"))
         {
-            for (int x = 0; x < Database.employeeMap.size(); x++)
-            {
-                System.out.println(Database.employeeMap.get(x).getID() + "-" + Database.employeeMap.get(x).getName() + "\n");
-
-            }
+        	for (Employee employee : Database.employeeMap.values())
+        	{
+        		System.out.println(employee.getID() + "-" + employee.getName() + "\n");
+        	}
         }
         else if (input.equals("2"))
         {
-            System.out.println("Enter ID\n");
-            String ID = keyboard.nextLine();
-            for (int x = 0; x < Database.employeeMap.size(); x++)
-            {
-                if (Database.employeeMap.get(x).getID().equals(ID))
-                {
-                    System.out.println(Database.employeeMap.get(x).getID() + "-" + Database.employeeMap.get(x).getName() + "\n");
-                }
-            }
+            System.out.println("Enter ID:\n");
+            int id = keyboard.nextInt();
+            keyboard.nextLine();
+            
+            Employee employee = Database.employeeMap.get(id);
+            System.out.println(employee.getID() + "-" + employee.getName() + "\n");
         }
     }
 
@@ -483,12 +514,6 @@ public class SystemDriver
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-    }
-
-    public void addUser(User newUser)
-    {
-    	Database.userMap.put(newUser.getID(), newUser);
-    	System.out.println("User Registered. Welcome " + newUser.getUsername());
     }
 
     public void login()
@@ -660,7 +685,8 @@ public class SystemDriver
         {
         	int id = Database.addUserToDB(username, password, email, fullName, phoneNumber, dob);
             newUser = new User(id, username, password, email, fullName, phoneNumber, dob);
-            addUser(newUser);
+            Database.userMap.put(newUser.getID(), newUser);
+        	System.out.println("User Registered. Welcome " + newUser.getUsername());
             setAuthUser(newUser);
             customerMenu();
         }
