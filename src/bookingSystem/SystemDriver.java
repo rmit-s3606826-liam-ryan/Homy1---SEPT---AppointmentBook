@@ -5,6 +5,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.Scanner;
 import java.util.StringTokenizer;
 import java.util.logging.*;
@@ -218,41 +219,23 @@ public class SystemDriver
      **/
     private void viewEmployeeAvailability()
     {
-        Connection c = Database.getDBConnection();
-        Statement stmt = null;
-        try
-        {
-            stmt = c.createStatement();
-            
-            System.out.println("======================\n"
-                             + "Employee Availability\n"
-                             + "======================\n"
-                             + "Enter employee name:\n");
-            String employee = keyboard.nextLine();
-            
-            ResultSet rs = stmt.executeQuery("SELECT * FROM EMPLOYEES WHERE NAME ='" + employee + "'");
-            if (rs.next())
-            {
-                System.out.println(employee + " is available for the following times:\n");
-                while (rs.next())
-                {
-                    System.out.println(rs.getString("date"));
-                }
-            }
-            else
-            ResultSet rs = stmt.executeQuery("SELECT * FROM TIMESLOTS WHERE employee ='" + employee + "' AND booked = 'false'");
-            System.out.println(employee + " is available for the following times:\n");
-            while (rs.next())
-            {
-                System.out.println("Employee not available");
-            }
-            c.close();
-            
-        }
-        catch (SQLException e)
-        {
-            e.printStackTrace();
-        }
+    	System.out.println("======================\n"
+    						+ "Employee Availability\n"
+    						+ "======================\n"
+    						+ "Enter employee ID:\n");
+    	
+    	int input = keyboard.nextInt();
+    	keyboard.nextLine();
+    	Employee employee = Database.employeeMap.get(input);
+    	HashMap<String, LocalTime[]> availability = employee.getAvailability();
+    	System.out.println(employee.getName() + " is available for the following times:\n");
+    	
+    	for (HashMap.Entry<String, LocalTime[]> entry : availability.entrySet())
+    	{
+    	    String dayOfWeek = entry.getKey();
+    	    LocalTime[] times = entry.getValue();
+    	    System.out.println(dayOfWeek + ": " + times[0] + " - " + times[1]);
+    	}
     }
 
     /**
