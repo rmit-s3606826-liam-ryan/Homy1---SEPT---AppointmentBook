@@ -199,9 +199,9 @@ public class Database
 			while (rs.next())
 			{
 				int id = rs.getInt(HEADER_TIMESLOTS_ID);
-				String dateAsString = rs.getString(HEADER_TIMESLOTS_DATE);
-				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-				LocalDate date = LocalDate.parse(dateAsString, formatter);
+				String dateString = rs.getString(HEADER_TIMESLOTS_DATE);
+		    	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("uuuu-MM-dd");
+		    	LocalDate date = LocalDate.parse(dateString, formatter);
 				
 				// deprecated lib - only used to pull from DB, then convert to LocalTime
 				java.sql.Time timeSQL = rs.getTime(HEADER_TIMESLOTS_TIME);
