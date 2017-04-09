@@ -1,0 +1,5 @@
+To run the program:
+Option A - Import the project into your chosen IDE (such as eclipse) and hit run
+Option B - In windows command prompt or a terminal, navigate to the directory containing the 
+           jar file and use the command 'java -jar notSEPT'
+	   The appropriate jaa files must be first installed (jdk 1.8) and must be in the path
