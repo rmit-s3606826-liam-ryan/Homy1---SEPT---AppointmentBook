@@ -6,6 +6,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 import java.util.StringTokenizer;
 import java.util.logging.*;
@@ -361,28 +362,69 @@ public class SystemDriver
 
     private void removeEmployee()
     {
-        System.out.println("Please enter employee ID\n");
-        int id = keyboard.nextInt();
-        keyboard.nextLine();
-        
-        Employee employee = Database.employeeMap.get(id);
-        System.out.println(
-                "Are you sure you wish to remove" + employee.getName() + " from the system? Y/N\n");
-        
-        if (keyboard.nextLine().equalsIgnoreCase("Y"))
-        {
+    	int id = 0;
+    	boolean valid = false;
+    	
+    	while (true)
+    	{
         	try
         	{
-				Database.removeEmployeeFromDB(id);
-				Database.employeeMap.remove(id);
-	            System.out.println("Sucessfully removed \"" + employee.getName() + "\".");
-			}
+        		System.out.println("Please enter employee ID\n");
+        		id = keyboard.nextInt(); // may throw InputMismatchException
+        		keyboard.nextLine();
+        		Employee employee = Database.employeeMap.get(id); // may throw NullPointerException
+                System.out.println(
+                        "Are you sure you wish to remove " + employee.getName() + " from the system? Y/N");
+                
+                while (!valid)
+                {
+                    String k = keyboard.nextLine();
+                    if (k.equalsIgnoreCase("Y"))
+                    {
+                    	Boolean success = Database.removeEmployeeFromDB(id); // may throw SQLException
+                    	if (success)
+                    	{
+                        	Database.employeeMap.remove(id);
+                        	System.out.println("Sucessfully removed \"" + employee.getName() + "\".");
+                        	ownerMenu();
+                    	}
+                    	else
+                    	{
+                    		throw new Exception("Error: Employee currently has bookings and cannot be deleted.");
+                    	}
+                    }
+                    else if (k.equalsIgnoreCase("N"))
+                    {
+                    	System.out.println("Cancelled remove employee. Returning to menu...");
+                    	ownerMenu();
+                    }
+                    else
+                    {
+                    	System.out.println("Invalid input - please enter Y or N.");
+                    }
+                }
+        	}
+        	catch (InputMismatchException e)
+        	{
+        		System.out.println("Error: Invalid ID.");
+        	}
+        	catch (NullPointerException e)
+        	{
+        		System.out.println("Error: Employee with id=" + id + " doesn't exist!");
+        	}
         	catch (SQLException e)
         	{
-				System.out.println(e);
+        		System.out.println(e.getMessage());
+        	}
+        	catch (Exception e)
+        	{
+        		System.out.println(e.getMessage());
 			}
-            
-        }
+        	finally
+        	{
+        		keyboard.nextLine(); // Remove trailing endline char, even if exception is thrown
+        	}
+    	}
     }
 
     private void addEmployee() throws UserRequestsExitException
@@ -555,6 +597,10 @@ public class SystemDriver
         catch (AuthException e)
         {
             System.out.println("\nAuthorisation error - " + e.getMessage() + ".\n");
+        }
+        catch (NullPointerException e)
+        {
+        	System.out.println("Error: User '" + username + "' does not exist.");
         }
 
     }
