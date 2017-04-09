@@ -49,7 +49,7 @@ public class Database
     static final String HEADER_EMPLOYEES_ID = "EMPLOYEE_ID";
     static final String HEADER_EMPLOYEES_NAME = "NAME";
     //
-    // EMPLOYEES Table
+    // AVAILABILITY Table
     static final String HEADER_AVAILABILITY_ID = "ID";
     static final String HEADER_AVAILABILITY_EMPLOYEE_ID = "EMPLOYEE_ID";
     static final String HEADER_AVAILABILITY_DAY = "DAYOFWEEK";
