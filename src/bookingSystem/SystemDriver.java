@@ -230,7 +230,6 @@ public class SystemDriver
                              + "Enter employee name:\n");
             String employee = keyboard.nextLine();
             
-<<<<<<< HEAD
             ResultSet rs = stmt.executeQuery("SELECT * FROM EMPLOYEES WHERE NAME ='" + employee + "'");
             if (rs.next())
             {
@@ -241,11 +240,9 @@ public class SystemDriver
                 }
             }
             else
-=======
             ResultSet rs = stmt.executeQuery("SELECT * FROM TIMESLOTS WHERE employee ='" + employee + "' AND booked = 'false'");
             System.out.println(employee + " is available for the following times:\n");
             while (rs.next())
->>>>>>> refs/remotes/origin/Adam
             {
                 System.out.println("Employee not available");
             }
@@ -752,7 +749,7 @@ public class SystemDriver
         return answer;
     }
     
-    public LocalDate parseDate(String dateString)
+    public static LocalDate parseDate(String dateString)
     /* Parses string into a java.time LocalDate object.
      * Checks size of day and month fields and
      * builds an appropriate formatting pattern.
