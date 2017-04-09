@@ -23,17 +23,10 @@ import java.text.SimpleDateFormat;
 /**
  * System driver class - contains menus and functions used to run the system
  **/
-
 public class SystemDriver
 {
     private Scanner keyboard = new Scanner(System.in);
     private static final Logger logger = Logger.getLogger("SystemDriver");
-
-    /**
-     * list to hold user data (may use one list for all people type objects
-     * customer/owner/employee and differentiate with a field)
-     **/
-
 
     User authUser = null; // TODO Add logout options to menus?
 
@@ -59,7 +52,9 @@ public class SystemDriver
      **/
     static Boolean running = true;
 
-
+    /**
+     * Simple Switch statement menu for registration and login
+     */
     public void registerAndLogin()
     {
         while (running)
@@ -111,6 +106,9 @@ public class SystemDriver
     	
     }
 
+    /**
+     * Display current user, for now as a test, later maybe for user use
+     */
     private void printCurrentUser()
     {
         User user = getAuthUser();
@@ -215,6 +213,9 @@ public class SystemDriver
         }
     }
 
+    /**
+     * View employees availability - not fully implemented
+     **/
     private void viewEmployeeAvailability()
     {
         Connection c = Database.getDBConnection();
@@ -229,11 +230,24 @@ public class SystemDriver
                              + "Enter employee name:\n");
             String employee = keyboard.nextLine();
             
+<<<<<<< HEAD
+            ResultSet rs = stmt.executeQuery("SELECT * FROM EMPLOYEES WHERE NAME ='" + employee + "'");
+            if (rs.next())
+            {
+                System.out.println(employee + " is available for the following times:\n");
+                while (rs.next())
+                {
+                    System.out.println(rs.getString("date"));
+                }
+            }
+            else
+=======
             ResultSet rs = stmt.executeQuery("SELECT * FROM TIMESLOTS WHERE employee ='" + employee + "' AND booked = 'false'");
             System.out.println(employee + " is available for the following times:\n");
             while (rs.next())
+>>>>>>> refs/remotes/origin/Adam
             {
-                System.out.println(rs.getString("date"));
+                System.out.println("Employee not available");
             }
             c.close();
             
@@ -244,12 +258,18 @@ public class SystemDriver
         }
     }
 
+    /**
+     * Add workers working times - days and hours they work
+     */
     private void addWorkingTimes()
     {
         // TODO Auto-generated method stub
         
     }
 
+    /**
+     * Menu for making bookings, not fully implemented
+     */
     private void addBookingMenu()
     {
         int answer = Integer.parseInt(keyboard.nextLine());
@@ -283,6 +303,9 @@ public class SystemDriver
         // calendar.set(z, Array[1] ,Array[2]);
     }
 
+    /**
+     * displays available time slots
+     */
     private void displayTimeSlots()
     {
         for (int x = 0; x < Database.timeslotMap.size(); x++)
@@ -441,6 +464,10 @@ public class SystemDriver
         }
     }
 
+    /**
+     * for viewing future and past bookings, displays all bookings made with in
+     * range of seven days before or after the current date
+     */
     private void viewBooking()
     {
         Connection c = Database.getDBConnection();
@@ -470,6 +497,7 @@ public class SystemDriver
             ResultSet rs = stmt.executeQuery("SELECT * FROM BOOKINGS");
             while (rs.next())
             {
+                // input 1 - view last weeks bookings
                 if (input.equals("1"))
                 {
                     String databaseDate = rs.getString("date");
@@ -480,6 +508,7 @@ public class SystemDriver
                                 rs.getString("username") + " on " + checkDate + " with " + rs.getString("employee"));
                     }
                 }
+                //input 2 - view next weeks bookings
                 else if (input.equals("2"))
                 {
                     String databaseDate = rs.getString("date");
@@ -508,11 +537,14 @@ public class SystemDriver
         }
         catch (java.text.ParseException e)
         {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
-
+    
+    /**
+     * login - sets the current authorised user and determines if
+     * they are the owner or a customer - directs to appropriate menu
+     */
     public void login()
     {
         User authUser = null;
@@ -558,6 +590,9 @@ public class SystemDriver
         throw new AuthException("Invalid credentials");
     }
     
+    /**
+     * checks database for the matching user and returns them if found
+     **/
     public User getUser(String username)
     {
     	for (User user : Database.userMap.values())
