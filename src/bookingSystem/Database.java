@@ -30,6 +30,7 @@ public class Database
     //
     static final String TABLE_USERS = "USERS";
     static final String TABLE_EMPLOYEES = "EMPLOYEES";
+    static final String TABLE_AVAILABILITY = "AVAILABILITY";
     static final String TABLE_TIMESLOTS = "TIMESLOTS";
     static final String TABLE_BOOKINGS = "BOOKINGS";
     //
@@ -47,6 +48,13 @@ public class Database
     // EMPLOYEES Table
     static final String HEADER_EMPLOYEES_ID = "EMPLOYEE_ID";
     static final String HEADER_EMPLOYEES_NAME = "NAME";
+    //
+    // AVAILABILITY Table
+    static final String HEADER_AVAILABILITY_ID = "ID";
+    static final String HEADER_AVAILABILITY_EMPLOYEE_ID = "EMPLOYEE_ID";
+    static final String HEADER_AVAILABILITY_DAY = "DAYOFWEEK";
+    static final String HEADER_AVAILABILITY_START = "STARTTIME";
+    static final String HEADER_AVAILABILITY_FINISH = "ENDTIME";
     //
     // TIMESLOTS Table
     static final String HEADER_TIMESLOTS_ID = "TIMESLOT_ID";
@@ -97,8 +105,9 @@ public class Database
 	{
 		try
 		{
-			getUsers(); // MUST DO users and employee tables first,
+			getUsers(); // MUST do users and employee tables first,
 			getEmployees(); // so timeslots and bookings have objects to link to.
+			getAvailability();
 			getTimeslots();
 			getBookings();
 		}
@@ -167,6 +176,48 @@ public class Database
 				String name = rs.getString(HEADER_EMPLOYEES_NAME);
 				Employee employee = new Employee(id, name);
 				employeeMap.put(id,employee);
+			}
+			stmt.close();
+			c.commit();
+		}
+		catch (SQLException e)
+	    {
+	        System.out.println(e.getMessage());
+	    }
+	    catch (Exception e)
+	    {
+	        e.printStackTrace();
+	    }
+	    finally
+	    {
+	        c.close();
+	    }
+	}
+	
+	static void getAvailability() throws SQLException
+	{
+		Connection c = getDBConnection();
+		Statement stmt = null;
+		String getAvailabilityQuery = "select * from " + TABLE_AVAILABILITY;
+		try
+		{
+			c.setAutoCommit(false);
+			stmt = c.createStatement();
+			ResultSet rs = stmt.executeQuery(getAvailabilityQuery);
+			
+			while (rs.next())
+			{
+				int id = rs.getInt(HEADER_AVAILABILITY_ID);
+				int employee_id = rs.getInt(HEADER_AVAILABILITY_EMPLOYEE_ID);
+				String dayOfWeek = rs.getString(HEADER_AVAILABILITY_DAY);
+				java.sql.Time sqlStartTime = rs.getTime(HEADER_AVAILABILITY_START);
+				LocalTime startTime = sqlStartTime.toLocalTime();
+				java.sql.Time sqlFinishTime = rs.getTime(HEADER_AVAILABILITY_FINISH);
+				LocalTime finishTime = sqlFinishTime.toLocalTime();
+				
+				// Put availability entry into appropriate employee's array
+				Employee e = employeeMap.get(employee_id);
+				e.addAvailability(dayOfWeek, startTime, finishTime);
 			}
 			stmt.close();
 			c.commit();
@@ -399,12 +450,12 @@ public class Database
 		return id;
 	}
 	
-	static void removeEmployeeFromDB(int id) throws SQLException
+	static boolean removeEmployeeFromDB(int id) throws SQLException
 	{
 		Connection c = getDBConnection();
 		Statement stmt = null;
 		
-		String deleteStatement = "DELETE FROM " + TABLE_EMPLOYEES + "WHERE " + HEADER_EMPLOYEES_ID + "=" + id + ";";
+		String deleteStatement = "DELETE FROM " + TABLE_EMPLOYEES + " WHERE " + HEADER_EMPLOYEES_ID + "=" + id + ";";
 		try
 		{
 			c.setAutoCommit(false);
@@ -415,7 +466,7 @@ public class Database
 		}
 		catch (SQLException e)
 		{
-			System.out.println("Exception Message " + e.getLocalizedMessage());
+			return false;
 		}
 		catch (Exception e)
 		{
@@ -425,6 +476,7 @@ public class Database
 		{
 			c.close();
 		}
+		return true;
 	}
 	
 	static int addTimeslotToDB(LocalDate date, LocalTime time, Boolean booked) throws SQLException

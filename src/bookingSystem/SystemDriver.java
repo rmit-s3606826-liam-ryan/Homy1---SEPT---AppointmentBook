@@ -5,6 +5,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.InputMismatchException;
+import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.StringTokenizer;
 import java.util.logging.*;
@@ -13,6 +16,9 @@ import users.Employee;
 import users.User;
 
 import com.sun.org.apache.xerces.internal.impl.xpath.regex.ParseException;
+
+import bookings.Booking;
+import bookings.Timeslot;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -27,6 +33,8 @@ public class SystemDriver
 {
     private Scanner keyboard = new Scanner(System.in);
     private static final Logger logger = Logger.getLogger("SystemDriver");
+    private static final DateTimeFormatter defaultDateFormat = DateTimeFormatter.ofPattern("dd/MM/uuuu");
+    private static final DateTimeFormatter defaultTimeFormat = DateTimeFormatter.ofPattern("hh:mm a");
 
     User authUser = null; // TODO Add logout options to menus?
 
@@ -187,8 +195,8 @@ public class SystemDriver
 
                 switch (answer)
                 {
-                case 1:  viewBooking();              break;
-                case 2:  viewEmployee();             break;
+                case 1:  viewBookings();             break;
+                case 2:  viewEmployees();            break;
                 case 3:  addWorkingTimes();          break;
                 case 4:  addEmployee();              break;
                 case 5:  removeEmployee();           break;
@@ -212,47 +220,26 @@ public class SystemDriver
             }
         }
     }
-
-    /**
-     * View employees availability - not fully implemented
-     **/
+    
     private void viewEmployeeAvailability()
     {
-        Connection c = Database.getDBConnection();
-        Statement stmt = null;
-        try
-        {
-            stmt = c.createStatement();
-            
-            System.out.println("======================\n"
-                             + "Employee Availability\n"
-                             + "======================\n"
-                             + "Enter employee name:\n");
-            String employee = keyboard.nextLine();
-            
-            ResultSet rs = stmt.executeQuery("SELECT * FROM EMPLOYEES WHERE NAME ='" + employee + "'");
-            if (rs.next())
-            {
-                System.out.println(employee + " is available for the following times:\n");
-                while (rs.next())
-                {
-                    System.out.println(rs.getString("date"));
-                }
-            }
-            else
-            ResultSet rs = stmt.executeQuery("SELECT * FROM TIMESLOTS WHERE employee ='" + employee + "' AND booked = 'false'");
-            System.out.println(employee + " is available for the following times:\n");
-            while (rs.next())
-            {
-                System.out.println("Employee not available");
-            }
-            c.close();
-            
-        }
-        catch (SQLException e)
-        {
-            e.printStackTrace();
-        }
+    	System.out.println("======================\n"
+    						+ "Employee Availability\n"
+    						+ "======================\n"
+    						+ "Enter employee ID:\n");
+    	
+    	int input = keyboard.nextInt();
+    	keyboard.nextLine();
+    	Employee employee = Database.employeeMap.get(input);
+    	HashMap<String, LocalTime[]> availability = employee.getAvailability();
+    	System.out.println(employee.getName() + " is available for the following times:\n");
+    	
+    	for (HashMap.Entry<String, LocalTime[]> entry : availability.entrySet())
+    	{
+    	    String dayOfWeek = entry.getKey();
+    	    LocalTime[] times = entry.getValue();
+    	    System.out.println(dayOfWeek + ": " + times[0] + " - " + times[1]);
+    	}
     }
 
     /**
@@ -261,6 +248,7 @@ public class SystemDriver
     private void addWorkingTimes()
     {
         // TODO Auto-generated method stub
+    	// for whoever codes this, see Employee.java for an addAvailability method
         
     }
 
@@ -269,9 +257,8 @@ public class SystemDriver
      */
     private void addBookingMenu()
     {
-        int answer = Integer.parseInt(keyboard.nextLine());
-
         System.out.println("1. View available bookingtimes\n" + "2. Check if a time and date are available");
+        int answer = Integer.parseInt(keyboard.nextLine());
         switch (answer)
         {
         case 1:
@@ -305,11 +292,13 @@ public class SystemDriver
      */
     private void displayTimeSlots()
     {
-        for (int x = 0; x < Database.timeslotMap.size(); x++)
-        {
-            System.out.println(Database.timeslotMap.get(x).getDate() + "\n");
-
-        }
+    	for (Timeslot timeslot : Database.timeslotMap.values())
+    	{
+    	    LocalDate date = timeslot.getDate();
+    	    LocalTime time = timeslot.getTime();
+    	    Boolean booked = timeslot.getStatus();
+    	    System.out.println(date.format(defaultDateFormat) + ", " + time.format(defaultTimeFormat) + " - " + "booked = " + booked);
+    	}
     }
     
     private void addBooking(int customer_id, int employee_id, int timeslot_id, String service, int duration)
@@ -378,28 +367,69 @@ public class SystemDriver
 
     private void removeEmployee()
     {
-        System.out.println("Please enter employee ID\n");
-        int id = keyboard.nextInt();
-        keyboard.nextLine();
-        
-        Employee employee = Database.employeeMap.get(id);
-        System.out.println(
-                "Are you sure you wish to remove" + employee.getName() + " from the system? Y/N\n");
-        
-        if (keyboard.nextLine().equalsIgnoreCase("Y"))
-        {
+    	int id = 0;
+    	boolean valid = false;
+    	
+    	while (true)
+    	{
         	try
         	{
-				Database.removeEmployeeFromDB(id);
-				Database.employeeMap.remove(id);
-	            System.out.println("Sucessfully removed \"" + employee.getName() + "\".");
-			}
+        		System.out.println("Please enter employee ID\n");
+        		id = keyboard.nextInt(); // may throw InputMismatchException
+        		keyboard.nextLine();
+        		Employee employee = Database.employeeMap.get(id); // may throw NullPointerException
+                System.out.println(
+                        "Are you sure you wish to remove " + employee.getName() + " from the system? Y/N");
+                
+                while (!valid)
+                {
+                    String k = keyboard.nextLine();
+                    if (k.equalsIgnoreCase("Y"))
+                    {
+                    	Boolean success = Database.removeEmployeeFromDB(id); // may throw SQLException
+                    	if (success)
+                    	{
+                        	Database.employeeMap.remove(id);
+                        	System.out.println("Sucessfully removed \"" + employee.getName() + "\".");
+                        	ownerMenu();
+                    	}
+                    	else
+                    	{
+                    		throw new Exception("Error: Employee currently has bookings and cannot be deleted.");
+                    	}
+                    }
+                    else if (k.equalsIgnoreCase("N"))
+                    {
+                    	System.out.println("Cancelled remove employee. Returning to menu...");
+                    	ownerMenu();
+                    }
+                    else
+                    {
+                    	System.out.println("Invalid input - please enter Y or N.");
+                    }
+                }
+        	}
+        	catch (InputMismatchException e)
+        	{
+        		System.out.println("Error: Invalid ID.");
+        	}
+        	catch (NullPointerException e)
+        	{
+        		System.out.println("Error: Employee with id=" + id + " doesn't exist!");
+        	}
         	catch (SQLException e)
         	{
-				System.out.println(e);
+        		System.out.println(e.getMessage());
+        	}
+        	catch (Exception e)
+        	{
+        		System.out.println(e.getMessage());
 			}
-            
-        }
+        	finally
+        	{
+        		keyboard.nextLine(); // Remove trailing endline char, even if exception is thrown
+        	}
+    	}
     }
 
     private void addEmployee() throws UserRequestsExitException
@@ -439,7 +469,7 @@ public class SystemDriver
         }
     }
 
-    private void viewEmployee()
+    private void viewEmployees()
     {
         System.out.println("1. View all employees\n" + "2. Search an employee\n");
         String input = keyboard.nextLine();
@@ -465,77 +495,60 @@ public class SystemDriver
      * for viewing future and past bookings, displays all bookings made with in
      * range of seven days before or after the current date
      */
-    private void viewBooking()
+    private void viewBookings()
     {
-        Connection c = Database.getDBConnection();
-        Statement stmt = null;
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy MM dd HH:mm:ss");
-        sdf.setLenient(true);
-        try
+    	String currentUser = "testUser";
+    	LocalDate today = LocalDate.now().plusDays(10); // TODO remove +10 days
+		LocalDate lastWeek = today.minus(Period.ofDays(7));
+		LocalDate nextWeek = today.plus(Period.ofDays(7));
+		boolean noResults = true;
+    	//String currentUser = getAuthUser().getUsername();
+    	System.out.println("Welcome " + currentUser);
+    	System.out.println("1. View last week's bookings\n2. View this weeks bookings");
+    	String input = keyboard.nextLine();
+    	
+    	
+    	// input 1 - view last weeks bookings
+        if (input.equals("1"))
         {
-
-            Calendar currentDate = Calendar.getInstance();
-            currentDate.add(Calendar.DATE, 0);
-
-            Calendar lastWeek = Calendar.getInstance();
-            lastWeek.add(Calendar.DATE, -7);
-
-            Calendar nextWeek = Calendar.getInstance();
-            nextWeek.add(Calendar.DATE, 7);
-
-            stmt = c.createStatement();
-
-            String currentUser = getAuthUser().getUsername();
-            System.out.println("Welcome " + currentUser);
-            System.out.println("1. View last weeks bookings\n2. View this weeks bookings");
-            String input = keyboard.nextLine();
-
-            System.out.println("There are booking(s) for:\n");
-            ResultSet rs = stmt.executeQuery("SELECT * FROM BOOKINGS");
-            while (rs.next())
-            {
-                // input 1 - view last weeks bookings
-                if (input.equals("1"))
-                {
-                    String databaseDate = rs.getString("date");
-                    Date checkDate = sdf.parse(databaseDate);
-                    if (checkDate.before(currentDate.getTime()) && checkDate.after(lastWeek.getTime()))
-                    {
-                        System.out.println(
-                                rs.getString("username") + " on " + checkDate + " with " + rs.getString("employee"));
-                    }
-                }
-                //input 2 - view next weeks bookings
-                else if (input.equals("2"))
-                {
-                    String databaseDate = rs.getString("date");
-                    Date checkDate = sdf.parse(databaseDate);
-                    if (checkDate.before(nextWeek.getTime()) && checkDate.after(currentDate.getTime()))
-                    {
-                        System.out.println(
-                                rs.getString("username") + " on " + checkDate + " with " + rs.getString("employee"));
-                    }
-                }
-                else
-                {
-                    System.out.println("Invalid Input");
-                }
-            }
-
+        	System.out.println("The booking(s) for last week were:\n");
+        	
+        	for (Booking b : Database.bookingMap.values())
+        	{
+        		LocalDate date = b.getTimeslot().getDate();
+        		if (date.isAfter(lastWeek) && date.isBefore(today))
+        		{
+        			LocalTime t = b.getTimeslot().getTime();
+                    System.out.println(
+                            b.getCustomer().getUsername() + " on " + date.format(defaultDateFormat) + " at " + t.format(defaultTimeFormat) + " with " + b.getEmployee().getName());
+                    noResults = false;
+        		}
+        	}
         }
-        catch (ParseException e)
+        //input 2 - view next weeks bookings
+        else if (input.equals("2"))
         {
-
-            e.printStackTrace();
+        	System.out.println("The booking(s) for next week are:\n");
+        	
+        	for (Booking b : Database.bookingMap.values())
+        	{
+        		LocalDate date = b.getTimeslot().getDate();
+        		if (date.isBefore(nextWeek) && date.isAfter(today))
+        		{
+        			LocalTime t = b.getTimeslot().getTime();
+        			DateTimeFormatter tf = DateTimeFormatter.ofPattern("hh:mm a");
+                    System.out.println(
+                            b.getCustomer().getUsername() + " on " + date.format(defaultDateFormat) + " at " + t.format(tf) + " with " + b.getEmployee().getName());
+                    noResults = false;
+        		}
+        	}
         }
-        catch (SQLException e)
+        else
         {
-            e.printStackTrace();
+            System.out.println("Invalid Input");
         }
-        catch (java.text.ParseException e)
-        {
-            e.printStackTrace();
-        }
+        if (noResults)
+        	System.out.println("NONE");
     }
     
     /**
@@ -572,6 +585,10 @@ public class SystemDriver
         catch (AuthException e)
         {
             System.out.println("\nAuthorisation error - " + e.getMessage() + ".\n");
+        }
+        catch (NullPointerException e)
+        {
+        	System.out.println("Error: User '" + username + "' does not exist.");
         }
 
     }

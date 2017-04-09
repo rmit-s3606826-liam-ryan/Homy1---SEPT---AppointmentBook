@@ -22,29 +22,30 @@ public class Booking {
 		this.duration = duration;
 	}
 	
-	User getCustomer()
+	public User getCustomer()
 	{
 		return customer;
 	}
 	
-	Employee getEmployee()
+	public Employee getEmployee()
 	{
 		return employee;
 	}
 	
-	Timeslot getTimeslot()
+	public Timeslot getTimeslot()
 	{
 		return timeslot;
 	}
 	
-	String getService()
+	public String getService()
 	{
 		return service;
 	}
 	
-	int getDuration()	// Return duration of appointment, in minutes.
-	{					//Should be multiples of 30 (half-hour intervals)
-		return duration;
+	public int getDuration()	// Return duration of appointment, in minutes.
+	{							// Should be multiples of 30 (half-hour intervals)
+		return duration;		// Not set in stone, can do different intervals or
+								//different system completely
 	}
 	
 	void confirm()
