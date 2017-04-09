@@ -1,5 +1,6 @@
 package bookingSystem;
 
+@SuppressWarnings("serial")
 public class AuthException extends Exception {
 	
 	public AuthException()
@@ -7,9 +8,9 @@ public class AuthException extends Exception {
 		
 	}
 	
-	public AuthException(String error)
+	public AuthException(String message)
 	{
-		super(error);
+		super(message);
 	}
 	
 }
