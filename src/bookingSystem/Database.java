@@ -199,9 +199,9 @@ public class Database
 			while (rs.next())
 			{
 				int id = rs.getInt(HEADER_TIMESLOTS_ID);
-				String dateAsString = rs.getString(HEADER_TIMESLOTS_DATE);
-				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-				LocalDate date = LocalDate.parse(dateAsString, formatter);
+				String dateString = rs.getString(HEADER_TIMESLOTS_DATE);
+		    	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("uuuu-MM-dd");
+		    	LocalDate date = LocalDate.parse(dateString, formatter);
 				
 				// deprecated lib - only used to pull from DB, then convert to LocalTime
 				java.sql.Time timeSQL = rs.getTime(HEADER_TIMESLOTS_TIME);
@@ -379,7 +379,7 @@ public class Database
 			ResultSet rs = selectStmt.executeQuery();
 			rs.next();	// increment resultset to first result.
 						// should be only one result as userID is a primary key.
-			id = rs.getInt(HEADER_USERS_ID);
+			id = rs.getInt(HEADER_EMPLOYEES_ID);
 			
 			selectStmt.close();
 			c.commit();
@@ -427,21 +427,18 @@ public class Database
 		}
 	}
 	
-	static int addTimeslotToDB(String username, String password, String email, String name, String phone, LocalDate dob) throws SQLException
+	static int addTimeslotToDB(LocalDate date, LocalTime time, Boolean booked) throws SQLException
 	{
 		Connection c = getDBConnection();
 		PreparedStatement insertStmt = null;
 		PreparedStatement selectStmt = null;
 		int id = 0;
 		
-		String insertStatement = "INSERT INTO " + TABLE_USERS + " ("
-									   + HEADER_USERS_USERNAME
-								+ ", " + HEADER_USERS_PASSWORD
-								+ ", " + HEADER_USERS_EMAIL
-								+ ", " + HEADER_USERS_PHONE
-								+ ", " + HEADER_USERS_DOB
-								+ ", " + HEADER_USERS_NAME
-								+ ") values (?, ?, ?, ?, ?, ?)";
+		String insertStatement = "INSERT INTO " + TABLE_TIMESLOTS + " ("
+									   + HEADER_TIMESLOTS_DATE
+								+ ", " + HEADER_TIMESLOTS_TIME
+								+ ", " + HEADER_TIMESLOTS_BOOKED
+								+ ") values (?, ?, ?)";
 		try
 		{
 			c.setAutoCommit(false);
@@ -449,42 +446,26 @@ public class Database
 			insertStmt = c.prepareStatement(insertStatement);
 			
 			// fill in variables into sql statement
-			insertStmt.setString(1, username);
-			insertStmt.setString(2, password);
-			java.sql.Date date = java.sql.Date.valueOf(dob);
-			insertStmt.setDate(5, date);
-			insertStmt.setString(6, name);
-			
-			// take care of possible null entries
-			if (email != null)
-			{
-				insertStmt.setString(3, email);
-			}
-			else
-			{
-				insertStmt.setNull(3, Types.VARCHAR);
-			}
-			if (phone != null)
-			{
-				insertStmt.setString(4, phone);
-			}
-			else
-			{
-				insertStmt.setNull(4, Types.VARCHAR);
-			}
+			java.sql.Date dbDate = java.sql.Date.valueOf(date);
+			insertStmt.setDate(1, dbDate);
+			java.sql.Time dbTime = java.sql.Time.valueOf(time);
+			insertStmt.setTime(2, dbTime);
+			insertStmt.setBoolean(3, booked);
 			
 			insertStmt.executeUpdate();
 			insertStmt.close();
             
-			selectStmt = c.prepareStatement("SELECT " + HEADER_USERS_ID
-											+ " FROM " + TABLE_USERS
-											+ " WHERE " + HEADER_USERS_USERNAME
-											+ "='" + username + "';");
+			selectStmt = c.prepareStatement("SELECT " + HEADER_TIMESLOTS_ID
+											+ " FROM " + TABLE_TIMESLOTS
+											+ " WHERE " + HEADER_TIMESLOTS_DATE
+											+ "='" + dbDate + "' "
+											+ "AND " + HEADER_TIMESLOTS_TIME
+											+ "='" + dbTime + "';");
 			
 			ResultSet rs = selectStmt.executeQuery();
 			rs.next();	// increment resultset to first result.
 						// should be only one result as userID is a primary key.
-			id = rs.getInt(HEADER_USERS_ID);
+			id = rs.getInt(HEADER_TIMESLOTS_ID);
 			
 			selectStmt.close();
 			c.commit();
@@ -503,7 +484,7 @@ public class Database
 		}
 		return id;
 	}
-	
+	// TODO Not yet implemented. Copied from addUserToDB. NOT FUNCTIONAL
 	static int addBookingToDB(String username, String password, String email, String name, String phone, LocalDate dob) throws SQLException
 	{
 		Connection c = getDBConnection();

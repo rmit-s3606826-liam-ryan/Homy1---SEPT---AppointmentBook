@@ -97,16 +97,13 @@ public class SystemDriver
         }
     }
     
-    public void adamTest()
+    public void adamTest() // TODO marker to find code easily
     {
-    	try
-    	{
-    		Database.addUserToDB("Ownera", "anything", "anything", "lol", "asdasd", LocalDate.of(1990, 12, 11));
-    	}
-    	catch (SQLException e)
-    	{
-    		
-    	}
+    	String s = "2/13/1988";
+    	
+    	LocalDate date = parseDate(s);
+    	System.out.println("date after parsing: " + date);
+    	
     }
 
     /**
@@ -243,6 +240,9 @@ public class SystemDriver
                 }
             }
             else
+            ResultSet rs = stmt.executeQuery("SELECT * FROM TIMESLOTS WHERE employee ='" + employee + "' AND booked = 'false'");
+            System.out.println(employee + " is available for the following times:\n");
+            while (rs.next())
             {
                 System.out.println("Employee not available");
             }
@@ -684,24 +684,12 @@ public class SystemDriver
             {
                 System.out.println("Enter date of birth: ");
                 String dobString = keyboard.nextLine();
-                DateTimeFormatter slashFormat = DateTimeFormatter.ofPattern("dd/MM/uuuu");
-                DateTimeFormatter hyphenFormat = DateTimeFormatter.ofPattern("dd-MM-uuuu");
-                DateTimeFormatter dotFormat = DateTimeFormatter.ofPattern("dd.MM.uuuu");
+                dob = parseDate(dobString);
                 
-                if (dobString.contains("/"))
+                if (dob != null)
                 {
-                	dob = LocalDate.parse(dobString, slashFormat);
+                	valid = true;
                 }
-                else if (dobString.contains("-"))
-                {
-                	dob = LocalDate.parse(dobString, hyphenFormat);
-                }
-                else
-                {
-                	dob = LocalDate.parse(dobString, dotFormat);
-                }
-                valid = true;	// won't reach here unless one of the above three calls parses the string successfully,
-                				// in which case the date is valid.
             }
             catch (NumberFormatException e)
             {
@@ -759,5 +747,65 @@ public class SystemDriver
             throw new UserRequestsExitException();
         }
         return answer;
+    }
+    
+    public static LocalDate parseDate(String dateString)
+    /* Parses string into a java.time LocalDate object.
+     * Checks size of day and month fields and
+     * builds an appropriate formatting pattern.
+     * 
+     * Works for delimiters:	/ . -
+     * 
+     * May be a cleaner way to do this, but for now it works well.
+     */
+    {
+    	LocalDate date = null;
+    	String[] parts = null;
+    	String formatString = "";
+    	
+    	if (dateString.contains("/"))
+        {
+        	parts = dateString.split("/");
+        	if (parts[0].length() == 1)
+    			formatString += "d/";
+    		else
+    			formatString += "dd/";
+        	
+        	if (parts[1].length() == 1)
+        		formatString += "M/uuuu";
+
+        	else
+        		formatString += "MM/uuuu";
+        }
+        else if (dateString.contains("-"))
+        {
+        	parts = dateString.split("-");
+        	if (parts[0].length() == 1)
+    			formatString += "d-";
+    		else
+    			formatString += "dd-";
+        	
+        	if (parts[1].length() == 1)
+        		formatString += "M-uuuu";
+        	else
+        		formatString += "MM-uuuu";
+        }
+        else
+        {
+        	parts = dateString.split("\\.");
+        	if (parts[0].length() == 1)
+    			formatString += "d.";
+    		else
+    			formatString += "dd.";
+        	
+        	if (parts[1].length() == 1)
+        		formatString += "M.uuuu";
+        	else
+        		formatString += "MM.uuuu";
+        }
+    	//System.out.println("format string="+formatString);
+    	DateTimeFormatter formatter = DateTimeFormatter.ofPattern(formatString);
+    	date = LocalDate.parse(dateString, formatter);
+        return date;
     }
 }
