@@ -44,7 +44,7 @@ public class Timeslot
 		booked = true;
 	}
 	
-	boolean getStatus()
+	public boolean getStatus()
 	{
 		return booked; 
 	}
