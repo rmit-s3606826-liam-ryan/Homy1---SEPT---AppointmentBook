@@ -99,14 +99,8 @@ public class SystemDriver
     
     public void adamTest()
     {
-    	try
-    	{
-    		Database.addUserToDB("Ownera", "anything", "anything", "lol", "asdasd", LocalDate.of(1990, 12, 11));
-    	}
-    	catch (SQLException e)
-    	{
-    		
-    	}
+    	LocalDate date = parseDate("12/11/1988");
+    	System.out.println("date after parsing: " + date);
     }
 
     /**
@@ -233,6 +227,7 @@ public class SystemDriver
                              + "Enter employee name:\n");
             String employee = keyboard.nextLine();
             
+<<<<<<< HEAD
             ResultSet rs = stmt.executeQuery("SELECT * FROM EMPLOYEES WHERE NAME ='" + employee + "'");
             if (rs.next())
             {
@@ -243,6 +238,11 @@ public class SystemDriver
                 }
             }
             else
+=======
+            ResultSet rs = stmt.executeQuery("SELECT * FROM TIMESLOTS WHERE employee ='" + employee + "' AND booked = 'false'");
+            System.out.println(employee + " is available for the following times:\n");
+            while (rs.next())
+>>>>>>> refs/remotes/origin/Adam
             {
                 System.out.println("Employee not available");
             }
@@ -684,24 +684,12 @@ public class SystemDriver
             {
                 System.out.println("Enter date of birth: ");
                 String dobString = keyboard.nextLine();
-                DateTimeFormatter slashFormat = DateTimeFormatter.ofPattern("dd/MM/uuuu");
-                DateTimeFormatter hyphenFormat = DateTimeFormatter.ofPattern("dd-MM-uuuu");
-                DateTimeFormatter dotFormat = DateTimeFormatter.ofPattern("dd.MM.uuuu");
+                dob = parseDate(dobString);
                 
-                if (dobString.contains("/"))
+                if (dob != null)
                 {
-                	dob = LocalDate.parse(dobString, slashFormat);
+                	valid = true;
                 }
-                else if (dobString.contains("-"))
-                {
-                	dob = LocalDate.parse(dobString, hyphenFormat);
-                }
-                else
-                {
-                	dob = LocalDate.parse(dobString, dotFormat);
-                }
-                valid = true;	// won't reach here unless one of the above three calls parses the string successfully,
-                				// in which case the date is valid.
             }
             catch (NumberFormatException e)
             {
@@ -759,5 +747,27 @@ public class SystemDriver
             throw new UserRequestsExitException();
         }
         return answer;
+    }
+    
+    private LocalDate parseDate(String dateString)
+    {
+    	LocalDate date = null;
+        DateTimeFormatter slashFormat = DateTimeFormatter.ofPattern("dd/MM/uuuu");
+        DateTimeFormatter hyphenFormat = DateTimeFormatter.ofPattern("dd-MM-uuuu");
+        DateTimeFormatter dotFormat = DateTimeFormatter.ofPattern("dd.MM.uuuu");
+        
+        if (dateString.contains("/"))
+        {
+        	date = LocalDate.parse(dateString, slashFormat);
+        }
+        else if (dateString.contains("-"))
+        {
+        	date = LocalDate.parse(dateString, hyphenFormat);
+        }
+        else
+        {
+        	date = LocalDate.parse(dateString, dotFormat);
+        }
+        return date;
     }
 }
