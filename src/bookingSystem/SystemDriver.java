@@ -16,6 +16,8 @@ import users.User;
 
 import com.sun.org.apache.xerces.internal.impl.xpath.regex.ParseException;
 
+import bookings.Booking;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -29,6 +31,7 @@ public class SystemDriver
 {
     private Scanner keyboard = new Scanner(System.in);
     private static final Logger logger = Logger.getLogger("SystemDriver");
+    private static final DateTimeFormatter defaultDateFormat = DateTimeFormatter.ofPattern("dd/MM/uuuu");
 
     User authUser = null; // TODO Add logout options to menus?
 
@@ -189,8 +192,8 @@ public class SystemDriver
 
                 switch (answer)
                 {
-                case 1:  viewBooking();              break;
-                case 2:  viewEmployee();             break;
+                case 1:  viewBookings();              break;
+                case 2:  viewEmployees();             break;
                 case 3:  addWorkingTimes();          break;
                 case 4:  addEmployee();              break;
                 case 5:  removeEmployee();           break;
@@ -214,10 +217,7 @@ public class SystemDriver
             }
         }
     }
-
-    /**
-     * View employees availability - not fully implemented
-     **/
+    
     private void viewEmployeeAvailability()
     {
     	System.out.println("======================\n"
@@ -245,6 +245,7 @@ public class SystemDriver
     private void addWorkingTimes()
     {
         // TODO Auto-generated method stub
+    	// for whoever codes this, see Employee.java for an addAvailability method
         
     }
 
@@ -464,7 +465,7 @@ public class SystemDriver
         }
     }
 
-    private void viewEmployee()
+    private void viewEmployees()
     {
         System.out.println("1. View all employees\n" + "2. Search an employee\n");
         String input = keyboard.nextLine();
@@ -490,77 +491,61 @@ public class SystemDriver
      * for viewing future and past bookings, displays all bookings made with in
      * range of seven days before or after the current date
      */
-    private void viewBooking()
+    private void viewBookings()
     {
-        Connection c = Database.getDBConnection();
-        Statement stmt = null;
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy MM dd HH:mm:ss");
-        sdf.setLenient(true);
-        try
+    	String currentUser = "testUser";
+    	LocalDate today = LocalDate.now().plusDays(10); // TODO remove +10 days
+		LocalDate lastWeek = today.minus(Period.ofDays(7));
+		LocalDate nextWeek = today.plus(Period.ofDays(7));
+		boolean noResults = true;
+    	//String currentUser = getAuthUser().getUsername();
+    	System.out.println("Welcome " + currentUser);
+    	System.out.println("1. View last week's bookings\n2. View this weeks bookings");
+    	String input = keyboard.nextLine();
+    	
+    	
+    	// input 1 - view last weeks bookings
+        if (input.equals("1"))
         {
-
-            Calendar currentDate = Calendar.getInstance();
-            currentDate.add(Calendar.DATE, 0);
-
-            Calendar lastWeek = Calendar.getInstance();
-            lastWeek.add(Calendar.DATE, -7);
-
-            Calendar nextWeek = Calendar.getInstance();
-            nextWeek.add(Calendar.DATE, 7);
-
-            stmt = c.createStatement();
-
-            String currentUser = getAuthUser().getUsername();
-            System.out.println("Welcome " + currentUser);
-            System.out.println("1. View last weeks bookings\n2. View this weeks bookings");
-            String input = keyboard.nextLine();
-
-            System.out.println("There are booking(s) for:\n");
-            ResultSet rs = stmt.executeQuery("SELECT * FROM BOOKINGS");
-            while (rs.next())
-            {
-                // input 1 - view last weeks bookings
-                if (input.equals("1"))
-                {
-                    String databaseDate = rs.getString("date");
-                    Date checkDate = sdf.parse(databaseDate);
-                    if (checkDate.before(currentDate.getTime()) && checkDate.after(lastWeek.getTime()))
-                    {
-                        System.out.println(
-                                rs.getString("username") + " on " + checkDate + " with " + rs.getString("employee"));
-                    }
-                }
-                //input 2 - view next weeks bookings
-                else if (input.equals("2"))
-                {
-                    String databaseDate = rs.getString("date");
-                    Date checkDate = sdf.parse(databaseDate);
-                    if (checkDate.before(nextWeek.getTime()) && checkDate.after(currentDate.getTime()))
-                    {
-                        System.out.println(
-                                rs.getString("username") + " on " + checkDate + " with " + rs.getString("employee"));
-                    }
-                }
-                else
-                {
-                    System.out.println("Invalid Input");
-                }
-            }
-
+        	System.out.println("The booking(s) for last week were:\n");
+        	
+        	for (Booking b : Database.bookingMap.values())
+        	{
+        		LocalDate date = b.getTimeslot().getDate();
+        		if (date.isAfter(lastWeek) && date.isBefore(today))
+        		{
+        			LocalTime t = b.getTimeslot().getTime();
+        			DateTimeFormatter tf = DateTimeFormatter.ofPattern("hh:mm a");
+                    System.out.println(
+                            b.getCustomer().getUsername() + " on " + date.format(defaultDateFormat) + " at " + t.format(tf) + " with " + b.getEmployee().getName());
+                    noResults = false;
+        		}
+        	}
         }
-        catch (ParseException e)
+        //input 2 - view next weeks bookings
+        else if (input.equals("2"))
         {
-
-            e.printStackTrace();
+        	System.out.println("The booking(s) for next week are:\n");
+        	
+        	for (Booking b : Database.bookingMap.values())
+        	{
+        		LocalDate date = b.getTimeslot().getDate();
+        		if (date.isBefore(nextWeek) && date.isAfter(today))
+        		{
+        			LocalTime t = b.getTimeslot().getTime();
+        			DateTimeFormatter tf = DateTimeFormatter.ofPattern("hh:mm a");
+                    System.out.println(
+                            b.getCustomer().getUsername() + " on " + date.format(defaultDateFormat) + " at " + t.format(tf) + " with " + b.getEmployee().getName());
+                    noResults = false;
+        		}
+        	}
         }
-        catch (SQLException e)
+        else
         {
-            e.printStackTrace();
+            System.out.println("Invalid Input");
         }
-        catch (java.text.ParseException e)
-        {
-            e.printStackTrace();
-        }
+        if (noResults)
+        	System.out.println("NONE");
     }
     
     /**
