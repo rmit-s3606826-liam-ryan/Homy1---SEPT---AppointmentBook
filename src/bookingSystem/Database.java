@@ -450,12 +450,12 @@ public class Database
 		return id;
 	}
 	
-	static void removeEmployeeFromDB(int id) throws SQLException
+	static boolean removeEmployeeFromDB(int id) throws SQLException
 	{
 		Connection c = getDBConnection();
 		Statement stmt = null;
 		
-		String deleteStatement = "DELETE FROM " + TABLE_EMPLOYEES + "WHERE " + HEADER_EMPLOYEES_ID + "=" + id + ";";
+		String deleteStatement = "DELETE FROM " + TABLE_EMPLOYEES + " WHERE " + HEADER_EMPLOYEES_ID + "=" + id + ";";
 		try
 		{
 			c.setAutoCommit(false);
@@ -466,7 +466,7 @@ public class Database
 		}
 		catch (SQLException e)
 		{
-			System.out.println("Exception Message " + e.getLocalizedMessage());
+			return false;
 		}
 		catch (Exception e)
 		{
@@ -476,6 +476,7 @@ public class Database
 		{
 			c.close();
 		}
+		return true;
 	}
 	
 	static int addTimeslotToDB(LocalDate date, LocalTime time, Boolean booked) throws SQLException
