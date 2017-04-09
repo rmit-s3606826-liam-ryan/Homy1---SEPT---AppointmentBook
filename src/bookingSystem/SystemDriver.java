@@ -97,10 +97,13 @@ public class SystemDriver
         }
     }
     
-    public void adamTest()
+    public void adamTest() // TODO marker to find code easily
     {
-    	LocalDate date = parseDate("12/11/1988");
+    	String s = "2/13/1988";
+    	
+    	LocalDate date = parseDate(s);
     	System.out.println("date after parsing: " + date);
+    	
     }
 
     /**
@@ -749,25 +752,63 @@ public class SystemDriver
         return answer;
     }
     
-    private LocalDate parseDate(String dateString)
+    public LocalDate parseDate(String dateString)
+    /* Parses string into a java.time LocalDate object.
+     * Checks size of day and month fields and
+     * builds an appropriate formatting pattern.
+     * 
+     * Works for delimiters:	/ . -
+     * 
+     * May be a cleaner way to do this, but for now it works well.
+     */
     {
     	LocalDate date = null;
-        DateTimeFormatter slashFormat = DateTimeFormatter.ofPattern("dd/MM/uuuu");
-        DateTimeFormatter hyphenFormat = DateTimeFormatter.ofPattern("dd-MM-uuuu");
-        DateTimeFormatter dotFormat = DateTimeFormatter.ofPattern("dd.MM.uuuu");
-        
-        if (dateString.contains("/"))
+    	String[] parts = null;
+    	String formatString = "";
+    	
+    	if (dateString.contains("/"))
         {
-        	date = LocalDate.parse(dateString, slashFormat);
+        	parts = dateString.split("/");
+        	if (parts[0].length() == 1)
+    			formatString += "d/";
+    		else
+    			formatString += "dd/";
+        	
+        	if (parts[1].length() == 1)
+        		formatString += "M/uuuu";
+
+        	else
+        		formatString += "MM/uuuu";
         }
         else if (dateString.contains("-"))
         {
-        	date = LocalDate.parse(dateString, hyphenFormat);
+        	parts = dateString.split("-");
+        	if (parts[0].length() == 1)
+    			formatString += "d-";
+    		else
+    			formatString += "dd-";
+        	
+        	if (parts[1].length() == 1)
+        		formatString += "M-uuuu";
+        	else
+        		formatString += "MM-uuuu";
         }
         else
         {
-        	date = LocalDate.parse(dateString, dotFormat);
+        	parts = dateString.split("\\.");
+        	if (parts[0].length() == 1)
+    			formatString += "d.";
+    		else
+    			formatString += "dd.";
+        	
+        	if (parts[1].length() == 1)
+        		formatString += "M.uuuu";
+        	else
+        		formatString += "MM.uuuu";
         }
+    	//System.out.println("format string="+formatString);
+    	DateTimeFormatter formatter = DateTimeFormatter.ofPattern(formatString);
+    	date = LocalDate.parse(dateString, formatter);
         return date;
     }
 }

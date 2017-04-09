@@ -484,7 +484,7 @@ public class Database
 		}
 		return id;
 	}
-	
+	// TODO Not yet implemented. Copied from addUserToDB. NOT FUNCTIONAL
 	static int addBookingToDB(String username, String password, String email, String name, String phone, LocalDate dob) throws SQLException
 	{
 		Connection c = getDBConnection();
