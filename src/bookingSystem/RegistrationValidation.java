@@ -1,5 +1,7 @@
 package bookingSystem;
 
+import java.time.LocalDate;
+
 /**
  * Class for validating user input from registration
  * returns boolean value if input is valid
@@ -7,10 +9,10 @@ package bookingSystem;
 public class RegistrationValidation
 {
     /**
-     * Username does not allow special charaters
+     * Username does not allow special characters
      * Alphanumeric and punctuation
      **/
-    boolean validateUserName(String username)
+    static boolean validateUserName(String username)
     {
         boolean validUsername = username.matches("[a-zA-Z0-9'., -]+");
         if (!validUsername) //need a regex that accepts only alphanumeric only
@@ -24,7 +26,7 @@ public class RegistrationValidation
      * Password can be any format
      * function checks whether passwords match
      **/
-    boolean validatePassword(String password, String confirmPassword)
+    static boolean validatePassword(String password, String confirmPassword)
     {
         boolean validPassword = password.equals(confirmPassword);
         if (!validPassword)
@@ -37,7 +39,7 @@ public class RegistrationValidation
     /**
      *  Validate email regex requires format of <alphaNum/punc>@<alphanum/punc>.<alphanum/punc>  
      **/
-    boolean validateEmail(String email)
+    static boolean validateEmail(String email)
     {
         boolean validEmail = email.matches("[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+.[a-zA-Z0-9-.]+");
         if (!validEmail) //need a regex that accepts  alphanumeric + a few special characters
@@ -50,7 +52,7 @@ public class RegistrationValidation
     /**
      *  Full name allows only alphabetical characters and common punctuation used in names 
      **/
-    boolean validateName(String fullName)
+    static boolean validateName(String fullName)
     {
         boolean validName = fullName.matches("[a-zA-Z'., -]+");
         if (!validName)
@@ -63,7 +65,7 @@ public class RegistrationValidation
     /**
      * Currently only requires using between 8 and 10 characters 
      **/
-    boolean validatePhone(String phoneNumber)
+    static boolean validatePhone(String phoneNumber)
     {
         boolean validNumber = phoneNumber.matches("[0-9]{8,10}+");
         if (!validNumber)
@@ -77,9 +79,11 @@ public class RegistrationValidation
      * Validation of day may allow some invalid dates through currently
      * and anyone over the age of 118 is in trouble.
      **/
-    boolean validateDOB(int day, int month, int year)
+    /* not needed any more
+    static boolean validateDOB(LocalDate date)
     {
         boolean validDate = false;
+        date
         if(day < 32 && day > 0)
         {
             if (month < 13 && month > 0)
@@ -96,4 +100,5 @@ public class RegistrationValidation
         }
         return validDate;
     }
+    */
 }
