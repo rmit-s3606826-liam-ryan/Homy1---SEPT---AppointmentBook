@@ -379,7 +379,7 @@ public class Database
 			ResultSet rs = selectStmt.executeQuery();
 			rs.next();	// increment resultset to first result.
 						// should be only one result as userID is a primary key.
-			id = rs.getInt(HEADER_USERS_ID);
+			id = rs.getInt(HEADER_EMPLOYEES_ID);
 			
 			selectStmt.close();
 			c.commit();

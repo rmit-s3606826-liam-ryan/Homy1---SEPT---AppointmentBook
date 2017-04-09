@@ -231,9 +231,9 @@ public class SystemDriver
                              + "======================\n"
                              + "Enter employee name:\n");
             String employee = keyboard.nextLine();
-            System.out.println(employee + " is available for the following times:\n");
             
             ResultSet rs = stmt.executeQuery("SELECT * FROM TIMESLOTS WHERE employee ='" + employee + "' AND booked = 'false'");
+            System.out.println(employee + " is available for the following times:\n");
             while (rs.next())
             {
                 System.out.println(rs.getString("date"));
