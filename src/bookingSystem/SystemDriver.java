@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.InputMismatchException;
+import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.StringTokenizer;
 import java.util.logging.*;
@@ -17,6 +18,7 @@ import users.User;
 import com.sun.org.apache.xerces.internal.impl.xpath.regex.ParseException;
 
 import bookings.Booking;
+import bookings.Timeslot;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -32,6 +34,7 @@ public class SystemDriver
     private Scanner keyboard = new Scanner(System.in);
     private static final Logger logger = Logger.getLogger("SystemDriver");
     private static final DateTimeFormatter defaultDateFormat = DateTimeFormatter.ofPattern("dd/MM/uuuu");
+    private static final DateTimeFormatter defaultTimeFormat = DateTimeFormatter.ofPattern("hh:mm a");
 
     User authUser = null; // TODO Add logout options to menus?
 
@@ -192,8 +195,8 @@ public class SystemDriver
 
                 switch (answer)
                 {
-                case 1:  viewBookings();              break;
-                case 2:  viewEmployees();             break;
+                case 1:  viewBookings();             break;
+                case 2:  viewEmployees();            break;
                 case 3:  addWorkingTimes();          break;
                 case 4:  addEmployee();              break;
                 case 5:  removeEmployee();           break;
@@ -254,9 +257,8 @@ public class SystemDriver
      */
     private void addBookingMenu()
     {
-        int answer = Integer.parseInt(keyboard.nextLine());
-
         System.out.println("1. View available bookingtimes\n" + "2. Check if a time and date are available");
+        int answer = Integer.parseInt(keyboard.nextLine());
         switch (answer)
         {
         case 1:
@@ -290,11 +292,13 @@ public class SystemDriver
      */
     private void displayTimeSlots()
     {
-        for (int x = 0; x < Database.timeslotMap.size(); x++)
-        {
-            System.out.println(Database.timeslotMap.get(x).getDate() + "\n");
-
-        }
+    	for (Timeslot timeslot : Database.timeslotMap.values())
+    	{
+    	    LocalDate date = timeslot.getDate();
+    	    LocalTime time = timeslot.getTime();
+    	    Boolean booked = timeslot.getStatus();
+    	    System.out.println(date.format(defaultDateFormat) + ", " + time.format(defaultTimeFormat) + " - " + "booked = " + booked);
+    	}
     }
     
     private void addBooking(int customer_id, int employee_id, int timeslot_id, String service, int duration)
@@ -515,9 +519,8 @@ public class SystemDriver
         		if (date.isAfter(lastWeek) && date.isBefore(today))
         		{
         			LocalTime t = b.getTimeslot().getTime();
-        			DateTimeFormatter tf = DateTimeFormatter.ofPattern("hh:mm a");
                     System.out.println(
-                            b.getCustomer().getUsername() + " on " + date.format(defaultDateFormat) + " at " + t.format(tf) + " with " + b.getEmployee().getName());
+                            b.getCustomer().getUsername() + " on " + date.format(defaultDateFormat) + " at " + t.format(defaultTimeFormat) + " with " + b.getEmployee().getName());
                     noResults = false;
         		}
         	}
