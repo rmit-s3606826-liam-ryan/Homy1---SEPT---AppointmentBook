@@ -1,5 +1,10 @@
-package bookingSystem;
+package db;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
@@ -11,16 +16,18 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.util.HashMap;
 
+import bookingSystem.SystemDriver;
 import bookings.Booking;
 import bookings.Timeslot;
 import users.Employee;
 import users.User;
 
-
 public class Database
 {
     private static final String DB_DRIVER = "org.h2.Driver";
-    private static final String DB_CONNECTION = "jdbc:h2:./db/database";
+    // Only connect to DB if it exists; We don't want to create skeleton DBs everywhere
+    private static final String DB_CONNECTION = "jdbc:h2:./bin/db/database;IFEXISTS=TRUE";
+    private static final String DB_CONNECTION_JAR = "jdbc:h2:./db/database;IFEXISTS=TRUE";
     private static final String DB_USER = "notSEPTadmin";
     private static final String DB_PASSWORD = "XxX_Pr0-d4nk-passw0rd_XxX";
     
@@ -72,10 +79,72 @@ public class Database
     //
     // ***************************************************************
     
-    static HashMap<Integer, User> userMap = new HashMap<Integer, User>();
-    static HashMap<Integer, Employee> employeeMap = new HashMap<Integer, Employee>();
-    static HashMap<Integer, Timeslot> timeslotMap = new HashMap<Integer, Timeslot>();
-    static HashMap<Integer, Booking> bookingMap = new HashMap<Integer, Booking>();
+    private static HashMap<Integer, User> userMap = new HashMap<Integer, User>();
+    private static HashMap<Integer, Employee> employeeMap = new HashMap<Integer, Employee>();
+    private static HashMap<Integer, Timeslot> timeslotMap = new HashMap<Integer, Timeslot>();
+    private static HashMap<Integer, Booking> bookingMap = new HashMap<Integer, Booking>();
+    
+    
+    private static boolean runningFromJar()
+    {
+    	String jarTest = SystemDriver.class.getResource("SystemDriver.class").toString();
+    	
+    	if (jarTest.startsWith("rsrc:"))
+    	{
+    		return true;
+    	}
+    	else
+    	{
+    		return false;
+    	}
+    }
+    
+    /*  Copy out the db file if running in self-contained .JAR.
+     *  Files within .JAR are read-only and would prevent us from writing changes to the DB.
+     *  
+     *  If running from within eclipse or any other file system, no need to do this,
+     *  we can connect to the bin/db/database.mv.db file directly.
+     */
+    public static void extractDbFile()
+    {
+    	if (runningFromJar())
+    	{
+    		//System.out.println("RUNNING FROM JAR!");
+        	String path = "db/database.mv.db";
+
+        	InputStream ddlStream = Database.class
+        		    .getClassLoader().getResourceAsStream(path);
+        	File dbFile =  new File(path);
+        	if (!dbFile.getParentFile().exists())
+        	{
+        	     dbFile.getParentFile().mkdirs();
+        	}
+        	
+    		try (FileOutputStream output = new FileOutputStream(dbFile);)
+    		{
+    			byte[] buffer = new byte[2048];
+    			int r;
+    			while(-1 != (r = ddlStream.read(buffer)))
+    			{
+    				output.write(buffer, 0, r);
+    			}
+        	}
+    		catch (FileNotFoundException e)
+    		{
+    			// TODO Auto-generated catch block
+    			e.printStackTrace();
+    		}
+    		catch (IOException e)
+    		{
+    			// TODO Auto-generated catch block
+    			e.printStackTrace();
+    		}
+    	}
+    	else
+    	{
+    		//System.out.println("RUNNING FROM ECLIPSE");
+    	}
+    }
     
 	static Connection getDBConnection()
 	
@@ -91,7 +160,14 @@ public class Database
 	    }
 	    try
 	    {
-	        dbConnection = DriverManager.getConnection(DB_CONNECTION, DB_USER, DB_PASSWORD);
+	    	if (runningFromJar())
+	    	{
+	    		dbConnection = DriverManager.getConnection(DB_CONNECTION_JAR, DB_USER, DB_PASSWORD);
+	    	}
+	    	else
+	    	{
+	    		dbConnection = DriverManager.getConnection(DB_CONNECTION, DB_USER, DB_PASSWORD);
+	    	}
 	        return dbConnection;
 	    }
 	    catch (SQLException e)
@@ -101,7 +177,7 @@ public class Database
 	    return dbConnection;
 	}
 	
-	static void loadFromDB()
+	public static void loadFromDB()
 	{
 		try
 		{
@@ -207,7 +283,7 @@ public class Database
 			
 			while (rs.next())
 			{
-				int id = rs.getInt(HEADER_AVAILABILITY_ID);
+				int id = rs.getInt(HEADER_AVAILABILITY_ID); // not needed?
 				int employee_id = rs.getInt(HEADER_AVAILABILITY_EMPLOYEE_ID);
 				String dayOfWeek = rs.getString(HEADER_AVAILABILITY_DAY);
 				java.sql.Time sqlStartTime = rs.getTime(HEADER_AVAILABILITY_START);
@@ -324,7 +400,7 @@ public class Database
 	    }
 	}
 	
-	static int addUserToDB(String username, String password, String email, String name, String phone, LocalDate dob) throws SQLException
+	public static int addUserToDB(String username, String password, String email, String name, String phone, LocalDate dob) throws SQLException
 	{
 		Connection c = getDBConnection();
 		PreparedStatement insertStmt = null;
@@ -401,7 +477,7 @@ public class Database
 		return id;
 	}
 	
-	static int addEmployeeToDB(String name) throws SQLException
+	public static int addEmployeeToDB(String name) throws SQLException
 	{
 		Connection c = getDBConnection();
 		PreparedStatement insertStmt = null;
@@ -450,7 +526,7 @@ public class Database
 		return id;
 	}
 	
-	static boolean removeEmployeeFromDB(int id) throws SQLException
+	public static boolean removeEmployeeFromDB(int id) throws SQLException
 	{
 		Connection c = getDBConnection();
 		Statement stmt = null;
@@ -612,5 +688,25 @@ public class Database
 			c.close();
 		}
 		return id;
+	}
+	
+	public static HashMap<Integer, User> getUserMap()
+	{
+		return userMap;
+	}
+	
+	public static HashMap<Integer, Employee> getEmployeeMap()
+	{
+		return employeeMap;
+	}
+	
+	public static HashMap<Integer, Timeslot> getTimeslotMap()
+	{
+		return timeslotMap;
+	}
+	
+	public static HashMap<Integer, Booking> getBookingMap()
+	{
+		return bookingMap;
 	}
 }
