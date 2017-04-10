@@ -79,6 +79,36 @@ public class Database
     //
     // ***************************************************************
     
+    
+    /* ATTENTION SEPTians.
+     * These HashMaps are very easy to search/iterate through.
+     * Use the syntaxes below:
+     * 
+     * If you're only interested in the keys (the integer id), you can iterate through the keySet() of the map:
+     * 
+     * for (Integer key : mapName.keySet())
+     * {
+     *     // ...
+     * }
+     * 
+     * If you only need the values (in this case, the booking/customer/user etc. objects), use values().
+     * Remember to change "Object" to the appropriate object type.
+     * 
+     * for (Object value : mapName.values())
+     * {
+     *     // ...
+     * }
+     * 
+     * If you want access to both the key and value, use entrySet():
+     * 
+     * for (HashMap.Entry<Integer, Object> entry : mapName.entrySet())
+     * {
+     * 	   String key = entry.getKey();
+     * 	   Object value = entry.getValue();
+     *     // ...
+     * }
+     * 
+     */
     private static HashMap<Integer, User> userMap = new HashMap<Integer, User>();
     private static HashMap<Integer, Employee> employeeMap = new HashMap<Integer, Employee>();
     private static HashMap<Integer, Timeslot> timeslotMap = new HashMap<Integer, Timeslot>();
