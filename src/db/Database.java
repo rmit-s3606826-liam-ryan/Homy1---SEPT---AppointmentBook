@@ -115,30 +115,39 @@ public class Database
         	InputStream ddlStream = Database.class
         		    .getClassLoader().getResourceAsStream(path);
         	File dbFile =  new File(path);
-        	if (!dbFile.getParentFile().exists())
-        	{
-        	     dbFile.getParentFile().mkdirs();
-        	}
         	
-    		try (FileOutputStream output = new FileOutputStream(dbFile);)
-    		{
-    			byte[] buffer = new byte[2048];
-    			int r;
-    			while(-1 != (r = ddlStream.read(buffer)))
-    			{
-    				output.write(buffer, 0, r);
-    			}
+        	/* Check that db hasn't already been extracted from previous use of the program.
+        	 * If it has, we don't want to override any possible additions/changes to the
+        	 * DB with a fresh copy from the jar!
+        	 */
+        	if (!dbFile.exists())
+        	{ // make /db/ directory if it doesn't exist... Which is probably the case
+            	if (!dbFile.getParentFile().exists())
+            	{
+            	     dbFile.getParentFile().mkdirs();
+            	}
+            	
+        		try (FileOutputStream output = new FileOutputStream(dbFile);)
+        		{
+        			byte[] buffer = new byte[2048];
+        			int r;
+        			while(-1 != (r = ddlStream.read(buffer)))
+        			{
+        				output.write(buffer, 0, r);
+        			}
+            	}
+        		catch (FileNotFoundException e)
+        		{
+        			// TODO Auto-generated catch block
+        			e.printStackTrace();
+        		}
+        		catch (IOException e)
+        		{
+        			// TODO Auto-generated catch block
+        			e.printStackTrace();
+        		}
         	}
-    		catch (FileNotFoundException e)
-    		{
-    			// TODO Auto-generated catch block
-    			e.printStackTrace();
-    		}
-    		catch (IOException e)
-    		{
-    			// TODO Auto-generated catch block
-    			e.printStackTrace();
-    		}
+
     	}
     	else
     	{
