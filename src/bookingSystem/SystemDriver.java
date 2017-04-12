@@ -3,11 +3,9 @@ package bookingSystem;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.InputMismatchException;
-import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.StringTokenizer;
 import java.util.logging.*;
@@ -15,16 +13,20 @@ import java.util.logging.*;
 import users.Employee;
 import users.User;
 
-import com.sun.org.apache.xerces.internal.impl.xpath.regex.ParseException;
+//import com.sun.org.apache.xerces.internal.impl.xpath.regex.ParseException;
 
 import bookings.Booking;
 import bookings.Timeslot;
+import db.Database;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.text.SimpleDateFormat;
 
 /**
  * System driver class - contains menus and functions used to run the system
@@ -38,10 +40,7 @@ public class SystemDriver
 
     User authUser = null; // TODO Add logout options to menus?
 
-    public SystemDriver()
-    {
-
-    }
+    public SystemDriver() {}
 
     /**
      * loads the system at start up, call functions to load users currently will
@@ -49,6 +48,7 @@ public class SystemDriver
      **/
     public void loadSystem()
     {
+    	Database.extractDbFile();
     	Database.loadFromDB();
 
         registerAndLogin();
@@ -107,10 +107,6 @@ public class SystemDriver
     
     public void adamTest() // TODO marker to find code easily
     {
-    	String s = "2/13/1988";
-    	
-    	LocalDate date = parseDate(s);
-    	System.out.println("date after parsing: " + date);
     	
     }
 
@@ -230,7 +226,7 @@ public class SystemDriver
     	
     	int input = keyboard.nextInt();
     	keyboard.nextLine();
-    	Employee employee = Database.employeeMap.get(input);
+    	Employee employee = Database.getEmployeeMap().get(input);
     	HashMap<String, LocalTime[]> availability = employee.getAvailability();
     	System.out.println(employee.getName() + " is available for the following times:\n");
     	
@@ -271,7 +267,7 @@ public class SystemDriver
         }
     }
 
-    // need to fix this
+    // TODO need to fix this
     private void searchTimeSlots(String date)
     {
         Calendar calendar = new GregorianCalendar(0000, 0, 00, 00, 00, 00);
@@ -292,7 +288,7 @@ public class SystemDriver
      */
     private void displayTimeSlots()
     {
-    	for (Timeslot timeslot : Database.timeslotMap.values())
+    	for (Timeslot timeslot : Database.getTimeslotMap().values())
     	{
     	    LocalDate date = timeslot.getDate();
     	    LocalTime time = timeslot.getTime();
@@ -377,7 +373,7 @@ public class SystemDriver
         		System.out.println("Please enter employee ID\n");
         		id = keyboard.nextInt(); // may throw InputMismatchException
         		keyboard.nextLine();
-        		Employee employee = Database.employeeMap.get(id); // may throw NullPointerException
+        		Employee employee = Database.getEmployeeMap().get(id); // may throw NullPointerException
                 System.out.println(
                         "Are you sure you wish to remove " + employee.getName() + " from the system? Y/N");
                 
@@ -389,7 +385,7 @@ public class SystemDriver
                     	Boolean success = Database.removeEmployeeFromDB(id); // may throw SQLException
                     	if (success)
                     	{
-                        	Database.employeeMap.remove(id);
+                        	Database.getEmployeeMap().remove(id);
                         	System.out.println("Sucessfully removed \"" + employee.getName() + "\".");
                         	ownerMenu();
                     	}
@@ -444,7 +440,7 @@ public class SystemDriver
             valid = RegistrationValidation.validateName(name);
             if (valid)
             {
-            	for (Employee employee : Database.employeeMap.values())
+            	for (Employee employee : Database.getEmployeeMap().values())
                 {
                 	if (employee.getName().equals(name))
                 	{
@@ -459,7 +455,7 @@ public class SystemDriver
         {
         	int id = Database.addEmployeeToDB(name);
             newEmployee = new Employee(id, name);
-        	Database.employeeMap.put(newEmployee.getID(), newEmployee);
+        	Database.getEmployeeMap().put(newEmployee.getID(), newEmployee);
         	System.out.println("\"" + name + "\" has been added as a new employee.");
             customerMenu();
         }
@@ -475,7 +471,7 @@ public class SystemDriver
         String input = keyboard.nextLine();
         if (input.equals("1"))
         {
-        	for (Employee employee : Database.employeeMap.values())
+        	for (Employee employee : Database.getEmployeeMap().values())
         	{
         		System.out.println(employee.getID() + "-" + employee.getName() + "\n");
         	}
@@ -486,7 +482,7 @@ public class SystemDriver
             int id = keyboard.nextInt();
             keyboard.nextLine();
             
-            Employee employee = Database.employeeMap.get(id);
+            Employee employee = Database.getEmployeeMap().get(id);
             System.out.println(employee.getID() + "-" + employee.getName() + "\n");
         }
     }
@@ -513,7 +509,7 @@ public class SystemDriver
         {
         	System.out.println("The booking(s) for last week were:\n");
         	
-        	for (Booking b : Database.bookingMap.values())
+        	for (Booking b : Database.getBookingMap().values())
         	{
         		LocalDate date = b.getTimeslot().getDate();
         		if (date.isAfter(lastWeek) && date.isBefore(today))
@@ -530,7 +526,7 @@ public class SystemDriver
         {
         	System.out.println("The booking(s) for next week are:\n");
         	
-        	for (Booking b : Database.bookingMap.values())
+        	for (Booking b : Database.getBookingMap().values())
         	{
         		LocalDate date = b.getTimeslot().getDate();
         		if (date.isBefore(nextWeek) && date.isAfter(today))
@@ -609,7 +605,7 @@ public class SystemDriver
      **/
     public User getUser(String username)
     {
-    	for (User user : Database.userMap.values())
+    	for (User user : Database.getUserMap().values())
     	{
     		if (user.getUsername().equals(username))
     		{
@@ -649,7 +645,7 @@ public class SystemDriver
             valid = RegistrationValidation.validateUserName(username);
             if (valid)
             {
-            	for (User user : Database.userMap.values())
+            	for (User user : Database.getUserMap().values())
                 {
                 	if (user.getUsername().equals(username))
                 	{
@@ -719,7 +715,7 @@ public class SystemDriver
         {
         	int id = Database.addUserToDB(username, password, email, fullName, phoneNumber, dob);
             newUser = new User(id, username, password, email, fullName, phoneNumber, dob);
-            Database.userMap.put(newUser.getID(), newUser);
+            Database.getUserMap().put(newUser.getID(), newUser);
         	System.out.println("User Registered. Welcome " + newUser.getUsername());
             setAuthUser(newUser);
             customerMenu();
