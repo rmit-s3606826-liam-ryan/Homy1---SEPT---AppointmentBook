@@ -18,6 +18,23 @@ import users.User;
 import bookings.Booking;
 import bookings.Timeslot;
 import db.Database;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.RadioButton;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import javafx.scene.paint.Color;
+import javafx.stage.Stage;
+import javafx.stage.Window;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -33,6 +50,29 @@ import java.sql.SQLException;
  **/
 public class SystemDriver
 {
+	
+	@FXML private Button mainLogin;
+	@FXML private Button mainRegister;
+	@FXML private TextField txtUsername;
+	@FXML private Label invUsername;
+	@FXML private TextField txtPassword;
+	@FXML private TextField txtConfirmPassword;
+	@FXML private Label invPassword;
+	@FXML private TextField txtEmail;
+	@FXML private Label invEmail;
+	@FXML private TextField txtPhone;
+	@FXML private Label invPhone;
+	@FXML private TextField txtName;
+	@FXML private Label invName;
+	@FXML private RadioButton radioNextWeek;
+	@FXML private RadioButton radioLastWeek;
+	@FXML private TableView<Booking> bookingsTable;
+	@FXML private TableColumn<Booking, Timeslot> bookingDate;
+	@FXML private TableColumn<Booking, Timeslot> bookingTime;
+	@FXML private TableColumn<Booking, User> custName;
+	
+	@FXML private Label test;
+
     private Scanner keyboard = new Scanner(System.in);
     private static final Logger logger = Logger.getLogger("SystemDriver");
     private static final DateTimeFormatter defaultDateFormat = DateTimeFormatter.ofPattern("dd/MM/uuuu");
@@ -50,8 +90,6 @@ public class SystemDriver
     {
     	Database.extractDbFile();
     	Database.loadFromDB();
-
-        registerAndLogin();
     }
 
 
@@ -62,10 +100,12 @@ public class SystemDriver
 
     /**
      * Simple Switch statement menu for registration and login
+     * @throws Exception 
      */
-    public void registerAndLogin()
+    public void registerAndLogin() throws Exception
     {
-        while (running)
+
+    	while (running)
         {
             try
             {
@@ -83,7 +123,6 @@ public class SystemDriver
                 switch (answer)
                 {
                 case 1:  login();                  break;
-                case 2:  register();               break;
                 case 3:  running = false;          break;
                 case 4:  ownerMenu();              break;
                 case 5:  customerMenu();           break;
@@ -97,10 +136,6 @@ public class SystemDriver
             catch (NumberFormatException e)
             {
                 System.out.println("Please Enter a valid number");
-            }
-            catch (UserRequestsExitException e)
-            {
-                System.out.println("User requested exit. Returning to menu...");
             }
         }
     }
@@ -150,10 +185,8 @@ public class SystemDriver
                 case 1:  viewCustomerBooking();    break;
                 case 2:  viewAvailableBooking();   break;
                 case 3:  addBookingMenu();         break;
-                case 4:  logout();
-                         registerAndLogin();       break;
+                case 4:  logout();				   break;
                 case 5:  running = false;          break;
-                case 6:  registerAndLogin();       break;
                 case 7:  ownerMenu();              break;
                 case 8:  printCurrentUser();       break;
                 default: System.out.println("no"); break;
@@ -198,9 +231,7 @@ public class SystemDriver
                 case 5:  removeEmployee();           break;
                 case 6:  viewEmployeeAvailability(); break;
                 case 7:  running = false;            break;
-                case 8:  logout();
-                         registerAndLogin();         break;
-                case 9:  registerAndLogin();         break;
+                case 8:  logout();                   break;
                 case 10: customerMenu();             break;
                 default: System.out.println("no");   break;
                 }
@@ -437,7 +468,7 @@ public class SystemDriver
         while (valid == false)
         {
             name = promptAndGetString("Please enter new employee's name:\n");
-            valid = RegistrationValidation.validateName(name);
+            //valid = RegistrationValidation.validateName(name);
             if (valid)
             {
             	for (Employee employee : Database.getEmployeeMap().values())
@@ -493,48 +524,48 @@ public class SystemDriver
      */
     private void viewBookings()
     {
-    	String currentUser = "testUser";
     	LocalDate today = LocalDate.now().plusDays(10); // TODO remove +10 days
 		LocalDate lastWeek = today.minus(Period.ofDays(7));
 		LocalDate nextWeek = today.plus(Period.ofDays(7));
 		boolean noResults = true;
     	//String currentUser = getAuthUser().getUsername();
-    	System.out.println("Welcome " + currentUser);
-    	System.out.println("1. View last week's bookings\n2. View this weeks bookings");
-    	String input = keyboard.nextLine();
     	
     	
     	// input 1 - view last weeks bookings
-        if (input.equals("1"))
+        if (radioNextWeek.isSelected())
         {
-        	System.out.println("The booking(s) for last week were:\n");
-        	
-        	for (Booking b : Database.getBookingMap().values())
+        	test.setText("one");
+    		ObservableList<Booking> oblist = FXCollections.observableArrayList();
+        	for (Booking booking : Database.getBookingMap().values())
         	{
-        		LocalDate date = b.getTimeslot().getDate();
+        		LocalDate date = booking.getTimeslot().getDate();
         		if (date.isAfter(lastWeek) && date.isBefore(today))
         		{
-        			LocalTime t = b.getTimeslot().getTime();
+            		oblist.add(booking);
+            		bookingsTable.setItems(oblist);
+        			LocalTime t = booking.getTimeslot().getTime();
                     System.out.println(
-                            b.getCustomer().getUsername() + " on " + date.format(defaultDateFormat) + " at " + t.format(defaultTimeFormat) + " with " + b.getEmployee().getName());
+                            booking.getCustomer().getUsername() + " on " + date.format(defaultDateFormat) + " at " + t.format(defaultTimeFormat) + " with " + booking.getEmployee().getName());
                     noResults = false;
         		}
         	}
         }
         //input 2 - view next weeks bookings
-        else if (input.equals("2"))
+        if (radioLastWeek.isSelected())
         {
-        	System.out.println("The booking(s) for next week are:\n");
-        	
-        	for (Booking b : Database.getBookingMap().values())
+        	test.setText("two");
+    		ObservableList<Booking> oblist = FXCollections.observableArrayList();
+        	for (Booking booking : Database.getBookingMap().values())
         	{
-        		LocalDate date = b.getTimeslot().getDate();
+        		LocalDate date = booking.getTimeslot().getDate();
         		if (date.isBefore(nextWeek) && date.isAfter(today))
         		{
-        			LocalTime t = b.getTimeslot().getTime();
+            		oblist.add(booking);
+            		bookingsTable.setItems(oblist);
+        			LocalTime t = booking.getTimeslot().getTime();
         			DateTimeFormatter tf = DateTimeFormatter.ofPattern("hh:mm a");
                     System.out.println(
-                            b.getCustomer().getUsername() + " on " + date.format(defaultDateFormat) + " at " + t.format(tf) + " with " + b.getEmployee().getName());
+                            booking.getCustomer().getUsername() + " on " + date.format(defaultDateFormat) + " at " + t.format(tf) + " with " + booking.getEmployee().getName());
                     noResults = false;
         		}
         	}
@@ -621,109 +652,203 @@ public class SystemDriver
     }
 
     /**
+     * Username does not allow special characters
+     * Alphanumeric and punctuation
+     **/
+    public void validateUsername(ActionEvent event)
+    {
+        boolean validUsername = txtUsername.getText().matches("[a-zA-Z0-9'., -]+");
+        boolean taken = false;
+    	for (User user : Database.getUserMap().values())
+    	{
+    		if (user.getUsername().equals(txtUsername.getText()))
+    		{	
+    			taken = true;
+    		}
+    	}
+
+        if (!validUsername) //need a regex that accepts only alphanumeric only
+        {
+	        invUsername.setText(" Invalid Username");				
+	    }
+        else if (taken)
+        {
+	        invUsername.setText(" Username Taken");				
+        }
+		else
+		{
+	        invUsername.setText("");				
+		}
+    }
+    
+    /**
+     * Password can be any format
+     * function checks whether passwords match
+     **/
+    public void validatePassword(ActionEvent event)
+    {
+        boolean validPassword = txtPassword.getText().equals(txtConfirmPassword.getText());
+        if (!validPassword)
+        {
+	        invPassword.setText(" Passwords do not match");				
+	    }
+		else
+		{
+	        invPassword.setText("");				
+		}
+    }
+
+    /**
+     *  Validate email regex requires format of <alphaNum/punc>@<alphanum/punc>.<alphanum/punc>  
+     **/
+    public void validateEmail(ActionEvent event)
+    {
+        boolean validEmail = txtEmail.getText().matches("[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+[.]{1,1}+[a-zA-Z0-9-.]+");
+        if (!validEmail) //need a regex that accepts  alphanumeric + a few special characters
+        {
+	        invEmail.setText(" Invalid email format");				
+	    }
+		else
+		{
+	        invEmail.setText("");				
+		}
+    }
+    
+    /**
+     * Currently only requires using between 8 and 10 characters 
+     **/
+    public void validatePhone(ActionEvent event)
+    {
+        boolean validNumber = txtPhone.getText().matches("[0-9]{8,10}+");
+        if (!validNumber)
+        {
+	        invPhone.setText(" Invalid phone number");				
+	    }
+		else
+		{
+	        invPhone.setText("");				
+		}
+    }
+
+    /**
+     *  Full name allows only alphabetical characters and common punctuation used in names 
+     **/
+    public void validateName(ActionEvent event)
+    {
+        boolean validName = txtName.getText().matches("[a-zA-Z'., -]+");
+        if (!validName)
+        {
+	        invName.setText(" Like no name I've seen");				
+	    }
+		else
+		{
+	        invName.setText("");				
+		}
+    }
+
+
+    /**
      * Registration function with simple validation
      * makes calls to validation functions within RegistrationValidation 
-     * object
-     * @throws UserRequestsExitException
      */
-	private void register() throws UserRequestsExitException
+	public void register(ActionEvent event) throws Exception
 	{
-        String username = null, password = null, email = null, 
-               fullName = null, phoneNumber = null, confirmPassword = null;
-        LocalDate dob = null;
-        User newUser = null;
-
-        System.out.println("======================\n");
-
-        // valid set to false after each field is correctly entered
-        // only single boolean instead of 6
-        // prompt and get username
-        boolean valid = false;
-        while (valid == false)
-        {
-            username = promptAndGetString("Enter username: ");
-            valid = RegistrationValidation.validateUserName(username);
-            if (valid)
-            {
-            	for (User user : Database.getUserMap().values())
-                {
-                	if (user.getUsername().equals(username))
-                	{
-                		System.out.println("Username Taken, Try Again");
-                		valid = false;
-                	}
-                }
-            }
-        }
-
-        // prompt and get password
-        valid = false;
-        while (valid == false)
-        {
-            password = promptAndGetString("Enter password: ");
-            confirmPassword = promptAndGetString("Confirm password: ");
-            valid = RegistrationValidation.validatePassword(password, confirmPassword);
-        }
-
-        // prompt and get email
-        valid = false;
-        while (valid == false)
-        {
-            email = promptAndGetString("Enter email address: ");
-            valid = RegistrationValidation.validateEmail(email);
-        }
-
-        // prompt and get full name
-        valid = false;
-        while (valid == false)
-        {
-            fullName = promptAndGetString("Enter full name: ");
-            valid = RegistrationValidation.validateName(fullName);
-        }
-
-        // prompt and get phone number
-        valid = false;
-        while (valid == false)
-        {
-            phoneNumber = promptAndGetString("Enter phone number: ");
-            valid = RegistrationValidation.validatePhone(phoneNumber);
-        }
-
-        // prompt and get date of birth
-        valid = false;
-        while(valid == false)
-        {
-            try
-            {
-                System.out.println("Enter date of birth: ");
-                String dobString = keyboard.nextLine();
-                dob = parseDate(dobString);
-                
-                if (dob != null)
-                {
-                	valid = true;
-                }
-            }
-            catch (NumberFormatException e)
-            {
-                System.out.println("Please only enter numbers");
-            }
-        }
+		Parent root = FXMLLoader.load(getClass().getResource("/bookingSystem/Registration.fxml"));
+		Scene scene = new Scene(root, 720, 480);
+		Stage primaryStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+		
+		primaryStage.setScene(scene);
         
-        // if user hasn't quit registation and all fields are valid, assign to user
-        try
-        {
-        	int id = Database.addUserToDB(username, password, email, fullName, phoneNumber, dob);
-            newUser = new User(id, username, password, email, fullName, phoneNumber, dob);
-            Database.getUserMap().put(newUser.getID(), newUser);
-        	System.out.println("User Registered. Welcome " + newUser.getUsername());
-            setAuthUser(newUser);
-            customerMenu();
-        }
-        catch (SQLException e)
-        {
-        	System.out.println(e.getMessage());
-        }
+//
+//        // valid set to false after each field is correctly entered
+//        // only single boolean instead of 6
+//        // prompt and get username
+//        boolean valid = false;
+//        while (valid == false)
+//        {
+//            username = promptAndGetString("Enter username: ");
+//            valid = RegistrationValidation.validateUserName(username);
+//            if (valid)
+//            {
+//            	for (User user : Database.getUserMap().values())
+//                {
+//                	if (user.getUsername().equals(username))
+//                	{
+//                		System.out.println("Username Taken, Try Again");
+//                		valid = false;
+//                	}
+//                }
+//            }
+//        }
+//
+//        // prompt and get password
+//        valid = false;
+//        while (valid == false)
+//        {
+//            password = promptAndGetString("Enter password: ");
+//            confirmPassword = promptAndGetString("Confirm password: ");
+//            valid = RegistrationValidation.validatePassword(password, confirmPassword);
+//        }
+//
+//        // prompt and get email
+//        valid = false;
+//        while (valid == false)
+//        {
+//            email = promptAndGetString("Enter email address: ");
+//            valid = RegistrationValidation.validateEmail(email);
+//        }
+//
+//        // prompt and get full name
+//        valid = false;
+//        while (valid == false)
+//        {
+//            fullName = promptAndGetString("Enter full name: ");
+//            valid = RegistrationValidation.validateName(fullName);
+//        }
+//
+//        // prompt and get phone number
+//        valid = false;
+//        while (valid == false)
+//        {
+//            phoneNumber = promptAndGetString("Enter phone number: ");
+//            valid = RegistrationValidation.validatePhone(phoneNumber);
+//        }
+//
+//        // prompt and get date of birth
+//        valid = false;
+//        while(valid == false)
+//        {
+//            try
+//            {
+//                System.out.println("Enter date of birth: ");
+//                String dobString = keyboard.nextLine();
+//                dob = parseDate(dobString);
+//                
+//                if (dob != null)
+//                {
+//                	valid = true;
+//                }
+//            }
+//            catch (NumberFormatException e)
+//            {
+//                System.out.println("Please only enter numbers");
+//            }
+//        }
+//        
+//        // if user hasn't quit registation and all fields are valid, assign to user
+//        try
+//        {
+//        	int id = Database.addUserToDB(username, password, email, fullName, phoneNumber, dob);
+//            newUser = new User(id, username, password, email, fullName, phoneNumber, dob);
+//            Database.getUserMap().put(newUser.getID(), newUser);
+//        	System.out.println("User Registered. Welcome " + newUser.getUsername());
+//            setAuthUser(newUser);
+//            customerMenu();
+//        }
+//        catch (SQLException e)
+//        {
+//        	System.out.println(e.getMessage());
+//        }
 	}
 	
     public void setAuthUser(User user)
