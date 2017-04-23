@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<TabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="480.0" prefWidth="720.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bookingSystem.SystemDriver">
+  <tabs>
+      <Tab text="View Bookings">
+        <content>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+               <children>
+                  <RadioButton fx:id="radioLastWeek" layoutX="14.0" layoutY="67.0" mnemonicParsing="false" text="Last Week">
+                     <toggleGroup>
+                        <ToggleGroup fx:id="one" />
+                     </toggleGroup></RadioButton>
+                  <RadioButton fx:id="radioNextWeek" layoutX="14.0" layoutY="106.0" mnemonicParsing="false" text="Next Week" toggleGroup="$one" />
+                  <TableView fx:id="bookingsTable" layoutX="224.0" layoutY="25.0" prefHeight="386.0" prefWidth="469.0">
+                    <columns>
+                        <TableColumn fx:id="custName" prefWidth="172.0" text="Customer" />
+                      <TableColumn fx:id="bookingDate" prefWidth="140.0" text="Date" />
+                      <TableColumn fx:id="bookingTime" prefWidth="156.0" text="Time" />
+                    </columns>
+                  </TableView>
+                  <Label fx:id="test" layoutX="53.0" layoutY="218.0" text="Label" />
+               </children>
+            </AnchorPane>
+        </content>
+      </Tab>
+    <Tab text="Employee Availability">
+      <content>
+        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+      </content>
+    </Tab>
+      <Tab text="Employee Working Times">
+        <content>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+        </content>
+      </Tab>
+    <Tab text="Add Employee">
+      <content>
+        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+      </content>
+    </Tab>
+      <Tab text="Remove Employee">
+        <content>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+        </content>
+      </Tab>
+  </tabs>
+</TabPane>
