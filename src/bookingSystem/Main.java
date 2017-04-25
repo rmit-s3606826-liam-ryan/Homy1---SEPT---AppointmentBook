@@ -24,7 +24,7 @@ public class Main extends Application
 	{
 		try
 		{
-			Parent root = FXMLLoader.load(getClass().getResource("/bookingSystem/OwnerMenu.fxml"));
+			Parent root = FXMLLoader.load(getClass().getResource("/bookingSystem/Main.fxml"));
 			Scene scene = new Scene(root, 720, 480);
 			primaryStage.setScene(scene);
 			primaryStage.show();

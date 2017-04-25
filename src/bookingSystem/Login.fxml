@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+
+<AnchorPane prefHeight="480.0" prefWidth="720.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" fx:controller="bookingSystem.SystemDriver">
+   <children>
+      <TextField fx:id="txtLoginUsername" layoutX="248.0" layoutY="188.0" />
+      <TextField fx:id="txtLoginPassword" layoutX="248.0" layoutY="259.0" />
+      <Label layoutX="248.0" layoutY="161.0" text="Username" />
+      <Label layoutX="248.0" layoutY="232.0" text="Password" />
+      <Button fx:id="loginButton" layoutX="248.0" layoutY="321.0" mnemonicParsing="false" onAction="#login" prefHeight="39.0" prefWidth="224.0" text="Log In" />
+      <Label fx:id="invLoginName" layoutX="489.0" layoutY="194.0" textFill="RED" />
+      <Label fx:id="invLoginPass" layoutX="489.0" layoutY="265.0" textFill="RED" />
+   </children>
+</AnchorPane>
