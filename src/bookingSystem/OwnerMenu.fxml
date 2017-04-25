@@ -30,14 +30,29 @@
                </children></AnchorPane>
       </content>
     </Tab>
-      <Tab text="Employee Working Times">
+      <Tab onSelectionChanged="#setUp" text="Employee Working Times">
         <content>
-          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+               <children>
+                  <ComboBox fx:id="empSelect2" layoutX="285.0" layoutY="97.0" onAction="#addWorkingTimes" prefWidth="150.0" />
+                  <Label layoutX="196.0" layoutY="45.0" text="Select an Employee to add working times" />
+                  <TextField layoutX="61.0" layoutY="218.0" />
+                  <TextField layoutX="435.0" layoutY="218.0" />
+                  <Label layoutX="61.0" layoutY="180.0" text="Start time" />
+                  <Label layoutX="435.0" layoutY="180.0" text="End Time" />
+                  <Label fx:id="workTimeMessage" layoutX="194.0" layoutY="313.0" prefHeight="27.0" prefWidth="332.0" textFill="RED" />
+               </children></AnchorPane>
         </content>
       </Tab>
-      <Tab text="Remove Employee">
+      <Tab onSelectionChanged="#setUp" text="Remove Employee">
         <content>
-          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="435.0" prefWidth="1004.0">
+               <children>
+                  <Button fx:id="empRemoveBut" layoutX="316.0" layoutY="218.0" mnemonicParsing="false" onAction="#removeEmployee" text="Remove" />
+                  <Label layoutX="252.0" layoutY="108.0" text="Select employee to remove" />
+                  <ComboBox fx:id="empSelect3" layoutX="285.0" layoutY="157.0" prefWidth="150.0" />
+                  <Label fx:id="empRemoveMessage" layoutX="210.0" layoutY="294.0" prefHeight="27.0" prefWidth="301.0" textFill="RED" />
+               </children></AnchorPane>
         </content>
       </Tab>
     <Tab text="Add Employee">
@@ -46,7 +61,7 @@
                <children>
                   <TextField fx:id="txtAddEmp" layoutX="248.0" layoutY="179.0" onAction="#addEmployee" />
                   <Label layoutX="236.0" layoutY="136.0" text="Enter the new Employees name" />
-                  <Label fx:id="addEmpMessage" layoutX="248.0" layoutY="239.0" />
+                  <Label fx:id="addEmpMessage" layoutX="248.0" layoutY="239.0" prefHeight="27.0" prefWidth="224.0" />
                </children></AnchorPane>
       </content>
     </Tab>

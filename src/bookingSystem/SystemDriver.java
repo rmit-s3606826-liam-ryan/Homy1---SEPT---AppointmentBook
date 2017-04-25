@@ -77,6 +77,7 @@ public class SystemDriver
 	@FXML private TextArea bookingsView;
 	@FXML private TextArea empAvailView;
 	@FXML private ComboBox<String> empSelect;
+	@FXML private ComboBox<String> empSelect2;
 	@FXML private TextField txtAddEmp;
 	@FXML private Label addEmpMessage;
 	
@@ -108,6 +109,7 @@ public class SystemDriver
     	}
 
 		empSelect.setItems(oblist);
+		empSelect2.setItems(oblist);
 
     }
 
@@ -287,7 +289,7 @@ public class SystemDriver
     /**
      * Add workers working times - days and hours they work
      */
-    private void addWorkingTimes()
+    public void addWorkingTimes()
     {
         // TODO Auto-generated method stub
     	// for whoever codes this, see Employee.java for an addAvailability method
