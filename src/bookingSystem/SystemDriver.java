@@ -70,17 +70,20 @@ public class SystemDriver
 	@FXML private Label invName;
 	@FXML private RadioButton radioNextWeek;
 	@FXML private RadioButton radioLastWeek;
-	@FXML private TableView<Booking> bookingsTable;
-	@FXML private TableColumn<Booking, Timeslot> bookingDate;
-	@FXML private TableColumn<Booking, Timeslot> bookingTime;
-	@FXML private TableColumn<Booking, User> custName;
 	@FXML private TextArea bookingsView;
 	@FXML private TextArea empAvailView;
 	@FXML private ComboBox<String> empSelect;
 	@FXML private ComboBox<String> empSelect2;
+	@FXML private ComboBox<String> empSelect3;
 	@FXML private TextField txtAddEmp;
 	@FXML private Label addEmpMessage;
-	
+	@FXML private Button empRemoveBut;
+	@FXML private Label empRemoveMessage;
+	@FXML private Label workTimeMessage;
+	@FXML private Button addTimeBut;
+	@FXML private TextField txtWorkStart;
+	@FXML private TextField txtWorkEnd;
+
 
     private Scanner keyboard = new Scanner(System.in);
     private static final Logger logger = Logger.getLogger("SystemDriver");
@@ -110,6 +113,7 @@ public class SystemDriver
 
 		empSelect.setItems(oblist);
 		empSelect2.setItems(oblist);
+		empSelect3.setItems(oblist);
 
     }
 
