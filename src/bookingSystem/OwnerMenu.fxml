@@ -34,14 +34,16 @@
         <content>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                <children>
-                  <ComboBox fx:id="empSelect2" layoutX="285.0" layoutY="97.0" prefWidth="150.0" />
-                  <Label layoutX="196.0" layoutY="45.0" text="Select an Employee to add working times" />
-                  <TextField fx:id="txtWorkStart" layoutX="61.0" layoutY="218.0" />
-                  <TextField fx:id="txtWorkEnd" layoutX="435.0" layoutY="218.0" />
-                  <Label layoutX="61.0" layoutY="180.0" text="Start time" />
-                  <Label layoutX="435.0" layoutY="180.0" text="End Time" />
+                  <ComboBox fx:id="empSelect2" layoutX="175.0" layoutY="106.0" prefWidth="150.0" />
+                  <Label layoutX="176.0" layoutY="79.0" text="Select Employee" />
+                  <TextField fx:id="txtWorkStart" layoutX="175.0" layoutY="248.0" />
+                  <TextField fx:id="txtWorkEnd" layoutX="175.0" layoutY="318.0" />
+                  <Label layoutX="175.0" layoutY="221.0" text="Start time" />
+                  <Label layoutX="175.0" layoutY="291.0" text="End Time" />
                   <Label fx:id="workTimeMessage" layoutX="194.0" layoutY="313.0" prefHeight="27.0" prefWidth="332.0" textFill="RED" />
-                  <Button fx:id="addTimeBut" layoutX="308.0" layoutY="307.0" mnemonicParsing="false" onAction="#addWorkingTimes" text="Add times" />
+                  <Button fx:id="addTimeBut" layoutX="474.0" layoutY="200.0" mnemonicParsing="false" onAction="#addWorkingTimes" text="Add times" />
+                  <Label layoutX="175.0" layoutY="151.0" text="Day" />
+                  <ComboBox fx:id="selectDay" layoutX="174.0" layoutY="178.0" prefWidth="150.0" />
                </children></AnchorPane>
         </content>
       </Tab>
@@ -49,10 +51,10 @@
         <content>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="435.0" prefWidth="1004.0">
                <children>
-                  <Button fx:id="empRemoveBut" layoutX="316.0" layoutY="218.0" mnemonicParsing="false" onAction="#removeEmployee" text="Remove" />
-                  <Label layoutX="252.0" layoutY="108.0" text="Select employee to remove" />
-                  <ComboBox fx:id="empSelect3" layoutX="285.0" layoutY="157.0" prefWidth="150.0" />
-                  <Label fx:id="empRemoveMessage" layoutX="210.0" layoutY="294.0" prefHeight="27.0" prefWidth="301.0" textFill="RED" />
+                  <Button fx:id="empRemoveBut" alignment="CENTER" contentDisplay="CENTER" layoutX="316.0" layoutY="218.0" mnemonicParsing="false" onAction="#removeEmployee" text="Remove" />
+                  <Label alignment="CENTER" layoutX="250.0" layoutY="111.0" prefHeight="27.0" prefWidth="221.0" text="Select employee to remove" textAlignment="CENTER" />
+                  <ComboBox fx:id="empSelect3" layoutX="285.0" layoutY="160.0" prefWidth="150.0" />
+                  <Label fx:id="empRemoveMessage" alignment="CENTER" contentDisplay="CENTER" layoutX="248.0" layoutY="280.0" prefHeight="65.0" prefWidth="225.0" textAlignment="CENTER" textFill="RED" wrapText="true" />
                </children></AnchorPane>
         </content>
       </Tab>
@@ -62,7 +64,7 @@
                <children>
                   <TextField fx:id="txtAddEmp" layoutX="248.0" layoutY="179.0" onAction="#addEmployee" />
                   <Label layoutX="236.0" layoutY="136.0" text="Enter the new Employees name" />
-                  <Label fx:id="empAddMessage" layoutX="248.0" layoutY="239.0" prefHeight="27.0" prefWidth="224.0" />
+                  <Label fx:id="addEmpMessage" layoutX="248.0" layoutY="239.0" prefHeight="27.0" prefWidth="224.0" />
                </children></AnchorPane>
       </content>
     </Tab>

@@ -75,6 +75,7 @@ public class SystemDriver
 	@FXML private ComboBox<String> empSelect;
 	@FXML private ComboBox<String> empSelect2;
 	@FXML private ComboBox<String> empSelect3;
+	@FXML private ComboBox<String> selectDay;
 	@FXML private TextField txtAddEmp;
 	@FXML private Label addEmpMessage;
 	@FXML private Button empRemoveBut;
@@ -114,6 +115,9 @@ public class SystemDriver
 		empSelect.setItems(oblist);
 		empSelect2.setItems(oblist);
 		empSelect3.setItems(oblist);
+		
+		selectDay.getItems().clear();
+		selectDay.getItems().addAll("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday");
 
     }
 
@@ -412,72 +416,45 @@ public class SystemDriver
             e.printStackTrace();
         }*/
     }
-
-    private void removeEmployee()
+    public void removeEmployee()
     {
-    	int id = 0;
-    	boolean valid = false;
-    	
-    	while (true)
-    	{
-        	try
-        	{
-        		System.out.println("Please enter employee ID\n");
-        		id = keyboard.nextInt(); // may throw InputMismatchException
-        		keyboard.nextLine();
-        		Employee employee = Database.getEmployeeMap().get(id); // may throw NullPointerException
-                System.out.println(
-                        "Are you sure you wish to remove " + employee.getName() + " from the system? Y/N");
-                
-                while (!valid)
-                {
-                    String k = keyboard.nextLine();
-                    if (k.equalsIgnoreCase("Y"))
-                    {
-                    	Boolean success = Database.removeEmployeeFromDB(id); // may throw SQLException
-                    	if (success)
-                    	{
-                        	Database.getEmployeeMap().remove(id);
-                        	System.out.println("Sucessfully removed \"" + employee.getName() + "\".");
-                        	ownerMenu();
-                    	}
-                    	else
-                    	{
-                    		throw new Exception("Error: Employee currently has bookings and cannot be deleted.");
-                    	}
-                    }
-                    else if (k.equalsIgnoreCase("N"))
-                    {
-                    	System.out.println("Cancelled remove employee. Returning to menu...");
-                    	ownerMenu();
-                    }
-                    else
-                    {
-                    	System.out.println("Invalid input - please enter Y or N.");
-                    }
-                }
-        	}
-        	catch (InputMismatchException e)
-        	{
-        		System.out.println("Error: Invalid ID.");
-        	}
-        	catch (NullPointerException e)
-        	{
-        		System.out.println("Error: Employee with id=" + id + " doesn't exist!");
-        	}
-        	catch (SQLException e)
-        	{
-        		System.out.println(e.getMessage());
-        	}
-        	catch (Exception e)
-        	{
-        		System.out.println(e.getMessage());
+		int id = 0;
+		try
+		{
+			Employee employee = null;
+			for (Entry<Integer, Employee> entry : Database.getEmployeeMap().entrySet())
+			{
+				Integer key = entry.getKey();
+				Employee value = entry.getValue();
+				if (empSelect3.getValue().equals(value.getName()))
+				{
+					employee = Database.getEmployeeMap().get(key);
+					id = key;
+				}
 			}
-        	finally
-        	{
-        		keyboard.nextLine(); // Remove trailing endline char, even if exception is thrown
-        	}
-    	}
+
+			Boolean success = Database.removeEmployeeFromDB(id); 
+			
+			if (success)
+			{
+				Database.getEmployeeMap().remove(id);
+				empRemoveMessage.setText("Sucessfully removed \"" + employee.getName() + "\".");
+				setUp();
+			}
+			else
+			{
+				empRemoveMessage.setText("Error: Employee currently has bookings and cannot be deleted.");
+				throw new Exception("Error: Employee currently has bookings and cannot be deleted.");
+			}
+		}
+		catch (SQLException e)
+		{
+			System.out.println(e.getMessage());
+		}
+		catch (Exception e)
+		{
+			System.out.println(e.getMessage());
+		}
     }
 
     public void addEmployee()
