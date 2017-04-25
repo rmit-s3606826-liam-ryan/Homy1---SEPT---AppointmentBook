@@ -11,26 +11,23 @@
         <content>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                <children>
-                  <RadioButton fx:id="radioLastWeek" layoutX="14.0" layoutY="67.0" mnemonicParsing="false" text="Last Week">
+                  <RadioButton fx:id="radioLastWeek" layoutX="14.0" layoutY="67.0" mnemonicParsing="false" onAction="#viewBookings" text="Last Week">
                      <toggleGroup>
                         <ToggleGroup fx:id="one" />
                      </toggleGroup></RadioButton>
-                  <RadioButton fx:id="radioNextWeek" layoutX="14.0" layoutY="106.0" mnemonicParsing="false" text="Next Week" toggleGroup="$one" />
-                  <TableView fx:id="bookingsTable" layoutX="224.0" layoutY="25.0" prefHeight="386.0" prefWidth="469.0">
-                    <columns>
-                        <TableColumn fx:id="custName" prefWidth="172.0" text="Customer" />
-                      <TableColumn fx:id="bookingDate" prefWidth="140.0" text="Date" />
-                      <TableColumn fx:id="bookingTime" prefWidth="156.0" text="Time" />
-                    </columns>
-                  </TableView>
-                  <Label fx:id="test" layoutX="53.0" layoutY="218.0" text="Label" />
+                  <RadioButton fx:id="radioNextWeek" layoutX="14.0" layoutY="106.0" mnemonicParsing="false" onAction="#viewBookings" text="Next Week" toggleGroup="$one" />
+                  <TextArea fx:id="bookingsView" editable="false" layoutX="229.0" layoutY="33.0" prefHeight="372.0" prefWidth="451.0" />
                </children>
             </AnchorPane>
         </content>
       </Tab>
-    <Tab text="Employee Availability">
+    <Tab onSelectionChanged="#setUp" text="Employee Availability">
       <content>
-        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+               <children>
+                  <ComboBox fx:id="empSelect" layoutX="28.0" layoutY="147.0" onAction="#viewEmployeeAvailability" prefWidth="150.0" />
+                  <TextArea fx:id="empAvailView" layoutX="226.0" layoutY="37.0" prefHeight="357.0" prefWidth="455.0" />
+               </children></AnchorPane>
       </content>
     </Tab>
       <Tab text="Employee Working Times">
@@ -38,15 +35,20 @@
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
         </content>
       </Tab>
-    <Tab text="Add Employee">
-      <content>
-        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-      </content>
-    </Tab>
       <Tab text="Remove Employee">
         <content>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
         </content>
       </Tab>
+    <Tab text="Add Employee">
+      <content>
+        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+               <children>
+                  <TextField fx:id="txtAddEmp" layoutX="248.0" layoutY="179.0" onAction="#addEmployee" />
+                  <Label layoutX="236.0" layoutY="136.0" text="Enter the new Employees name" />
+                  <Label fx:id="addEmpMessage" layoutX="248.0" layoutY="239.0" />
+               </children></AnchorPane>
+      </content>
+    </Tab>
   </tabs>
 </TabPane>

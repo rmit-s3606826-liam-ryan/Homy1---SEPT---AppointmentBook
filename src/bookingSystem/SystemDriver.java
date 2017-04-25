@@ -6,6 +6,7 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.InputMismatchException;
+import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.StringTokenizer;
 import java.util.logging.*;
@@ -27,10 +28,13 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.Labeled;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
@@ -70,8 +74,12 @@ public class SystemDriver
 	@FXML private TableColumn<Booking, Timeslot> bookingDate;
 	@FXML private TableColumn<Booking, Timeslot> bookingTime;
 	@FXML private TableColumn<Booking, User> custName;
+	@FXML private TextArea bookingsView;
+	@FXML private TextArea empAvailView;
+	@FXML private ComboBox<String> empSelect;
+	@FXML private TextField txtAddEmp;
+	@FXML private Label addEmpMessage;
 	
-	@FXML private Label test;
 
     private Scanner keyboard = new Scanner(System.in);
     private static final Logger logger = Logger.getLogger("SystemDriver");
@@ -91,7 +99,17 @@ public class SystemDriver
     	Database.extractDbFile();
     	Database.loadFromDB();
     }
+    public void setUp()
+    {
+		ObservableList<String> oblist = FXCollections.observableArrayList();
+    	for (Employee employee : Database.getEmployeeMap().values())
+    	{
+    		oblist.add(employee.getName());
+    	}
 
+		empSelect.setItems(oblist);
+
+    }
 
     /**
      * boolean running keeps menus looping until quit is selected
@@ -229,18 +247,12 @@ public class SystemDriver
                 case 3:  addWorkingTimes();          break;
                 case 4:  addEmployee();              break;
                 case 5:  removeEmployee();           break;
-                case 6:  viewEmployeeAvailability(); break;
                 case 7:  running = false;            break;
                 case 8:  logout();                   break;
                 case 10: customerMenu();             break;
                 default: System.out.println("no");   break;
                 }
             }
-            catch (UserRequestsExitException e)
-            {
-                System.out.println("User requested exit. Returning to menu...");
-            }
-            
             catch (NumberFormatException e)
             {
                 System.out.println("Please Enter a valid number");
@@ -248,24 +260,27 @@ public class SystemDriver
         }
     }
     
-    private void viewEmployeeAvailability()
+    public void viewEmployeeAvailability()
     {
-    	System.out.println("======================\n"
-    						+ "Employee Availability\n"
-    						+ "======================\n"
-    						+ "Enter employee ID:\n");
-    	
-    	int input = keyboard.nextInt();
-    	keyboard.nextLine();
-    	Employee employee = Database.getEmployeeMap().get(input);
+    	empAvailView.setText("");
+    	Employee employee = null;
+        for (Entry<Integer, Employee> entry : Database.getEmployeeMap().entrySet())
+        {
+        	Integer key = entry.getKey();
+        	Employee value = entry.getValue();
+        	if (empSelect.getValue().equals(value.getName()))
+        	{
+            	employee = Database.getEmployeeMap().get(key);
+        	}
+        }
+
+        
     	HashMap<String, LocalTime[]> availability = employee.getAvailability();
-    	System.out.println(employee.getName() + " is available for the following times:\n");
-    	
     	for (HashMap.Entry<String, LocalTime[]> entry : availability.entrySet())
     	{
     	    String dayOfWeek = entry.getKey();
     	    LocalTime[] times = entry.getValue();
-    	    System.out.println(dayOfWeek + ": " + times[0] + " - " + times[1]);
+    	    empAvailView.appendText(dayOfWeek + ": " + times[0].toString() + " - " + times[1].toString() + "\n");
     	}
     }
 
@@ -459,40 +474,35 @@ public class SystemDriver
     	}
     }
 
-    private void addEmployee() throws UserRequestsExitException
+    public void addEmployee()
     {
     	String name = null;
     	Employee newEmployee = null;
-        boolean valid = false;
+        boolean valid = true;
         
-        while (valid == false)
+        name = txtAddEmp.getText();
+        //valid = RegistrationValidation.validateName(name);
+        for (Employee employee : Database.getEmployeeMap().values())
         {
-            name = promptAndGetString("Please enter new employee's name:\n");
-            //valid = RegistrationValidation.validateName(name);
-            if (valid)
+        	if (employee.getName().equals(name))
             {
-            	for (Employee employee : Database.getEmployeeMap().values())
-                {
-                	if (employee.getName().equals(name))
-                	{
-                		System.out.println("Employee already exists");;
-                		valid = false;
-                	}
-                }
+        		addEmpMessage.setText("Employee already exists");
+                valid = false;
             }
         }
-        
-        try
+        if (valid)
         {
-        	int id = Database.addEmployeeToDB(name);
-            newEmployee = new Employee(id, name);
-        	Database.getEmployeeMap().put(newEmployee.getID(), newEmployee);
-        	System.out.println("\"" + name + "\" has been added as a new employee.");
-            customerMenu();
-        }
-        catch (SQLException e)
-        {
-        	System.out.println(e.getMessage());
+        	try
+        	{
+        		int id = Database.addEmployeeToDB(name);
+        		newEmployee = new Employee(id, name);
+        		Database.getEmployeeMap().put(newEmployee.getID(), newEmployee);
+        		addEmpMessage.setText("\"" + name + "\" has been added as a new employee.");
+        	}
+        	catch (SQLException e)
+        	{
+        		System.out.println(e.getMessage());
+        	}
         }
     }
 
@@ -522,50 +532,52 @@ public class SystemDriver
      * for viewing future and past bookings, displays all bookings made with in
      * range of seven days before or after the current date
      */
-    private void viewBookings()
+    public void viewBookings()
     {
-    	LocalDate today = LocalDate.now().plusDays(10); // TODO remove +10 days
-		LocalDate lastWeek = today.minus(Period.ofDays(7));
+		ObservableList<String> oblist = FXCollections.observableArrayList();
+    	for (Employee employee : Database.getEmployeeMap().values())
+    	{
+    		oblist.add(employee.getName());
+    	}
+
+		empSelect.setItems(oblist);
+
+    	LocalDate today = LocalDate.now(); // TODO remove +10 days
+		LocalDate lastWeek = today.minus(Period.ofDays(100));
 		LocalDate nextWeek = today.plus(Period.ofDays(7));
 		boolean noResults = true;
     	//String currentUser = getAuthUser().getUsername();
     	
     	
     	// input 1 - view last weeks bookings
-        if (radioNextWeek.isSelected())
+        if (radioLastWeek.isSelected())
         {
-        	test.setText("one");
-    		ObservableList<Booking> oblist = FXCollections.observableArrayList();
+        	bookingsView.setText("");
         	for (Booking booking : Database.getBookingMap().values())
         	{
         		LocalDate date = booking.getTimeslot().getDate();
         		if (date.isAfter(lastWeek) && date.isBefore(today))
         		{
-            		oblist.add(booking);
-            		bookingsTable.setItems(oblist);
         			LocalTime t = booking.getTimeslot().getTime();
-                    System.out.println(
-                            booking.getCustomer().getUsername() + " on " + date.format(defaultDateFormat) + " at " + t.format(defaultTimeFormat) + " with " + booking.getEmployee().getName());
+                    bookingsView.appendText(
+                            booking.getCustomer().getUsername() + " on " + date.format(defaultDateFormat) + " at " + t.format(defaultTimeFormat) + " with " + booking.getEmployee().getName() + "\n");
                     noResults = false;
         		}
         	}
         }
         //input 2 - view next weeks bookings
-        if (radioLastWeek.isSelected())
+        else if (radioNextWeek.isSelected())
         {
-        	test.setText("two");
-    		ObservableList<Booking> oblist = FXCollections.observableArrayList();
+        	bookingsView.setText("");
         	for (Booking booking : Database.getBookingMap().values())
         	{
         		LocalDate date = booking.getTimeslot().getDate();
         		if (date.isBefore(nextWeek) && date.isAfter(today))
         		{
-            		oblist.add(booking);
-            		bookingsTable.setItems(oblist);
         			LocalTime t = booking.getTimeslot().getTime();
         			DateTimeFormatter tf = DateTimeFormatter.ofPattern("hh:mm a");
-                    System.out.println(
-                            booking.getCustomer().getUsername() + " on " + date.format(defaultDateFormat) + " at " + t.format(tf) + " with " + booking.getEmployee().getName());
+                    bookingsView.appendText(
+                            booking.getCustomer().getUsername() + " on " + date.format(defaultDateFormat) + " at " + t.format(tf) + " with " + booking.getEmployee().getName() + "\n");
                     noResults = false;
         		}
         	}
@@ -575,7 +587,9 @@ public class SystemDriver
             System.out.println("Invalid Input");
         }
         if (noResults)
-        	System.out.println("NONE");
+        {
+        	bookingsView.setText("NONE");
+        }
     }
     
     /**
