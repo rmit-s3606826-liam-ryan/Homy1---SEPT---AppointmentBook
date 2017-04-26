@@ -5,19 +5,48 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
-
-<AnchorPane prefHeight="480.0" prefWidth="720.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8">
+<AnchorPane prefHeight="480.0" prefWidth="720.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bookingSystem.SystemDriver">
    <children>
       <TabPane prefHeight="480.0" prefWidth="720.0" tabClosingPolicy="UNAVAILABLE">
         <tabs>
           <Tab text="My Bookings">
             <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="480.0" prefWidth="720.0" />
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="480.0" prefWidth="720.0">
+                     <children>
+                        <TextArea fx:id="custBookingsView" layoutX="179.0" layoutY="75.0" prefHeight="285.0" prefWidth="363.0" />
+                     </children></AnchorPane>
             </content>
           </Tab>
             <Tab text="Available Bookings">
               <content>
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <TextArea fx:id="availBookingsView" layoutX="342.0" layoutY="14.0" prefHeight="404.0" prefWidth="364.0" />
+                        <ComboBox fx:id="availBookingsDay" layoutX="85.0" layoutY="71.0" prefWidth="150.0" />
+                        <ComboBox fx:id="availBookingsEmployee" layoutX="85.0" layoutY="179.0" prefWidth="150.0" />
+                        <ComboBox fx:id="availBookingsService" layoutX="85.0" layoutY="292.0" prefWidth="150.0" />
+                        <Label layoutX="85.0" layoutY="44.0" text="Day" />
+                        <Label layoutX="85.0" layoutY="152.0" text="Employee" />
+                        <Label layoutX="85.0" layoutY="265.0" text="Service" />
+                     </children></AnchorPane>
+              </content>
+            </Tab>
+            <Tab text="Make Booking">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <ComboBox fx:id="makeBookingService" layoutX="176.0" layoutY="90.0" prefWidth="150.0" />
+                        <Label layoutX="176.0" layoutY="63.0" text="Select Service Type" />
+                        <ComboBox fx:id="makeBookingEmployee" layoutX="176.0" layoutY="168.0" prefWidth="150.0" />
+                        <ComboBox fx:id="makeBookingDay" layoutX="177.0" layoutY="247.0" prefWidth="150.0" />
+                        <ComboBox fx:id="makeBookingTime" layoutX="177.0" layoutY="334.0" prefWidth="150.0" />
+                        <Label layoutX="176.0" layoutY="141.0" text="Select Employee" />
+                        <Label layoutX="176.0" layoutY="220.0" text="Select Day" />
+                        <Label layoutX="176.0" layoutY="307.0" text="Select Time" />
+                        <Button fx:id="makeBookingBut" layoutX="412.0" layoutY="188.0" mnemonicParsing="false" onAction="#addBooking" text="Create Booking" />
+                        <Label fx:id="makeBookingMessage" layoutX="412.0" layoutY="286.0" textFill="RED" />
+                     </children>
+                  </AnchorPane>
               </content>
             </Tab>
         </tabs>

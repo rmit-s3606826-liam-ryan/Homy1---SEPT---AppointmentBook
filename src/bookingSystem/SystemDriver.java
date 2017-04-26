@@ -54,9 +54,11 @@ import java.sql.SQLException;
  **/
 public class SystemDriver
 {
-	
+	// main scene
 	@FXML private Button mainLogin;
 	@FXML private Button mainRegister;
+	
+	//register scene
 	@FXML private TextField txtUsername;
 	@FXML private Label invUsername;
 	@FXML private TextField txtPassword;
@@ -68,6 +70,8 @@ public class SystemDriver
 	@FXML private Label invPhone;
 	@FXML private TextField txtName;
 	@FXML private Label invName;
+	
+	// owner menu scene
 	@FXML private RadioButton radioNextWeek;
 	@FXML private RadioButton radioLastWeek;
 	@FXML private TextArea bookingsView;
@@ -84,6 +88,29 @@ public class SystemDriver
 	@FXML private Button addTimeBut;
 	@FXML private TextField txtWorkStart;
 	@FXML private TextField txtWorkEnd;
+	
+	// customer menu scene
+	@FXML private ComboBox<String> makeBookingService;
+	@FXML private ComboBox<String> makeBookingEmployee;
+    @FXML private ComboBox<String> makeBookingDay;
+    @FXML private ComboBox<String> makeBookingTime;
+    @FXML private Button makeBookingBut;
+    @FXML private Label makeBookingMessage;
+	@FXML private ComboBox<String> availBookingsEmployee;
+    @FXML private ComboBox<String> availBookingsDay;
+    @FXML private ComboBox<String> availBookingsService;
+	@FXML private TextArea availBookingsView;
+	@FXML private TextArea custBookingsView;
+	
+	// login scene
+	@FXML private TextField txtLoginUsername;
+	@FXML private TextField txtLoginPassword;
+	@FXML private Label invLoginName;
+	@FXML private Label invLoginPass;
+	@FXML private Button loginButton;
+	
+	
+	
 
 
     private Scanner keyboard = new Scanner(System.in);
@@ -120,6 +147,22 @@ public class SystemDriver
 		selectDay.getItems().addAll("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday");
 
     }
+    
+    public void loadLoginScene(ActionEvent event) throws Exception
+    {
+		Parent root = FXMLLoader.load(getClass().getResource("/bookingSystem/Login.fxml"));
+		Scene scene = new Scene(root, 720, 480);
+		Stage primaryStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+		primaryStage.setScene(scene);
+    }
+    
+    public void loadRegisterScene(ActionEvent event) throws Exception
+    {
+		Parent root = FXMLLoader.load(getClass().getResource("/bookingSystem/Registration.fxml"));
+		Scene scene = new Scene(root, 720, 480);
+		Stage primaryStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+		primaryStage.setScene(scene);
+    }
 
     /**
      * boolean running keeps menus looping until quit is selected
@@ -150,7 +193,6 @@ public class SystemDriver
 
                 switch (answer)
                 {
-                case 1:  login();                  break;
                 case 3:  running = false;          break;
                 case 4:  ownerMenu();              break;
                 case 5:  customerMenu();           break;
@@ -353,7 +395,7 @@ public class SystemDriver
     	}
     }
     
-    private void addBooking(int customer_id, int employee_id, int timeslot_id, String service, int duration)
+    public void addBooking()
     {/* //TODO: all "add" functions require callbacks from DB as they need to add a new entry, auto-generate an ID, then read this back to java
     	// so that we can enter it into the HashMap as the key. A bit fiddly, but manually generating ID is lazy and crappy. I will add this code shortly -Adam
         for (int x = 0; x < Database.timeslotMap.size(); x++)
@@ -578,41 +620,36 @@ public class SystemDriver
     /**
      * login - sets the current authorised user and determines if
      * they are the owner or a customer - directs to appropriate menu
+     * @throws IOException 
      */
-    public void login()
+    public void login(ActionEvent event) throws IOException
     {
+        invLoginPass.setText("");
+    	invLoginName.setText("");
         User authUser = null;
-        String username, password = null;
-        System.out.println("======================\n" + "Enter username: ");
-        username = keyboard.nextLine();
-
-        System.out.println("\nEnter password: ");
-        password = keyboard.nextLine();
-
         try
         {
-            authUser = auth(username, password);
+            authUser = auth(txtLoginUsername.getText(), txtLoginPassword.getText());
             setAuthUser(authUser);
             System.out.println("\nSuccessfully logged in as " + authUser.getUsername() + ".\n");
 
+            String sceneToDisplay = authUser.getUsername().equals("Owner") 
+        				          ? "/bookingSystem/OwnerMenu.fxml"
+        				          : "/bookingSystem/CustomerMenu.fxml";
+       		
+    		Parent root = FXMLLoader.load(getClass().getResource(sceneToDisplay));
+    		Scene scene = new Scene(root, 720, 480);
+    		Stage primaryStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+    		primaryStage.setScene(scene);
 
-            if (authUser.getUsername().equals("Owner"))
-            {
-                System.out.println("Directing to Owners menu.");
-                ownerMenu();
-            }
-            else
-            {
-                customerMenu();
-            }
         }
         catch (AuthException e)
         {
-            System.out.println("\nAuthorisation error - " + e.getMessage() + ".\n");
+            invLoginPass.setText("\nAuthorisation error - " + e.getMessage() + ".\n");
         }
         catch (NullPointerException e)
         {
-        	System.out.println("Error: User '" + username + "' does not exist.");
+        	invLoginName.setText("Error: User '" + txtLoginUsername.getText() + "' does not exist.");
         }
 
     }
@@ -750,11 +787,6 @@ public class SystemDriver
      */
 	public void register(ActionEvent event) throws Exception
 	{
-		Parent root = FXMLLoader.load(getClass().getResource("/bookingSystem/Registration.fxml"));
-		Scene scene = new Scene(root, 720, 480);
-		Stage primaryStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-		
-		primaryStage.setScene(scene);
         
 //
 //        // valid set to false after each field is correctly entered
