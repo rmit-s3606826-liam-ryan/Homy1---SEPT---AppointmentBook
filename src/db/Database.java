@@ -1,5 +1,10 @@
-package bookingSystem;
+package db;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
@@ -11,16 +16,18 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.util.HashMap;
 
+import bookingSystem.SystemDriver;
 import bookings.Booking;
 import bookings.Timeslot;
 import users.Employee;
 import users.User;
 
-
 public class Database
 {
     private static final String DB_DRIVER = "org.h2.Driver";
-    private static final String DB_CONNECTION = "jdbc:h2:./db/database";
+    // Only connect to DB if it exists; We don't want to create skeleton DBs everywhere
+    private static final String DB_CONNECTION = "jdbc:h2:./bin/db/database;IFEXISTS=TRUE";
+    private static final String DB_CONNECTION_JAR = "jdbc:h2:./db/database;IFEXISTS=TRUE";
     private static final String DB_USER = "notSEPTadmin";
     private static final String DB_PASSWORD = "XxX_Pr0-d4nk-passw0rd_XxX";
     
@@ -30,6 +37,7 @@ public class Database
     //
     static final String TABLE_USERS = "USERS";
     static final String TABLE_EMPLOYEES = "EMPLOYEES";
+    static final String TABLE_AVAILABILITY = "AVAILABILITY";
     static final String TABLE_TIMESLOTS = "TIMESLOTS";
     static final String TABLE_BOOKINGS = "BOOKINGS";
     //
@@ -48,6 +56,13 @@ public class Database
     static final String HEADER_EMPLOYEES_ID = "EMPLOYEE_ID";
     static final String HEADER_EMPLOYEES_NAME = "NAME";
     //
+    // AVAILABILITY Table
+    static final String HEADER_AVAILABILITY_ID = "ID";
+    static final String HEADER_AVAILABILITY_EMPLOYEE_ID = "EMPLOYEE_ID";
+    static final String HEADER_AVAILABILITY_DAY = "DAYOFWEEK";
+    static final String HEADER_AVAILABILITY_START = "STARTTIME";
+    static final String HEADER_AVAILABILITY_FINISH = "ENDTIME";
+    //
     // TIMESLOTS Table
     static final String HEADER_TIMESLOTS_ID = "TIMESLOT_ID";
     static final String HEADER_TIMESLOTS_DATE = "DATE";
@@ -64,10 +79,111 @@ public class Database
     //
     // ***************************************************************
     
-    static HashMap<Integer, User> userMap = new HashMap<Integer, User>();
-    static HashMap<Integer, Employee> employeeMap = new HashMap<Integer, Employee>();
-    static HashMap<Integer, Timeslot> timeslotMap = new HashMap<Integer, Timeslot>();
-    static HashMap<Integer, Booking> bookingMap = new HashMap<Integer, Booking>();
+    
+    /* ATTENTION SEPTians.
+     * These HashMaps are very easy to search/iterate through.
+     * Use the syntaxes below:
+     * 
+     * If you're only interested in the keys (the integer id), you can iterate through the keySet() of the map:
+     * 
+     * for (Integer key : mapName.keySet())
+     * {
+     *     // ...
+     * }
+     * 
+     * If you only need the values (in this case, the booking/customer/user etc. objects), use values().
+     * Remember to change "Object" to the appropriate object type.
+     * 
+     * for (Object value : mapName.values())
+     * {
+     *     // ...
+     * }
+     * 
+     * If you want access to both the key and value, use entrySet():
+     * 
+     * for (HashMap.Entry<Integer, Object> entry : mapName.entrySet())
+     * {
+     * 	   String key = entry.getKey();
+     * 	   Object value = entry.getValue();
+     *     // ...
+     * }
+     * 
+     */
+    private static HashMap<Integer, User> userMap = new HashMap<Integer, User>();
+    private static HashMap<Integer, Employee> employeeMap = new HashMap<Integer, Employee>();
+    private static HashMap<Integer, Timeslot> timeslotMap = new HashMap<Integer, Timeslot>();
+    private static HashMap<Integer, Booking> bookingMap = new HashMap<Integer, Booking>();
+    
+    
+    private static boolean runningFromJar()
+    {
+    	String jarTest = SystemDriver.class.getResource("SystemDriver.class").toString();
+    	
+    	if (jarTest.startsWith("rsrc:"))
+    	{
+    		return true;
+    	}
+    	else
+    	{
+    		return false;
+    	}
+    }
+    
+    /*  Copy out the db file if running in self-contained .JAR.
+     *  Files within .JAR are read-only and would prevent us from writing changes to the DB.
+     *  
+     *  If running from within eclipse or any other file system, no need to do this,
+     *  we can connect to the bin/db/database.mv.db file directly.
+     */
+    public static void extractDbFile()
+    {
+    	if (runningFromJar())
+    	{
+    		//System.out.println("RUNNING FROM JAR!");
+        	String path = "db/database.mv.db";
+
+        	InputStream ddlStream = Database.class
+        		    .getClassLoader().getResourceAsStream(path);
+        	File dbFile =  new File(path);
+        	
+        	/* Check that db hasn't already been extracted from previous use of the program.
+        	 * If it has, we don't want to override any possible additions/changes to the
+        	 * DB with a fresh copy from the jar!
+        	 */
+        	if (!dbFile.exists())
+        	{ // make /db/ directory if it doesn't exist... Which is probably the case
+            	if (!dbFile.getParentFile().exists())
+            	{
+            	     dbFile.getParentFile().mkdirs();
+            	}
+            	
+        		try (FileOutputStream output = new FileOutputStream(dbFile);)
+        		{
+        			byte[] buffer = new byte[2048];
+        			int r;
+        			while(-1 != (r = ddlStream.read(buffer)))
+        			{
+        				output.write(buffer, 0, r);
+        			}
+            	}
+        		catch (FileNotFoundException e)
+        		{
+        			// TODO Auto-generated catch block
+        			e.printStackTrace();
+        		}
+        		catch (IOException e)
+        		{
+        			// TODO Auto-generated catch block
+        			e.printStackTrace();
+        		}
+        	}
+
+    	}
+    	else
+    	{
+    		//System.out.println("RUNNING FROM ECLIPSE");
+    	}
+    }
     
 	static Connection getDBConnection()
 	
@@ -83,7 +199,14 @@ public class Database
 	    }
 	    try
 	    {
-	        dbConnection = DriverManager.getConnection(DB_CONNECTION, DB_USER, DB_PASSWORD);
+	    	if (runningFromJar())
+	    	{
+	    		dbConnection = DriverManager.getConnection(DB_CONNECTION_JAR, DB_USER, DB_PASSWORD);
+	    	}
+	    	else
+	    	{
+	    		dbConnection = DriverManager.getConnection(DB_CONNECTION, DB_USER, DB_PASSWORD);
+	    	}
 	        return dbConnection;
 	    }
 	    catch (SQLException e)
@@ -93,12 +216,13 @@ public class Database
 	    return dbConnection;
 	}
 	
-	static void loadFromDB()
+	public static void loadFromDB()
 	{
 		try
 		{
-			getUsers(); // MUST DO users and employee tables first,
+			getUsers(); // MUST do users and employee tables first,
 			getEmployees(); // so timeslots and bookings have objects to link to.
+			getAvailability();
 			getTimeslots();
 			getBookings();
 		}
@@ -185,6 +309,48 @@ public class Database
 	    }
 	}
 	
+	static void getAvailability() throws SQLException
+	{
+		Connection c = getDBConnection();
+		Statement stmt = null;
+		String getAvailabilityQuery = "select * from " + TABLE_AVAILABILITY;
+		try
+		{
+			c.setAutoCommit(false);
+			stmt = c.createStatement();
+			ResultSet rs = stmt.executeQuery(getAvailabilityQuery);
+			
+			while (rs.next())
+			{
+				int id = rs.getInt(HEADER_AVAILABILITY_ID); // not needed?
+				int employee_id = rs.getInt(HEADER_AVAILABILITY_EMPLOYEE_ID);
+				String dayOfWeek = rs.getString(HEADER_AVAILABILITY_DAY);
+				java.sql.Time sqlStartTime = rs.getTime(HEADER_AVAILABILITY_START);
+				LocalTime startTime = sqlStartTime.toLocalTime();
+				java.sql.Time sqlFinishTime = rs.getTime(HEADER_AVAILABILITY_FINISH);
+				LocalTime finishTime = sqlFinishTime.toLocalTime();
+				
+				// Put availability entry into appropriate employee's array
+				Employee e = employeeMap.get(employee_id);
+				e.addAvailability(dayOfWeek, startTime, finishTime);
+			}
+			stmt.close();
+			c.commit();
+		}
+		catch (SQLException e)
+	    {
+	        System.out.println(e.getMessage());
+	    }
+	    catch (Exception e)
+	    {
+	        e.printStackTrace();
+	    }
+	    finally
+	    {
+	        c.close();
+	    }
+	}
+	
 	static void getTimeslots() throws SQLException
 	{
 		Connection c = getDBConnection();
@@ -199,9 +365,9 @@ public class Database
 			while (rs.next())
 			{
 				int id = rs.getInt(HEADER_TIMESLOTS_ID);
-				String dateAsString = rs.getString(HEADER_TIMESLOTS_DATE);
-				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-				LocalDate date = LocalDate.parse(dateAsString, formatter);
+				String dateString = rs.getString(HEADER_TIMESLOTS_DATE);
+		    	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("uuuu-MM-dd");
+		    	LocalDate date = LocalDate.parse(dateString, formatter);
 				
 				// deprecated lib - only used to pull from DB, then convert to LocalTime
 				java.sql.Time timeSQL = rs.getTime(HEADER_TIMESLOTS_TIME);
@@ -273,7 +439,7 @@ public class Database
 	    }
 	}
 	
-	static int addUserToDB(String username, String password, String email, String name, String phone, LocalDate dob) throws SQLException
+	public static int addUserToDB(String username, String password, String email, String name, String phone, LocalDate dob) throws SQLException
 	{
 		Connection c = getDBConnection();
 		PreparedStatement insertStmt = null;
@@ -350,7 +516,7 @@ public class Database
 		return id;
 	}
 	
-	static int addEmployeeToDB(String name) throws SQLException
+	public static int addEmployeeToDB(String name) throws SQLException
 	{
 		Connection c = getDBConnection();
 		PreparedStatement insertStmt = null;
@@ -379,7 +545,7 @@ public class Database
 			ResultSet rs = selectStmt.executeQuery();
 			rs.next();	// increment resultset to first result.
 						// should be only one result as userID is a primary key.
-			id = rs.getInt(HEADER_USERS_ID);
+			id = rs.getInt(HEADER_EMPLOYEES_ID);
 			
 			selectStmt.close();
 			c.commit();
@@ -399,12 +565,12 @@ public class Database
 		return id;
 	}
 	
-	static void removeEmployeeFromDB(int id) throws SQLException
+	public static boolean removeEmployeeFromDB(int id) throws SQLException
 	{
 		Connection c = getDBConnection();
 		Statement stmt = null;
 		
-		String deleteStatement = "DELETE FROM " + TABLE_EMPLOYEES + "WHERE " + HEADER_EMPLOYEES_ID + "=" + id + ";";
+		String deleteStatement = "DELETE FROM " + TABLE_EMPLOYEES + " WHERE " + HEADER_EMPLOYEES_ID + "=" + id + ";";
 		try
 		{
 			c.setAutoCommit(false);
@@ -415,7 +581,7 @@ public class Database
 		}
 		catch (SQLException e)
 		{
-			System.out.println("Exception Message " + e.getLocalizedMessage());
+			return false;
 		}
 		catch (Exception e)
 		{
@@ -425,23 +591,21 @@ public class Database
 		{
 			c.close();
 		}
+		return true;
 	}
 	
-	static int addTimeslotToDB(String username, String password, String email, String name, String phone, LocalDate dob) throws SQLException
+	static int addTimeslotToDB(LocalDate date, LocalTime time, Boolean booked) throws SQLException
 	{
 		Connection c = getDBConnection();
 		PreparedStatement insertStmt = null;
 		PreparedStatement selectStmt = null;
 		int id = 0;
 		
-		String insertStatement = "INSERT INTO " + TABLE_USERS + " ("
-									   + HEADER_USERS_USERNAME
-								+ ", " + HEADER_USERS_PASSWORD
-								+ ", " + HEADER_USERS_EMAIL
-								+ ", " + HEADER_USERS_PHONE
-								+ ", " + HEADER_USERS_DOB
-								+ ", " + HEADER_USERS_NAME
-								+ ") values (?, ?, ?, ?, ?, ?)";
+		String insertStatement = "INSERT INTO " + TABLE_TIMESLOTS + " ("
+									   + HEADER_TIMESLOTS_DATE
+								+ ", " + HEADER_TIMESLOTS_TIME
+								+ ", " + HEADER_TIMESLOTS_BOOKED
+								+ ") values (?, ?, ?)";
 		try
 		{
 			c.setAutoCommit(false);
@@ -449,42 +613,26 @@ public class Database
 			insertStmt = c.prepareStatement(insertStatement);
 			
 			// fill in variables into sql statement
-			insertStmt.setString(1, username);
-			insertStmt.setString(2, password);
-			java.sql.Date date = java.sql.Date.valueOf(dob);
-			insertStmt.setDate(5, date);
-			insertStmt.setString(6, name);
-			
-			// take care of possible null entries
-			if (email != null)
-			{
-				insertStmt.setString(3, email);
-			}
-			else
-			{
-				insertStmt.setNull(3, Types.VARCHAR);
-			}
-			if (phone != null)
-			{
-				insertStmt.setString(4, phone);
-			}
-			else
-			{
-				insertStmt.setNull(4, Types.VARCHAR);
-			}
+			java.sql.Date dbDate = java.sql.Date.valueOf(date);
+			insertStmt.setDate(1, dbDate);
+			java.sql.Time dbTime = java.sql.Time.valueOf(time);
+			insertStmt.setTime(2, dbTime);
+			insertStmt.setBoolean(3, booked);
 			
 			insertStmt.executeUpdate();
 			insertStmt.close();
             
-			selectStmt = c.prepareStatement("SELECT " + HEADER_USERS_ID
-											+ " FROM " + TABLE_USERS
-											+ " WHERE " + HEADER_USERS_USERNAME
-											+ "='" + username + "';");
+			selectStmt = c.prepareStatement("SELECT " + HEADER_TIMESLOTS_ID
+											+ " FROM " + TABLE_TIMESLOTS
+											+ " WHERE " + HEADER_TIMESLOTS_DATE
+											+ "='" + dbDate + "' "
+											+ "AND " + HEADER_TIMESLOTS_TIME
+											+ "='" + dbTime + "';");
 			
 			ResultSet rs = selectStmt.executeQuery();
 			rs.next();	// increment resultset to first result.
 						// should be only one result as userID is a primary key.
-			id = rs.getInt(HEADER_USERS_ID);
+			id = rs.getInt(HEADER_TIMESLOTS_ID);
 			
 			selectStmt.close();
 			c.commit();
@@ -503,7 +651,7 @@ public class Database
 		}
 		return id;
 	}
-	
+	// TODO Not yet implemented. Copied from addUserToDB. NOT FUNCTIONAL
 	static int addBookingToDB(String username, String password, String email, String name, String phone, LocalDate dob) throws SQLException
 	{
 		Connection c = getDBConnection();
@@ -579,5 +727,25 @@ public class Database
 			c.close();
 		}
 		return id;
+	}
+	
+	public static HashMap<Integer, User> getUserMap()
+	{
+		return userMap;
+	}
+	
+	public static HashMap<Integer, Employee> getEmployeeMap()
+	{
+		return employeeMap;
+	}
+	
+	public static HashMap<Integer, Timeslot> getTimeslotMap()
+	{
+		return timeslotMap;
+	}
+	
+	public static HashMap<Integer, Booking> getBookingMap()
+	{
+		return bookingMap;
 	}
 }

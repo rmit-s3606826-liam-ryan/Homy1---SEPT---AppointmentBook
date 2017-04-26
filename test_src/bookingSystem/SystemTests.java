@@ -4,12 +4,14 @@ import static org.junit.Assert.*;
 import static org.junit.contrib.java.lang.system.TextFromStandardInputStream.*;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 
 import org.junit.*;
 import org.junit.contrib.java.lang.system.TextFromStandardInputStream;
 import org.junit.rules.TemporaryFolder;
 
-import bookings.timeSlots;
+import bookings.Timeslot;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -158,7 +160,8 @@ public class SystemTests
         assertFalse(testRegVal.validatePhone("0400000"));
     }
     
-    @Test
+    // DoB is validated now upon entry using date parsing.
+    /* @Test
     public void testThatDOBValidationFunctionReturnsTrueWithValidDate()
     {
         assertTrue(testRegVal.validateDOB(2, 12, 1978));
@@ -186,10 +189,59 @@ public class SystemTests
     public void testThatDOBValidationFunctionReturnsFalseWithYearVariableToLow()
     {
         assertFalse(testRegVal.validateDOB(2, 12, 1899));
+    } */
+    
+    @Test
+    public void testDateParse_NumberOfDayDigits()
+    {
+    	// If date does not parse successfully, will throw a DateTimeParseException
+    	String dateString = "4/12/1990";
+    	LocalDate date = testSystem.parseDate(dateString);
+    	
+    	dateString = "14/12/1990";
+    	date = testSystem.parseDate(dateString);
     }
-
-
-
+    
+    @Test
+    public void testDateParse_NumberOfMonthDigits()
+    {
+    	// If date does not parse successfully, will throw a DateTimeParseException
+    	String dateString = "10/1/1990";
+    	LocalDate date = testSystem.parseDate(dateString);
+    	
+    	dateString = "10/11/1990";
+    	date = testSystem.parseDate(dateString);
+    }
+    
+    @Test
+    public void testDateParse_OneDayOneMonth()
+    {
+    	// If date does not parse successfully, will throw a DateTimeParseException
+    	String dateString = "6/7/1944";
+    	LocalDate date = testSystem.parseDate(dateString);
+    }
+    
+    @Test (expected = DateTimeParseException.class)
+    public void testDateParse_DayOutOfBounds()
+    {
+    	String dateString = "36/10/1964";
+    	LocalDate date = testSystem.parseDate(dateString);
+    }
+    
+    @Test (expected = DateTimeParseException.class)
+    public void testDateParse_MonthOutOfBounds()
+    {
+    	String dateString = "14/16/1964";
+    	LocalDate date = testSystem.parseDate(dateString);
+    }
+    
+    @Test (expected = DateTimeParseException.class)
+    public void testDateParse_YearOutOfBounds()
+    {
+    	String dateString = "4/10/19021";
+    	LocalDate date = testSystem.parseDate(dateString);
+    }
+    
     @Test
     public void testingRegisterFunction()
     {
