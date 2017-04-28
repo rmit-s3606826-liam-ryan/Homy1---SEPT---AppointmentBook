@@ -17,6 +17,7 @@
                      </toggleGroup></RadioButton>
                   <RadioButton fx:id="radioNextWeek" layoutX="14.0" layoutY="106.0" mnemonicParsing="false" onAction="#viewBookings" text="Next Week" toggleGroup="$one" />
                   <TextArea fx:id="bookingsView" editable="false" layoutX="229.0" layoutY="33.0" prefHeight="372.0" prefWidth="451.0" />
+                  <Button fx:id="ownerLogoutOne" layoutX="14.0" layoutY="382.0" mnemonicParsing="false" onAction="#logout" text="Log Out" />
                </children>
             </AnchorPane>
         </content>
@@ -27,6 +28,7 @@
                <children>
                   <ComboBox fx:id="empSelect" layoutX="28.0" layoutY="147.0" onAction="#viewEmployeeAvailability" prefWidth="150.0" />
                   <TextArea fx:id="empAvailView" layoutX="226.0" layoutY="37.0" prefHeight="357.0" prefWidth="455.0" />
+                  <Button fx:id="ownerLogoutTwo" layoutX="14.0" layoutY="382.0" mnemonicParsing="false" onAction="#logout" text="Log Out" />
                </children></AnchorPane>
       </content>
     </Tab>
@@ -44,6 +46,7 @@
                   <Button fx:id="addTimeBut" layoutX="474.0" layoutY="200.0" mnemonicParsing="false" onAction="#addWorkingTimes" text="Add times" />
                   <Label layoutX="175.0" layoutY="151.0" text="Day" />
                   <ComboBox fx:id="selectDay" layoutX="174.0" layoutY="178.0" prefWidth="150.0" />
+                  <Button fx:id="ownerLogutThree" layoutX="14.0" layoutY="382.0" mnemonicParsing="false" onAction="#logout" text="Log Out" />
                </children></AnchorPane>
         </content>
       </Tab>
@@ -55,6 +58,7 @@
                   <Label alignment="CENTER" layoutX="250.0" layoutY="111.0" prefHeight="27.0" prefWidth="221.0" text="Select employee to remove" textAlignment="CENTER" />
                   <ComboBox fx:id="empSelect3" layoutX="285.0" layoutY="160.0" prefWidth="150.0" />
                   <Label fx:id="empRemoveMessage" alignment="CENTER" contentDisplay="CENTER" layoutX="248.0" layoutY="280.0" prefHeight="65.0" prefWidth="225.0" textAlignment="CENTER" textFill="RED" wrapText="true" />
+                  <Button fx:id="ownerLogoutFour" layoutX="14.0" layoutY="382.0" mnemonicParsing="false" onAction="#logout" text="Log Out" />
                </children></AnchorPane>
         </content>
       </Tab>
@@ -65,6 +69,7 @@
                   <TextField fx:id="txtAddEmp" layoutX="248.0" layoutY="179.0" onAction="#addEmployee" />
                   <Label layoutX="236.0" layoutY="136.0" text="Enter the new Employees name" />
                   <Label fx:id="addEmpMessage" layoutX="248.0" layoutY="239.0" prefHeight="27.0" prefWidth="224.0" />
+                  <Button fx:id="ownerLogoutFive" layoutX="14.0" layoutY="382.0" mnemonicParsing="false" onAction="#logout" text="Log Out" />
                </children></AnchorPane>
       </content>
     </Tab>

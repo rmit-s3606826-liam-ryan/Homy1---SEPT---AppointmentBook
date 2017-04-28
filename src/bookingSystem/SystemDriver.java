@@ -698,9 +698,10 @@ public class SystemDriver
     	return null; // no matching user found
     }
 
-    public void logout()
+    public void logout(ActionEvent event)
     {
         setAuthUser(null);
+        backToMain(event);
     }
 
     /**
@@ -863,6 +864,23 @@ public class SystemDriver
     public User getAuthUser()
     {
         return authUser;
+    }
+    
+    public void backToMain(ActionEvent event)
+    {
+		try
+		{
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/bookingSystem/Main.fxml"));
+    		Parent root = loader.load();
+    		Scene scene = new Scene(root, 720, 480);
+    		Stage primaryStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+    		primaryStage.setScene(scene);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+
     }
 
     /**
