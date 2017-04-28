@@ -9,7 +9,12 @@
    <children>
       <TabPane prefHeight="480.0" prefWidth="720.0" tabClosingPolicy="UNAVAILABLE">
         <tabs>
-          <Tab text="My Bookings">
+            <Tab text="Untitled Tab">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+              </content>
+            </Tab>
+          <Tab onSelectionChanged="#viewCustomerBooking" text="My Bookings">
             <content>
               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="480.0" prefWidth="720.0">
                      <children>
@@ -17,7 +22,7 @@
                      </children></AnchorPane>
             </content>
           </Tab>
-            <Tab text="Available Bookings">
+            <Tab onSelectionChanged="#custSetUp" text="Available Bookings">
               <content>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
@@ -28,10 +33,11 @@
                         <Label layoutX="85.0" layoutY="44.0" text="Day" />
                         <Label layoutX="85.0" layoutY="152.0" text="Employee" />
                         <Label layoutX="85.0" layoutY="265.0" text="Service" />
+                        <Button fx:id="getTimesBut" layoutX="108.0" layoutY="362.0" mnemonicParsing="false" onAction="#viewAvailableBooking" text="Get Times" />
                      </children></AnchorPane>
               </content>
             </Tab>
-            <Tab text="Make Booking">
+            <Tab onSelectionChanged="#custSetUp" text="Make Booking">
               <content>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>

@@ -48,6 +48,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 
 /**
  * System driver class - contains menus and functions used to run the system
@@ -70,6 +71,7 @@ public class SystemDriver
 	@FXML private Label invPhone;
 	@FXML private TextField txtName;
 	@FXML private Label invName;
+	@FXML private Label registerMessage;
 	
 	// owner menu scene
 	@FXML private RadioButton radioNextWeek;
@@ -100,6 +102,7 @@ public class SystemDriver
     @FXML private ComboBox<String> availBookingsDay;
     @FXML private ComboBox<String> availBookingsService;
 	@FXML private TextArea availBookingsView;
+    @FXML private Button getTimesBut;
 	@FXML private TextArea custBookingsView;
 	
 	// login scene
@@ -143,9 +146,22 @@ public class SystemDriver
 		empSelect2.setItems(oblist);
 		empSelect3.setItems(oblist);
 		
+		
 		selectDay.getItems().clear();
 		selectDay.getItems().addAll("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday");
+    }
+    
+    public void custSetUp()
+    {
+		ObservableList<String> oblist = FXCollections.observableArrayList();
+    	for (Employee employee : Database.getEmployeeMap().values())
+    	{
+    		oblist.add(employee.getName());
+    	}
 
+		availBookingsEmployee.setItems(oblist);
+		availBookingsDay.getItems().clear();
+		availBookingsDay.getItems().addAll("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday");
     }
     
     public void loadLoginScene(ActionEvent event) throws Exception
@@ -420,43 +436,43 @@ public class SystemDriver
     }
 
     // TODO mock up function - not yet implemented
-    private void viewAvailableBooking()
-    {/*
-        System.out.println("=================================================\n" 
-                         + "Available Bookings:\n"
-                         + "=================================================\n");
-        for (int index = 0; index < Database.timeslotMap.size(); ++index)
+    public void viewAvailableBooking()
+    {
+    	availBookingsView.setText("");
+        for (Timeslot timeslot : Database.getTimeslotMap().values())
         {
-            if (Database.timeslotMap.get(index).returnStatus() == false)
+            if (availBookingsDay.getValue() != null
+             && !availBookingsDay.getValue().equalsIgnoreCase(timeslot.getDate().getDayOfWeek().name()))
             {
-                System.out.println(Database.timeslotMap.get(index).getDate() + "-" + Database.timeslotMap.get(index).getEmployee() + "\n");
+            	continue;
             }
-        }*/
+            
+            if (timeslot.getStatus() != false)
+            {
+            	continue;
+            }
+        	availBookingsView.appendText(timeslot.getDate() + " : " + timeslot.getTime() + "\n");
+        }
     }
 
-    private void viewCustomerBooking()
+    public void viewCustomerBooking()
     {
-        /*Connection c = Database.getDBConnection();
-        Statement stmt = null;
-        try
+    	System.out.println(authUser.getFullName());
+        for (Booking booking : Database.getBookingMap().values())
         {
-            stmt = c.createStatement();
-
-            String currentUser = getAuthUser().getName();
-            System.out.println("Welcome " + currentUser);
-            System.out.println("You Have a booking(s) with us on:\n");
-
-            ResultSet rs = stmt.executeQuery("SELECT * FROM BOOKINGS WHERE username ='" + currentUser + "'");
-            while (rs.next())
-            {
-                System.out.println(rs.getString("date") + " at " + " with " + rs.getString("employee"));
-            }
-            c.close();
+        	//if (authUser.getID() == booking.getCustomer().getID())
+        	{
+        		custBookingsView.appendText(
+        				booking.getTimeslot().getDate().toString()
+        				+ " | at " 
+        				+ booking.getTimeslot().getTime().toString()
+        				+ " | for "
+        				+ booking.getService()
+        				+ " | with "
+        				+ booking.getEmployee().getName()
+        				+ "\n");	
+        	}
         }
-        catch (SQLException e)
-        {
-            e.printStackTrace();
-        }*/
     }
     public void removeEmployee()
     {
@@ -689,13 +705,13 @@ public class SystemDriver
      * Username does not allow special characters
      * Alphanumeric and punctuation
      **/
-    public void validateUsername(ActionEvent event)
+    public boolean validateUsername(String username)
     {
-        boolean validUsername = txtUsername.getText().matches("[a-zA-Z0-9'., -]+");
+        boolean validUsername = username.matches("[a-zA-Z0-9'., -]+");
         boolean taken = false;
     	for (User user : Database.getUserMap().values())
     	{
-    		if (user.getUsername().equals(txtUsername.getText()))
+    		if (user.getUsername().equals(username))
     		{	
     			taken = true;
     		}
@@ -707,21 +723,23 @@ public class SystemDriver
 	    }
         else if (taken)
         {
-	        invUsername.setText(" Username Taken");				
+	        invUsername.setText(" Username Taken");	
+	        validUsername = false;
         }
 		else
 		{
 	        invUsername.setText("");				
 		}
+        return validUsername;
     }
     
     /**
      * Password can be any format
      * function checks whether passwords match
      **/
-    public void validatePassword(ActionEvent event)
+    public boolean validatePassword(String password, String confirmPassword)
     {
-        boolean validPassword = txtPassword.getText().equals(txtConfirmPassword.getText());
+        boolean validPassword = password.equals(confirmPassword);
         if (!validPassword)
         {
 	        invPassword.setText(" Passwords do not match");				
@@ -730,14 +748,15 @@ public class SystemDriver
 		{
 	        invPassword.setText("");				
 		}
+        return validPassword;
     }
 
     /**
      *  Validate email regex requires format of <alphaNum/punc>@<alphanum/punc>.<alphanum/punc>  
      **/
-    public void validateEmail(ActionEvent event)
+    public boolean validateEmail(String email)
     {
-        boolean validEmail = txtEmail.getText().matches("[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+[.]{1,1}+[a-zA-Z0-9-.]+");
+        boolean validEmail = email.matches("[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+[.]{1,1}+[a-zA-Z0-9-.]+");
         if (!validEmail) //need a regex that accepts  alphanumeric + a few special characters
         {
 	        invEmail.setText(" Invalid email format");				
@@ -746,14 +765,15 @@ public class SystemDriver
 		{
 	        invEmail.setText("");				
 		}
+        return validEmail;
     }
     
     /**
      * Currently only requires using between 8 and 10 characters 
      **/
-    public void validatePhone(ActionEvent event)
+    public boolean validatePhone(String phone)
     {
-        boolean validNumber = txtPhone.getText().matches("[0-9]{8,10}+");
+        boolean validNumber = phone.matches("[0-9]{8,10}+");
         if (!validNumber)
         {
 	        invPhone.setText(" Invalid phone number");				
@@ -762,14 +782,15 @@ public class SystemDriver
 		{
 	        invPhone.setText("");				
 		}
+        return validNumber;
     }
 
     /**
      *  Full name allows only alphabetical characters and common punctuation used in names 
      **/
-    public void validateName(ActionEvent event)
+    public boolean validateName(String name)
     {
-        boolean validName = txtName.getText().matches("[a-zA-Z'., -]+");
+        boolean validName = name.matches("[a-zA-Z'., -]+");
         if (!validName)
         {
 	        invName.setText(" Like no name I've seen");				
@@ -778,6 +799,7 @@ public class SystemDriver
 		{
 	        invName.setText("");				
 		}
+        return validName;
     }
 
 
@@ -787,97 +809,48 @@ public class SystemDriver
      */
 	public void register(ActionEvent event) throws Exception
 	{
+		boolean validUsername = txtUsername.getLength() != 0 ? validateUsername(txtUsername.getText()) : false;
+		boolean validPassword = txtConfirmPassword.getLength() != 0 ? validatePassword(txtPassword.getText(), txtConfirmPassword.getText()) : false;
+		boolean validEmail = txtEmail.getLength() != 0 ? validateEmail(txtEmail.getText()) : false;
+		boolean validPhone = txtPhone.getLength() != 0 ? validatePhone(txtPhone.getText()) : false;
+		boolean validName = txtName.getLength() != 0 ? validateName(txtName.getText()) : false;
         
-//
-//        // valid set to false after each field is correctly entered
-//        // only single boolean instead of 6
-//        // prompt and get username
-//        boolean valid = false;
-//        while (valid == false)
-//        {
-//            username = promptAndGetString("Enter username: ");
-//            valid = RegistrationValidation.validateUserName(username);
-//            if (valid)
-//            {
-//            	for (User user : Database.getUserMap().values())
-//                {
-//                	if (user.getUsername().equals(username))
-//                	{
-//                		System.out.println("Username Taken, Try Again");
-//                		valid = false;
-//                	}
-//                }
-//            }
-//        }
-//
-//        // prompt and get password
-//        valid = false;
-//        while (valid == false)
-//        {
-//            password = promptAndGetString("Enter password: ");
-//            confirmPassword = promptAndGetString("Confirm password: ");
-//            valid = RegistrationValidation.validatePassword(password, confirmPassword);
-//        }
-//
-//        // prompt and get email
-//        valid = false;
-//        while (valid == false)
-//        {
-//            email = promptAndGetString("Enter email address: ");
-//            valid = RegistrationValidation.validateEmail(email);
-//        }
-//
-//        // prompt and get full name
-//        valid = false;
-//        while (valid == false)
-//        {
-//            fullName = promptAndGetString("Enter full name: ");
-//            valid = RegistrationValidation.validateName(fullName);
-//        }
-//
-//        // prompt and get phone number
-//        valid = false;
-//        while (valid == false)
-//        {
-//            phoneNumber = promptAndGetString("Enter phone number: ");
-//            valid = RegistrationValidation.validatePhone(phoneNumber);
-//        }
-//
-//        // prompt and get date of birth
-//        valid = false;
-//        while(valid == false)
-//        {
-//            try
-//            {
-//                System.out.println("Enter date of birth: ");
-//                String dobString = keyboard.nextLine();
-//                dob = parseDate(dobString);
-//                
-//                if (dob != null)
-//                {
-//                	valid = true;
-//                }
-//            }
-//            catch (NumberFormatException e)
-//            {
-//                System.out.println("Please only enter numbers");
-//            }
-//        }
-//        
-//        // if user hasn't quit registation and all fields are valid, assign to user
-//        try
-//        {
-//        	int id = Database.addUserToDB(username, password, email, fullName, phoneNumber, dob);
-//            newUser = new User(id, username, password, email, fullName, phoneNumber, dob);
-//            Database.getUserMap().put(newUser.getID(), newUser);
-//        	System.out.println("User Registered. Welcome " + newUser.getUsername());
-//            setAuthUser(newUser);
-//            customerMenu();
-//        }
-//        catch (SQLException e)
-//        {
-//        	System.out.println(e.getMessage());
-//        }
+		boolean validRegistration = validUsername 
+								 && validPassword
+								 && validEmail
+								 && validPhone
+								 && validName;
+		
+		try
+        {
+			if (validRegistration)
+			{
+				registerMessage.setText("all is well");
+				/*
+				int id = Database.addUserToDB(txtUsername.getText(),
+											  txtPassword.getText(),
+											  txtEmail.getText(),
+											  txtName.getText(),
+											  txtPhone.getText());
+            	User newUser = new User(id,
+            					   txtUsername.getText(),
+            					   txtPassword.getText(),
+            					   txtEmail.getText(),
+            					   txtName.getText(),
+            					   txtPhone.getText());
+            	Database.getUserMap().put(newUser.getID(), newUser);
+        		System.out.println("User Registered. Welcome " + newUser.getUsername());
+        		setAuthUser(newUser);
+			*/}
+			else
+			{
+				registerMessage.setText("Invalid Field(s): Can not Register");
+			}
+        }
+        catch (Exception e)
+        {
+        	System.out.println(e.getMessage());
+        }
 	}
 	
     public void setAuthUser(User user)
