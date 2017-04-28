@@ -457,20 +457,21 @@ public class SystemDriver
 
     public void viewCustomerBooking()
     {
-    	System.out.println(authUser.getFullName());
+    	custBookingsView.setText("");
         for (Booking booking : Database.getBookingMap().values())
         {
-        	//if (authUser.getID() == booking.getCustomer().getID())
+        	if (authUser.getID() == booking.getCustomer().getID())
         	{
         		custBookingsView.appendText(
-        				booking.getTimeslot().getDate().toString()
-        				+ " | at " 
+        				  "DATE: "
+        				+ booking.getTimeslot().getDate().toString()
+        				+ "\nAT: " 
         				+ booking.getTimeslot().getTime().toString()
-        				+ " | for "
+        				+ "\nFOR: "
         				+ booking.getService()
-        				+ " | with "
+        				+ "\nWITH: "
         				+ booking.getEmployee().getName()
-        				+ "\n");	
+        				+ "\n==========================\n");	
         	}
         }
     }
@@ -646,18 +647,19 @@ public class SystemDriver
         try
         {
             authUser = auth(txtLoginUsername.getText(), txtLoginPassword.getText());
-            setAuthUser(authUser);
             System.out.println("\nSuccessfully logged in as " + authUser.getUsername() + ".\n");
-
+            setAuthUser(authUser);
             String sceneToDisplay = authUser.getUsername().equals("Owner") 
         				          ? "/bookingSystem/OwnerMenu.fxml"
         				          : "/bookingSystem/CustomerMenu.fxml";
        		
-    		Parent root = FXMLLoader.load(getClass().getResource(sceneToDisplay));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(sceneToDisplay));
+    		Parent root = loader.load();
+    		SystemDriver c = loader.getController();
+    		c.setAuthUser(authUser);
     		Scene scene = new Scene(root, 720, 480);
     		Stage primaryStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
     		primaryStage.setScene(scene);
-
         }
         catch (AuthException e)
         {

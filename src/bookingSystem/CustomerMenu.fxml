@@ -9,19 +9,6 @@
    <children>
       <TabPane prefHeight="480.0" prefWidth="720.0" tabClosingPolicy="UNAVAILABLE">
         <tabs>
-            <Tab text="Untitled Tab">
-              <content>
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-              </content>
-            </Tab>
-          <Tab onSelectionChanged="#viewCustomerBooking" text="My Bookings">
-            <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="480.0" prefWidth="720.0">
-                     <children>
-                        <TextArea fx:id="custBookingsView" layoutX="179.0" layoutY="75.0" prefHeight="285.0" prefWidth="363.0" />
-                     </children></AnchorPane>
-            </content>
-          </Tab>
             <Tab onSelectionChanged="#custSetUp" text="Available Bookings">
               <content>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
@@ -55,6 +42,14 @@
                   </AnchorPane>
               </content>
             </Tab>
+          <Tab onSelectionChanged="#viewCustomerBooking" text="My Bookings">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="480.0" prefWidth="720.0">
+                     <children>
+                        <TextArea fx:id="custBookingsView" layoutX="179.0" layoutY="75.0" prefHeight="285.0" prefWidth="363.0" />
+                     </children></AnchorPane>
+            </content>
+          </Tab>
         </tabs>
       </TabPane>
    </children>
