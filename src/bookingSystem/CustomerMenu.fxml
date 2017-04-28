@@ -15,12 +15,13 @@
                      <children>
                         <TextArea fx:id="availBookingsView" layoutX="342.0" layoutY="14.0" prefHeight="404.0" prefWidth="364.0" />
                         <ComboBox fx:id="availBookingsDay" layoutX="85.0" layoutY="71.0" prefWidth="150.0" />
-                        <ComboBox fx:id="availBookingsEmployee" layoutX="85.0" layoutY="179.0" prefWidth="150.0" />
-                        <ComboBox fx:id="availBookingsService" layoutX="85.0" layoutY="292.0" prefWidth="150.0" />
+                        <ComboBox fx:id="availBookingsEmployee" layoutX="85.0" layoutY="146.0" prefWidth="150.0" />
+                        <ComboBox fx:id="availBookingsService" layoutX="85.0" layoutY="226.0" prefWidth="150.0" />
                         <Label layoutX="85.0" layoutY="44.0" text="Day" />
-                        <Label layoutX="85.0" layoutY="152.0" text="Employee" />
-                        <Label layoutX="85.0" layoutY="265.0" text="Service" />
-                        <Button fx:id="getTimesBut" layoutX="108.0" layoutY="362.0" mnemonicParsing="false" onAction="#viewAvailableBooking" text="Get Times" />
+                        <Label layoutX="85.0" layoutY="119.0" text="Employee" />
+                        <Label layoutX="85.0" layoutY="199.0" text="Service" />
+                        <Button fx:id="getTimesBut" layoutX="108.0" layoutY="296.0" mnemonicParsing="false" onAction="#viewAvailableBooking" text="Get Times" />
+                        <Button fx:id="customerLogoutThree" layoutX="14.0" layoutY="382.0" mnemonicParsing="false" onAction="#logout" text="Log Out" />
                      </children></AnchorPane>
               </content>
             </Tab>
@@ -38,6 +39,7 @@
                         <Label layoutX="176.0" layoutY="307.0" text="Select Time" />
                         <Button fx:id="makeBookingBut" layoutX="412.0" layoutY="188.0" mnemonicParsing="false" onAction="#addBooking" text="Create Booking" />
                         <Label fx:id="makeBookingMessage" layoutX="412.0" layoutY="286.0" textFill="RED" />
+                        <Button fx:id="customerLogoutTwo" layoutX="14.0" layoutY="382.0" mnemonicParsing="false" onAction="#logout" text="Log Out" />
                      </children>
                   </AnchorPane>
               </content>
@@ -47,6 +49,7 @@
               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="480.0" prefWidth="720.0">
                      <children>
                         <TextArea fx:id="custBookingsView" layoutX="179.0" layoutY="75.0" prefHeight="285.0" prefWidth="363.0" />
+                        <Button fx:id="customerLogoutOne" layoutX="14.0" layoutY="382.0" mnemonicParsing="false" onAction="#logout" text="Log Out" />
                      </children></AnchorPane>
             </content>
           </Tab>
