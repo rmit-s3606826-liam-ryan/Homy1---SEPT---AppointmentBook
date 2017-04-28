@@ -705,7 +705,7 @@ public class SystemDriver
      * Username does not allow special characters
      * Alphanumeric and punctuation
      **/
-    private boolean validateUsername(String username)
+    public boolean validateUsername(String username)
     {
         boolean validUsername = username.matches("[a-zA-Z0-9'., -]+");
         boolean taken = false;

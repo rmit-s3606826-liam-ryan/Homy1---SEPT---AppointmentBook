@@ -67,129 +67,99 @@ public class SystemTests
     @Test
     public void testThatUsernameValidationFunctionAcceptsValidInput()
     {
-        assertTrue(testRegVal.validateUserName("Jimbob"));
+        assertTrue(testSystem.validateUsername("Jimbob"));
     }
     
     @Test
     public void testThatUsernameValidationFunctionDoesNotAcceptIllegalCharacters()
     {
-        assertFalse(testRegVal.validateUserName("!@"));
+        assertFalse(testSystem.validateUsername("!@"));
     }
 
     @Test
     public void testThatPasswordValidationFunctionReturnsTrueWhenPasswordEqualsConfirmPassword()
     {
-        assertTrue(testRegVal.validatePassword("password", "password"));
+        assertTrue(testSystem.validatePassword("password", "password"));
     }
 
     @Test
     public void testThatPasswordValidationFunctionReturnsFalseWhenPasswordNotEqualToConfirmPassword()
     {
-        assertFalse(testRegVal.validatePassword("password", "notPassword"));
+        assertFalse(testSystem.validatePassword("password", "notPassword"));
     }
     
     @Test
     public void testThatEmailValidationFunctionReturnsTrueWhenInputFormatValid()
     {
-        assertTrue(testRegVal.validateEmail("dont.look@me.now"));
+        assertTrue(testSystem.validateEmail("dont.look@me.now"));
     }
 
     @Test
     public void testThatEmailValidationFunctionReturnsFalseWithNoATSymbol()
     {
-        assertFalse(testRegVal.validateEmail("dont.lookme.now"));
+        assertFalse(testSystem.validateEmail("dont.lookme.now"));
     }
 
     @Test
     public void testThatEmailValidationFunctionReturnsFalseWhenNothingBeforeATSymbol()
     {
-        assertFalse(testRegVal.validateEmail("@me.now"));
+        assertFalse(testSystem.validateEmail("@me.now"));
     }
 
     @Test
     public void testThatEmailValidationFunctionReturnsFalseWhenNothingAfterATSymbol()
     {
-        assertFalse(testRegVal.validateEmail("dont.look@"));
+        assertFalse(testSystem.validateEmail("dont.look@"));
     }
 
     @Test
     public void testThatEmailValidationFunctionReturnsFalseWhenNoPeriodAfterATSymbol()
     {
-        assertFalse(testRegVal.validateEmail("dont.look@me"));
+        assertFalse(testSystem.validateEmail("dont.look@me"));
     }
     
     @Test
     public void testThatEmailValidationFunctionReturnsFalseWithIllegalSymbol()
     {
-        assertFalse(testRegVal.validateEmail("dont.look√@me.now"));
+        assertFalse(testSystem.validateEmail("dont.look√@me.now"));
     }
 
     @Test
     public void testThatNameValidationFunctionReturnsTrueWithValidInput()
     {
-        assertTrue(testRegVal.validateName("Reginal'd John-Darcy"));
+        assertTrue(testSystem.validateName("Reginal'd John-Darcy"));
     }
 
     @Test
     public void testThatNameValidationFunctionReturnsFalseWithIllegalCharacter()
     {
-        assertFalse(testRegVal.validateName("Reginald *John-Darcy"));
+        assertFalse(testSystem.validateName("Reginald *John-Darcy"));
     }
 
     @Test
     public void testThatPhoneValidationFunctionReturnsTrueWithValidLengthOfTen()
     {
-        assertTrue(testRegVal.validatePhone("0400000001"));
+        assertTrue(testSystem.validatePhone("0400000001"));
     }
 
     @Test
     public void testThatPhoneValidationFunctionReturnsTrueWithValidLengthOf8()
     {
-        assertTrue(testRegVal.validatePhone("54333322"));
+        assertTrue(testSystem.validatePhone("54333322"));
     }
 
     @Test
     public void testThatPhoneValidationFunctionReturnsFalseWithInvalidLengthOfEleven()
     {
-        assertFalse(testRegVal.validatePhone("04000000011"));
+        assertFalse(testSystem.validatePhone("04000000011"));
     }
 
     @Test
     public void testThatPhoneValidationFunctionReturnsFalseWithInalidLengthOfSeven()
     {
-        assertFalse(testRegVal.validatePhone("0400000"));
+        assertFalse(testSystem.validatePhone("0400000"));
     }
     
-    // DoB is validated now upon entry using date parsing.
-    /* @Test
-    public void testThatDOBValidationFunctionReturnsTrueWithValidDate()
-    {
-        assertTrue(testRegVal.validateDOB(2, 12, 1978));
-    }
-    
-    @Test
-    public void testThatDOBValidationFunctionReturnsFalseWithInvalidDayVariable()
-    {
-        assertFalse(testRegVal.validateDOB(78, 12, 1978));
-    }
-    
-    @Test
-    public void testThatDOBValidationFunctionReturnsFalseWithInvalidMonthVariable()
-    {
-        assertFalse(testRegVal.validateDOB(2, 14, 1978));
-    }
-    
-    @Test
-    public void testThatDOBValidationFunctionReturnsFalseWithYearVariableToHigh()
-    {
-        assertFalse(testRegVal.validateDOB(2, 12, 2020));
-    }
-
-    @Test
-    public void testThatDOBValidationFunctionReturnsFalseWithYearVariableToLow()
-    {
-        assertFalse(testRegVal.validateDOB(2, 12, 1899));
-    } */
     
     @Test
     public void testDateParse_NumberOfDayDigits()
