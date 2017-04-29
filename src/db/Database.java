@@ -61,7 +61,7 @@ public class Database
     static final String HEADER_EMPLOYEES_ADDRESS = "ADDRESS";
     //
     // SERVICES Tables
-    static final String HEADER_SERVICES_ID = "SERVICES_ID";
+    static final String HEADER_SERVICES_ID = "SERVICE_ID";
     static final String HEADER_SERVICES_NAME = "NAME";
     static final String HEADER_SERVICES_DURATION = "DURATION";
     static final String HEADER_EMPSERVICES_EMPID = "EMPLOYEE_ID";
