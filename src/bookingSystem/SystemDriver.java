@@ -48,6 +48,8 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 
+import bookingSystem.NotSeptLogger;
+
 /**
  * System driver class - contains menus and functions used to run the system
  **/
@@ -115,7 +117,7 @@ public class SystemDriver
 
 
     private Scanner keyboard = new Scanner(System.in);
-    private static final Logger logger = Logger.getLogger("SystemDriver");
+    private static final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
     private static final DateTimeFormatter defaultDateFormat = DateTimeFormatter.ofPattern("dd/MM/uuuu");
     private static final DateTimeFormatter defaultTimeFormat = DateTimeFormatter.ofPattern("hh:mm a");
 
@@ -129,8 +131,18 @@ public class SystemDriver
      **/
     public void loadSystem()
     {
+		try
+		{
+			NotSeptLogger.setup();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+
     	Database.extractDbFile();
     	Database.loadFromDB();
+    	logger.info("database loaded into system");
     }
     public void setUp()
     {
@@ -143,10 +155,15 @@ public class SystemDriver
 		empSelect.setItems(oblist);
 		empSelect2.setItems(oblist);
 		empSelect3.setItems(oblist);
-		
+		empSelect.getSelectionModel().selectFirst();
+		empSelect2.getSelectionModel().selectFirst();
+		empSelect3.getSelectionModel().selectFirst();
 		
 		selectDay.getItems().clear();
 		selectDay.getItems().addAll("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday");
+    	
+		logger.info("Owner Menu: Employee/Day Comboboxes refilled");
+
     }
     
     public void custSetUp()
@@ -160,6 +177,7 @@ public class SystemDriver
 		availBookingsEmployee.setItems(oblist);
 		availBookingsDay.getItems().clear();
 		availBookingsDay.getItems().addAll("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday");
+    	logger.info("Customer Menu: Employee/Day Comboboxes refilled");
     }
     
     public void loadLoginScene(ActionEvent event) throws Exception
@@ -168,6 +186,8 @@ public class SystemDriver
 		Scene scene = new Scene(root, 720, 480);
 		Stage primaryStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
 		primaryStage.setScene(scene);
+    	logger.info("Changed to Login Scene");
+
     }
     
     public void loadRegisterScene(ActionEvent event) throws Exception
@@ -176,6 +196,7 @@ public class SystemDriver
 		Scene scene = new Scene(root, 720, 480);
 		Stage primaryStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
 		primaryStage.setScene(scene);
+    	logger.info("Changed to Register Scene");
     }
 
     /**
@@ -183,47 +204,6 @@ public class SystemDriver
      **/
     static Boolean running = true;
 
-    /**
-     * Simple Switch statement menu for registration and login
-     * @throws Exception 
-     */
-    public void registerAndLogin() throws Exception
-    {
-
-    	while (running)
-        {
-            try
-            {
-                System.out.println("======================\n" 
-                                 + "1. Log In\n" 
-                                 + "2. Register\n" + "3. Quit\n"
-                                 + "4. owner menu (testing)\n" 
-                                 + "5. customer menu (testing)\n"
-                                 + "6. show currently authenticated user (testing)\n" 
-                                 + "7. Logout\n"
-                                 + "8. Adam's test hut\n");
-
-                int answer = Integer.parseInt(keyboard.nextLine());
-
-                switch (answer)
-                {
-                case 3:  running = false;          break;
-                case 4:  ownerMenu();              break;
-                case 5:  customerMenu();           break;
-                case 6:  printCurrentUser();       break;
-                case 7:  logout();                 break;
-                case 8: adamTest();                break;
-                default: System.out.println("no"); break;
-                }
-            }
-
-            catch (NumberFormatException e)
-            {
-                System.out.println("Please Enter a valid number");
-            }
-        }
-    }
-    
     public void adamTest() // TODO marker to find code easily
     {
     	
@@ -244,90 +224,6 @@ public class SystemDriver
             System.out.println("NONE\n");
     }
 
-    /**
-     * Customer specific menu, user sent here when valid customer account used
-     **/
-    private void customerMenu()
-    {
-        while (running)
-        {
-            try
-            {
-                System.out.println("======================\n" 
-                                 + "1. View 'My' Bookings\n"
-                                 + "2. View Available Bookings\n" 
-                                 + "3. Make Booking\n" + "4. Log out\n" 
-                                 + "5. Quit\n"
-                                 + "6. register/login menu (testing)\n" 
-                                 + "7. owner menu (testing)\n"
-                                 + "8. print current user (testing)");
-
-                int answer = Integer.parseInt(keyboard.nextLine());
-
-                switch (answer)
-                {
-                case 1:  viewCustomerBooking();    break;
-                case 2:  viewAvailableBooking();   break;
-                case 3:  addBookingMenu();         break;
-                case 4:  logout();				   break;
-                case 5:  running = false;          break;
-                case 7:  ownerMenu();              break;
-                case 8:  printCurrentUser();       break;
-                default: System.out.println("no"); break;
-                }
-            }
-            catch (NumberFormatException e)
-            {
-                System.out.println("Please Enter a valid number");
-            }
-        }
-    }
-
-    /**
-     * Owner specific menu - only accessible with owner user name and password
-     */
-    private void ownerMenu()
-    {
-        while (running)
-        {
-            try
-            {
-                System.out.println("======================\n" 
-                                 + "1. View Bookings\n" 
-                                 + "2. View Employees\n"
-                                 + "3. Add Working Times\n"
-                                 + "4. View employee working times\n"
-                                 + "5. Add Employee\n"
-                                 + "6. View Employee Availability\n"
-                                 + "7. Add Employee Services\n"
-                                 + "8. View Services\n"
-                                 + "9. Remove Employee\n"
-                                 + "10. Quit\n" 
-                                 + "11. Log Out\n"
-                                 + "12. register/login menu (testing)\n" 
-                                 + "13. customer menu (testing)\n");
-
-                int answer = Integer.parseInt(keyboard.nextLine());
-
-                switch (answer)
-                {
-                case 1:  viewBookings();             break;
-                case 2:  viewEmployees();            break;
-                case 3:  addWorkingTimes();          break;
-                case 4:  addEmployee();              break;
-                case 5:  removeEmployee();           break;
-                case 7:  running = false;            break;
-                case 8:  logout();                   break;
-                case 10: customerMenu();             break;
-                default: System.out.println("no");   break;
-                }
-            }
-            catch (NumberFormatException e)
-            {
-                System.out.println("Please Enter a valid number");
-            }
-        }
-    }
     
     public void viewEmployeeAvailability()
     {
@@ -340,6 +236,7 @@ public class SystemDriver
         	if (empSelect.getValue().equals(value.getName()))
         	{
             	employee = Database.getEmployeeMap().get(key);
+            	logger.info("Viewing availability for " + empSelect.getValue());
         	}
         }
 
@@ -575,7 +472,9 @@ public class SystemDriver
             	continue;
             }
         	availBookingsView.appendText(timeslot.getDate() + " : " + timeslot.getTime() + "\n");
+        	
         }
+    	logger.info("Viewing bookings for " + availBookingsDay.getValue());
     }
 
     public void viewCustomerBooking()
@@ -597,6 +496,7 @@ public class SystemDriver
         				+ "\n==========================\n");	
         	}
         }
+        logger.info("Viewing bookings for " + authUser.getUsername());
     }
     public void removeEmployee()
     {
@@ -619,18 +519,23 @@ public class SystemDriver
 			
 			if (success)
 			{
+				logger.info("removed employee " + employee.getName());
 				Database.getEmployeeMap().remove(id);
 				empRemoveMessage.setText("Sucessfully removed \"" + employee.getName() + "\".");
 				setUp();
 			}
 			else
 			{
+				logger.warning("failed to remove employee " + employee.getName());
+
 				empRemoveMessage.setText("Error: Employee currently has bookings and cannot be deleted.");
 				throw new Exception("Error: Employee currently has bookings and cannot be deleted.");
 			}
 		}
 		catch (SQLException e)
 		{
+			logger.warning("SQL Exception caught");
+
 			System.out.println(e.getMessage());
 		}
 		catch (Exception e)
@@ -639,58 +544,9 @@ public class SystemDriver
 		}
     }
 
-    public void addEmployee() throws UserRequestsExitException
+    public void addEmployee()
     {
-    	int id = 0;
     	String name = null;
-    	String phone = null;
-    	String address = null;
-    	
-        boolean valid = false;
-        
-        Employee newEmployee = null;
-        
-        System.out.println("======================\n");
-        
-        // valid set to true after each field passes the validation
-        while (valid == false)
-        {
-        	name = promptAndGetString("Enter employee name: ");
-        	//valid = RegistrationValidation.validateName(name);
-        	valid = true;
-        }
-        
-        valid = false;
-        while (valid == false)
-        {
-        	phone = promptAndGetString("Enter phone number: ");
-        	valid = RegistrationValidation.validatePhone(phone);
-        }
-        
-        valid = false;
-        while (valid == false)
-        {
-        	address = promptAndGetString("Enter address: ");
-        	// Should we have validation for address? Gets complicated with possible unit numbers etc
-        	// containing symbols and various non-standard characters.
-        	//valid = RegistrationValidation.validateAddress(address);
-        	valid = true;
-        }
-        
-        try
-        {
-        	id = Database.addEmployeeToDB(name, phone, address);
-        	newEmployee = new Employee(id, name, phone, address);
-        	Database.getEmployeeMap().put(newEmployee.getID(), newEmployee);
-        	System.out.println("\"" + name + "\" has been added as a new employee.");
-        	customerMenu();
-        }
-        catch (SQLException e)
-        {
-        	//...
-        }
-          
-        /* TODO: Liam's code. Uncomment, just had to comment out to merge changes above.
     	Employee newEmployee = null;
         boolean valid = true;
         
@@ -705,7 +561,19 @@ public class SystemDriver
             }
         }
         if (valid)
-        */
+        {
+        	try
+        	{
+        		int id = Database.addEmployeeToDB(name);
+        		newEmployee = new Employee(id, name);
+        		Database.getEmployeeMap().put(newEmployee.getID(), newEmployee);
+        		addEmpMessage.setText("\"" + name + "\" has been added as a new employee.");
+        	}
+        	catch (SQLException e)
+        	{
+        		System.out.println(e.getMessage());
+        	}
+        }
     }
     
     private void viewEmployees()
@@ -1043,14 +911,9 @@ public class SystemDriver
 
     }
 
-    /**
-     * used to keep looping until enough employees/time slots have been added
-     **/
-    private boolean promptToContinue()
+    public void quit()
     {
-        System.out.println("Any more Inputs (y/n)?");
-        String response = keyboard.nextLine();
-        return response.equalsIgnoreCase("y") || response.equalsIgnoreCase("yes");
+        System.exit(0);
     }
 
     /**
