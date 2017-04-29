@@ -16,6 +16,7 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.util.HashMap;
 
+import bookingSystem.Service;
 import bookingSystem.SystemDriver;
 import bookings.Booking;
 import bookings.Timeslot;
@@ -37,6 +38,8 @@ public class Database
     //
     static final String TABLE_USERS = "USERS";
     static final String TABLE_EMPLOYEES = "EMPLOYEES";
+    static final String TABLE_SERVICES = "SERVICES";
+    static final String TABLE_EMPSERVICES = "EMPLOYEE_SERVICES";
     static final String TABLE_AVAILABILITY = "AVAILABILITY";
     static final String TABLE_TIMESLOTS = "TIMESLOTS";
     static final String TABLE_BOOKINGS = "BOOKINGS";
@@ -49,12 +52,20 @@ public class Database
     static final String HEADER_USERS_PASSWORD = "PASSWORD";
     static final String HEADER_USERS_EMAIL = "EMAIL";
     static final String HEADER_USERS_PHONE = "PHONE";
-    static final String HEADER_USERS_DOB = "DOB";
     static final String HEADER_USERS_NAME = "NAME";
     //
     // EMPLOYEES Table
     static final String HEADER_EMPLOYEES_ID = "EMPLOYEE_ID";
     static final String HEADER_EMPLOYEES_NAME = "NAME";
+    static final String HEADER_EMPLOYEES_PHONE = "PHONE";
+    static final String HEADER_EMPLOYEES_ADDRESS = "ADDRESS";
+    //
+    // SERVICES Tables
+    static final String HEADER_SERVICES_ID = "SERVICE_ID";
+    static final String HEADER_SERVICES_NAME = "NAME";
+    static final String HEADER_SERVICES_DURATION = "DURATION";
+    static final String HEADER_EMPSERVICES_EMPID = "EMPLOYEE_ID";
+    static final String HEADER_EMPSERVICES_SID = "SERVICE_ID";
     //
     // AVAILABILITY Table
     static final String HEADER_AVAILABILITY_ID = "ID";
@@ -74,8 +85,7 @@ public class Database
     static final String HEADER_BOOKINGS_CUSTOMER_ID = "CUSTOMER_ID";
     static final String HEADER_BOOKINGS_EMPLOYEE_ID = "EMPLOYEE_ID";
     static final String HEADER_BOOKINGS_TIMESLOT_ID = "TIMESLOT_ID";
-    static final String HEADER_BOOKINGS_SERVICE = "SERVICE";
-    static final String HEADER_BOOKINGS_DURATION = "DURATION";
+    static final String HEADER_BOOKINGS_SERVICE_ID = "SERVICE_ID";
     //
     // ***************************************************************
     
@@ -113,6 +123,7 @@ public class Database
     private static HashMap<Integer, Employee> employeeMap = new HashMap<Integer, Employee>();
     private static HashMap<Integer, Timeslot> timeslotMap = new HashMap<Integer, Timeslot>();
     private static HashMap<Integer, Booking> bookingMap = new HashMap<Integer, Booking>();
+    private static HashMap<Integer, Service> serviceMap = new HashMap<Integer, Service>();
     
     
     private static boolean runningFromJar()
@@ -220,8 +231,10 @@ public class Database
 	{
 		try
 		{
-			getUsers(); // MUST do users and employee tables first,
-			getEmployees(); // so timeslots and bookings have objects to link to.
+			getUsers(); // MUST do in this order, so that the required collections are populated
+			getServices(); // for adding object links to.
+			getEmployees();
+			getEmployeeServices();
 			getAvailability();
 			getTimeslots();
 			getBookings();
@@ -250,12 +263,45 @@ public class Database
 				String password = rs.getString(HEADER_USERS_PASSWORD);
 				String email = rs.getString(HEADER_USERS_EMAIL);
 				String phone = rs.getString(HEADER_USERS_PHONE);
-				String dobAsString = rs.getString(HEADER_USERS_DOB);
-				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("uuuu-MM-dd");
-				LocalDate dob = LocalDate.parse(dobAsString, formatter);
 				String name = rs.getString(HEADER_USERS_NAME);
-				User user = new User(id, username, password, email, name, phone, dob);
+				User user = new User(id, username, password, email, name, phone);
 				userMap.put(id, user);
+			}
+			stmt.close();
+			c.commit();
+		}
+		catch (SQLException e)
+	    {
+	        System.out.println(e.getMessage());
+	    }
+	    catch (Exception e)
+	    {
+	        e.printStackTrace();
+	    }
+	    finally
+	    {
+	        c.close();
+	    }
+	}
+	
+	static void getServices() throws SQLException
+	{
+		Connection c = getDBConnection();
+		Statement stmt = null;
+		String getServicesQuery = "select * from " + TABLE_SERVICES;
+		try
+		{
+			c.setAutoCommit(false);
+			stmt = c.createStatement();
+			ResultSet rs = stmt.executeQuery(getServicesQuery);
+			
+			while (rs.next())
+			{			
+				int id = rs.getInt(HEADER_SERVICES_ID);
+				String name = rs.getString(HEADER_SERVICES_NAME);
+				int duration = rs.getInt(HEADER_SERVICES_DURATION);
+				Service service = new Service(id, name, duration);
+				serviceMap.put(id, service);
 			}
 			stmt.close();
 			c.commit();
@@ -289,8 +335,47 @@ public class Database
 			{			
 				int id = rs.getInt(HEADER_EMPLOYEES_ID);
 				String name = rs.getString(HEADER_EMPLOYEES_NAME);
-				Employee employee = new Employee(id, name);
+				String phone = rs.getString(HEADER_EMPLOYEES_PHONE);
+				String address = rs.getString(HEADER_EMPLOYEES_ADDRESS);
+				Employee employee = new Employee(id, name, phone, address);
 				employeeMap.put(id,employee);
+			}
+			stmt.close();
+			c.commit();
+		}
+		catch (SQLException e)
+	    {
+	        System.out.println(e.getMessage());
+	    }
+	    catch (Exception e)
+	    {
+	        e.printStackTrace();
+	    }
+	    finally
+	    {
+	        c.close();
+	    }
+	}
+	
+	static void getEmployeeServices() throws SQLException
+	{
+		Connection c = getDBConnection();
+		Statement stmt = null;
+		
+		String getEmpServicesQuery = "select * from " + TABLE_EMPSERVICES;
+		try
+		{
+			c.setAutoCommit(false);
+			stmt = c.createStatement();
+			ResultSet rs = stmt.executeQuery(getEmpServicesQuery);
+			
+			while (rs.next())
+			{			
+				int serviceId = rs.getInt(HEADER_EMPSERVICES_SID);
+				int employeeId = rs.getInt(HEADER_EMPSERVICES_EMPID);
+				
+				Service service = serviceMap.get(serviceId);
+				employeeMap.get(employeeId).addService(service);
 			}
 			stmt.close();
 			c.commit();
@@ -323,7 +408,7 @@ public class Database
 			while (rs.next())
 			{
 				int id = rs.getInt(HEADER_AVAILABILITY_ID); // not needed?
-				int employee_id = rs.getInt(HEADER_AVAILABILITY_EMPLOYEE_ID);
+				int employee_id = rs.getInt(HEADER_AVAILABILITY_EMPLOYEE_ID); 
 				String dayOfWeek = rs.getString(HEADER_AVAILABILITY_DAY);
 				java.sql.Time sqlStartTime = rs.getTime(HEADER_AVAILABILITY_START);
 				LocalTime startTime = sqlStartTime.toLocalTime();
@@ -407,19 +492,19 @@ public class Database
 			while (rs.next())
 			{
 				int id = rs.getInt(HEADER_BOOKINGS_ID);
-				String service = rs.getString(HEADER_BOOKINGS_SERVICE);
-				int duration = rs.getInt(HEADER_BOOKINGS_DURATION);
 				
 				// Convert ID's to actual objects
-				int customer_id = rs.getInt(HEADER_BOOKINGS_CUSTOMER_ID);
-				int employee_id = rs.getInt(HEADER_BOOKINGS_EMPLOYEE_ID);
-				int timeslot_id = rs.getInt(HEADER_BOOKINGS_TIMESLOT_ID);
+				int customerId = rs.getInt(HEADER_BOOKINGS_CUSTOMER_ID);
+				int employeeId = rs.getInt(HEADER_BOOKINGS_EMPLOYEE_ID);
+				int timeslotId = rs.getInt(HEADER_BOOKINGS_TIMESLOT_ID);
+				int serviceId = rs.getInt(HEADER_BOOKINGS_SERVICE_ID);
 				
-				User customer = userMap.get(customer_id);
-				Employee employee = employeeMap.get(employee_id);
-				Timeslot timeslot = timeslotMap.get(timeslot_id);
+				User customer = userMap.get(customerId);
+				Employee employee = employeeMap.get(employeeId);
+				Timeslot timeslot = timeslotMap.get(timeslotId);
+				Service service = serviceMap.get(serviceId);
 				
-				Booking booking = new Booking(id, customer, employee, timeslot, service, duration);
+				Booking booking = new Booking(id, customer, employee, timeslot, service);
 				bookingMap.put(id, booking);
 			}
 			stmt.close();
@@ -439,7 +524,7 @@ public class Database
 	    }
 	}
 	
-	public static int addUserToDB(String username, String password, String email, String name, String phone, LocalDate dob) throws SQLException
+	public static int addUserToDB(String username, String password, String email, String name, String phone) throws SQLException
 	{
 		Connection c = getDBConnection();
 		PreparedStatement insertStmt = null;
@@ -451,9 +536,8 @@ public class Database
 								+ ", " + HEADER_USERS_PASSWORD
 								+ ", " + HEADER_USERS_EMAIL
 								+ ", " + HEADER_USERS_PHONE
-								+ ", " + HEADER_USERS_DOB
 								+ ", " + HEADER_USERS_NAME
-								+ ") values (?, ?, ?, ?, ?, ?)";
+								+ ") values (?, ?, ?, ?, ?)";
 		try
 		{
 			c.setAutoCommit(false);
@@ -463,9 +547,7 @@ public class Database
 			// fill in variables into sql statement
 			insertStmt.setString(1, username);
 			insertStmt.setString(2, password);
-			java.sql.Date date = java.sql.Date.valueOf(dob);
-			insertStmt.setDate(5, date);
-			insertStmt.setString(6, name);
+			insertStmt.setString(5, name);
 			
 			// take care of possible null entries
 			if (email != null)
@@ -516,7 +598,7 @@ public class Database
 		return id;
 	}
 	
-	public static int addEmployeeToDB(String name) throws SQLException
+	public static int addEmployeeToDB(String name, String phone, String address) throws SQLException
 	{
 		Connection c = getDBConnection();
 		PreparedStatement insertStmt = null;
@@ -525,7 +607,9 @@ public class Database
 		
 		String insertStatement = "INSERT INTO " + TABLE_EMPLOYEES + " ("
 									   + HEADER_EMPLOYEES_NAME
-									   + ") values (?)";
+									   + ", " + HEADER_EMPLOYEES_PHONE
+									   + ", " + HEADER_EMPLOYEES_ADDRESS
+									   + ") values (?, ?, ?)";
 		try
 		{
 			c.setAutoCommit(false);
@@ -534,6 +618,8 @@ public class Database
 			
 			// fill in variables into sql statement
 			insertStmt.setString(1, name);
+			insertStmt.setString(2, phone);
+			insertStmt.setString(3, address);
 			insertStmt.executeUpdate();
 			insertStmt.close();
             
@@ -544,7 +630,7 @@ public class Database
 			
 			ResultSet rs = selectStmt.executeQuery();
 			rs.next();	// increment resultset to first result.
-						// should be only one result as userID is a primary key.
+						// should be only one result.
 			id = rs.getInt(HEADER_EMPLOYEES_ID);
 			
 			selectStmt.close();
@@ -631,7 +717,7 @@ public class Database
 			
 			ResultSet rs = selectStmt.executeQuery();
 			rs.next();	// increment resultset to first result.
-						// should be only one result as userID is a primary key.
+						// should be only one result.
 			id = rs.getInt(HEADER_TIMESLOTS_ID);
 			
 			selectStmt.close();
@@ -651,22 +737,20 @@ public class Database
 		}
 		return id;
 	}
-	// TODO Not yet implemented. Copied from addUserToDB. NOT FUNCTIONAL
-	static int addBookingToDB(String username, String password, String email, String name, String phone, LocalDate dob) throws SQLException
+	
+	public static int addBookingToDB(int employeeId, int customerId, int timeslotId, int serviceId) throws SQLException
 	{
 		Connection c = getDBConnection();
 		PreparedStatement insertStmt = null;
 		PreparedStatement selectStmt = null;
 		int id = 0;
 		
-		String insertStatement = "INSERT INTO " + TABLE_USERS + " ("
-									   + HEADER_USERS_USERNAME
-								+ ", " + HEADER_USERS_PASSWORD
-								+ ", " + HEADER_USERS_EMAIL
-								+ ", " + HEADER_USERS_PHONE
-								+ ", " + HEADER_USERS_DOB
-								+ ", " + HEADER_USERS_NAME
-								+ ") values (?, ?, ?, ?, ?, ?)";
+		String insertStatement = "INSERT INTO " + TABLE_BOOKINGS + " ("
+									   + HEADER_BOOKINGS_EMPLOYEE_ID
+								+ ", " + HEADER_BOOKINGS_CUSTOMER_ID
+								+ ", " + HEADER_BOOKINGS_TIMESLOT_ID
+								+ ", " + HEADER_BOOKINGS_SERVICE_ID
+								+ ") values (?, ?, ?, ?)";
 		try
 		{
 			c.setAutoCommit(false);
@@ -674,42 +758,87 @@ public class Database
 			insertStmt = c.prepareStatement(insertStatement);
 			
 			// fill in variables into sql statement
-			insertStmt.setString(1, username);
-			insertStmt.setString(2, password);
-			java.sql.Date date = java.sql.Date.valueOf(dob);
-			insertStmt.setDate(5, date);
-			insertStmt.setString(6, name);
-			
-			// take care of possible null entries
-			if (email != null)
-			{
-				insertStmt.setString(3, email);
-			}
-			else
-			{
-				insertStmt.setNull(3, Types.VARCHAR);
-			}
-			if (phone != null)
-			{
-				insertStmt.setString(4, phone);
-			}
-			else
-			{
-				insertStmt.setNull(4, Types.VARCHAR);
-			}
+			insertStmt.setInt(1, employeeId);
+			insertStmt.setInt(2, customerId);
+			insertStmt.setInt(3, timeslotId);
+			insertStmt.setInt(4, serviceId);
 			
 			insertStmt.executeUpdate();
 			insertStmt.close();
-            
-			selectStmt = c.prepareStatement("SELECT " + HEADER_USERS_ID
-											+ " FROM " + TABLE_USERS
-											+ " WHERE " + HEADER_USERS_USERNAME
-											+ "='" + username + "';");
+            // Select the entry we just entered and get the generated id.
+			// Only (employee id + timeslot id) are required in order to return a unique entry -
+			// The other columns are just for additional information
+			selectStmt = c.prepareStatement("SELECT " + HEADER_BOOKINGS_ID
+											+ " FROM " + TABLE_BOOKINGS
+											+ " WHERE " + HEADER_BOOKINGS_EMPLOYEE_ID
+											+ "=" + employeeId + " AND "
+											+ HEADER_BOOKINGS_TIMESLOT_ID + "=" + timeslotId + ";");
 			
 			ResultSet rs = selectStmt.executeQuery();
 			rs.next();	// increment resultset to first result.
-						// should be only one result as userID is a primary key.
-			id = rs.getInt(HEADER_USERS_ID);
+						// should be only one result.
+			id = rs.getInt(HEADER_BOOKINGS_ID);
+			
+			selectStmt.close();
+			c.commit();
+		}
+		catch (SQLException e)
+		{
+			System.out.println("Exception Message " + e.getLocalizedMessage());
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		finally
+		{
+			c.close();
+		}
+		return id;
+	}
+	
+	public static int addWorkingTimesToDB(int employeeId, String dayOfWeek, LocalTime start, LocalTime finish) throws SQLException
+	{
+		Connection c = getDBConnection();
+		PreparedStatement insertStmt = null;
+		PreparedStatement selectStmt = null;
+		int id = 0;	
+		
+		String insertStatement = "INSERT INTO " + TABLE_AVAILABILITY + " ("
+									   + HEADER_AVAILABILITY_EMPLOYEE_ID
+								+ ", " + HEADER_AVAILABILITY_DAY
+								+ ", " + HEADER_AVAILABILITY_START
+								+ ", " + HEADER_AVAILABILITY_FINISH
+								+ ") values (?, ?, ?, ?)";
+		try
+		{
+			c.setAutoCommit(false);
+			
+			insertStmt = c.prepareStatement(insertStatement);
+			
+			// fill in variables into sql statement
+			insertStmt.setInt(1, employeeId);
+			insertStmt.setString(2, dayOfWeek);
+			java.sql.Time dbStart = java.sql.Time.valueOf(start);
+			insertStmt.setTime(3, dbStart);
+			java.sql.Time dbFinish = java.sql.Time.valueOf(finish);
+			insertStmt.setTime(4, dbFinish);
+			
+			insertStmt.executeUpdate();
+			insertStmt.close();
+            // Select the entry we just entered and get the generated id.
+			// Only (employee id + timeslot id) are required in order to return a unique entry -
+			// The other columns are just for additional information
+			selectStmt = c.prepareStatement("SELECT " + HEADER_AVAILABILITY_ID
+											+ " FROM " + TABLE_AVAILABILITY
+											+ " WHERE " + HEADER_AVAILABILITY_EMPLOYEE_ID
+											+ "=" + employeeId + " AND "
+											+ HEADER_AVAILABILITY_DAY + "=" + dayOfWeek + ";");
+			
+			ResultSet rs = selectStmt.executeQuery();
+			rs.next();	// increment resultset to first result.
+						// should be only one result.
+			id = rs.getInt(HEADER_AVAILABILITY_ID);
 			
 			selectStmt.close();
 			c.commit();
@@ -747,5 +876,10 @@ public class Database
 	public static HashMap<Integer, Booking> getBookingMap()
 	{
 		return bookingMap;
+	}
+	
+	public static HashMap<Integer, Service> getServiceMap()
+	{
+		return serviceMap;
 	}
 }

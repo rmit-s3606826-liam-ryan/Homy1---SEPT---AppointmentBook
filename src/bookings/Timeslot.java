@@ -1,11 +1,7 @@
 package bookings;
 
-//import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
-//import java.util.Calendar;
-
-//import java.util.GregorianCalendar;
 
 public class Timeslot
 {
@@ -17,7 +13,7 @@ public class Timeslot
 	private LocalDate date = null;
 	private LocalTime time = null;
 	
-	public Timeslot( LocalDate date, LocalTime time, boolean booked)
+	public Timeslot (LocalDate date, LocalTime time, boolean booked)
 	{
 		this.date = date;
 		this.time = time;

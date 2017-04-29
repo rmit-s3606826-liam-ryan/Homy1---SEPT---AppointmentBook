@@ -1,6 +1,8 @@
 package bookingSystem;
 
-import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -35,34 +37,53 @@ public class RegistrationValidation
         return validUsername;
     }
 
-
-
-
-
     /**
-     * Validation of day may allow some invalid dates through currently
-     * and anyone over the age of 118 is in trouble.
+     * Currently only requires using between 8 and 10 characters 
      **/
-    /* not needed any more
-    static boolean validateDOB(LocalDate date)
+    static boolean validatePhone(String phoneNumber)
     {
-        boolean validDate = false;
-        date
-        if(day < 32 && day > 0)
+        boolean validNumber = phoneNumber.matches("[0-9]{8,10}+");
+        if (!validNumber)
         {
-            if (month < 13 && month > 0)
-            {
-                if (year < 2018 && year > 1900)
-                {
-                    validDate = true;
-                }
-            }
+            System.out.println("Please enter a valid phone number.");
         }
-        if (!validDate)
-        {
-            System.out.println("Please enter a valid date");
-        }
-        return validDate;
+        return validNumber;
     }
-    */
+    
+    // Check that day of the week matches any of the 7 days,
+    // or 5 if company doesn't work weekends (uncomment line below)
+    static boolean validateDayOfWeek(String dayOfWeek)
+    {
+    	String[] days = {"monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"};
+    	// String[] days = {"monday", "tuesday", "wednesday", "thursday", "friday"};
+        boolean validDay = Arrays.asList(days).contains(dayOfWeek.toLowerCase());
+        if (!validDay)
+        {
+            System.out.println("Please enter a valid day.");
+        }
+        return validDay;
+    }
+    
+    static LocalTime validateTime(String timeString)
+    {
+    	boolean validTime = false;
+    	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+    	LocalTime time = null;
+    	
+    	try
+    	{
+    		time = LocalTime.parse(timeString, formatter);
+    		validTime = true;
+    	}
+    	catch (Exception e)
+    	{
+    		// Do nothing, leave validTime = false.
+    	}
+    	
+        if (!validTime)
+        {
+            System.out.println("Please enter a valid time.");
+        }
+        return time;
+    }
 }
