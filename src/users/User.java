@@ -10,9 +10,8 @@ public class User
     private String email;
     private String fullName;
     private String phoneNumber;
-    private LocalDate dob;
     
-    public User(int id, String username, String password, String email, String fullName, String phoneNumber, LocalDate dob)
+    public User(int id, String username, String password, String email, String fullName, String phoneNumber)
     {
     	this.id = id;
         this.username = username;
@@ -20,7 +19,6 @@ public class User
         this.email = email;
         this.fullName = fullName;
         this.phoneNumber = phoneNumber;
-        this.dob = dob;
     }
     
     public int getID()
@@ -51,10 +49,5 @@ public class User
     public String getPhoneNumber()
     {
     	return phoneNumber;
-    }
-    
-    public LocalDate getDOB()
-    {
-    	return dob;
     }
 }

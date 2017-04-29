@@ -14,8 +14,6 @@ import java.util.logging.*;
 import users.Employee;
 import users.User;
 
-//import com.sun.org.apache.xerces.internal.impl.xpath.regex.ParseException;
-
 import bookings.Booking;
 import bookings.Timeslot;
 import db.Database;
@@ -298,13 +296,16 @@ public class SystemDriver
                                  + "1. View Bookings\n" 
                                  + "2. View Employees\n"
                                  + "3. Add Working Times\n"
-                                 + "4. Add Employee\n" 
-                                 + "5. Remove Employee\n"
-                                 + "6. View employee working times\n"
-                                 + "7. Quit\n" 
-                                 + "8. Log Out\n"
-                                 + "9. register/login menu (testing)\n" 
-                                 + "10. customer menu (testing)\n");
+                                 + "4. View employee working times\n"
+                                 + "5. Add Employee\n"
+                                 + "6. View Employee Availability\n"
+                                 + "7. Add Employee Services\n"
+                                 + "8. View Services\n"
+                                 + "9. Remove Employee\n"
+                                 + "10. Quit\n" 
+                                 + "11. Log Out\n"
+                                 + "12. register/login menu (testing)\n" 
+                                 + "13. customer menu (testing)\n");
 
                 int answer = Integer.parseInt(keyboard.nextLine());
 
@@ -354,12 +355,75 @@ public class SystemDriver
 
     /**
      * Add workers working times - days and hours they work
+     * @throws UserRequestsExitException 
+     * @throws NumberFormatException 
      */
-    public void addWorkingTimes()
+    private void addWorkingTimes() throws NumberFormatException, UserRequestsExitException
     {
-        // TODO Auto-generated method stub
-    	// for whoever codes this, see Employee.java for an addAvailability method
+    	int id = 0;
+    	int employeeId = 0;
+    	String dayOfWeek_lowercase = null;
+    	String startString = null; // format HH:mm
+    	String finishString = null; // format HH:mm
+    	LocalTime start = null;
+    	LocalTime finish = null;
+    	
+    	boolean valid = false;
         
+        System.out.println("======================\n");
+        
+        // valid set to true after each field passes the validation
+        while (valid == false)
+        {
+        	employeeId = Integer.parseInt(promptAndGetString("Enter employee id: "));
+        	//valid = RegistrationValidation.validateName(name);
+        	valid = true;
+        }
+        
+        valid = false;
+        while (valid == false)
+        {
+        	String dayOfWeek = promptAndGetString("Enter day of the week: ");
+        	dayOfWeek_lowercase = dayOfWeek.toLowerCase();
+        	valid = RegistrationValidation.validateDayOfWeek(dayOfWeek);
+        }
+        
+        valid = false;
+        while (valid == false)
+        {
+        	startString = promptAndGetString("Enter start time (in format HH:MM): ");
+        	start = RegistrationValidation.validateTime(startString);
+        	if (start != null)
+        	{
+        		valid = true;
+        	}
+        }
+        
+        valid = false;
+        while (valid == false)
+        {
+        	finishString = promptAndGetString("Enter finish time (in format HH:MM): ");
+        	finish = RegistrationValidation.validateTime(finishString);
+        	if (finish != null)
+        	{
+        		valid = true;
+        	}
+        }
+        
+        try
+        {        	
+        	// Add entry to DB, return ID, add to local collection
+        	id = Database.addWorkingTimesToDB(employeeId, dayOfWeek_lowercase, start, finish); //TODO: Need to validate to check for current working times overlapping, already in system.
+        	
+        	Employee employee = Database.getEmployeeMap().get(employeeId);
+        	employee.addAvailability(dayOfWeek_lowercase, start, finish);
+        	System.out.println(dayOfWeek_lowercase + ", " + start + "-" + finish + " has been added to " + employee.getName() + "'s availability.");
+        	customerMenu();
+        }
+        catch (SQLException e)
+        {
+        	System.out.println(e.getMessage());
+        }
     }
 
     /**
@@ -409,26 +473,85 @@ public class SystemDriver
     	    Boolean booked = timeslot.getStatus();
     	    System.out.println(date.format(defaultDateFormat) + ", " + time.format(defaultTimeFormat) + " - " + "booked = " + booked);
     	}
-    }
+    } 
     
-    public void addBooking()
-    {/* //TODO: all "add" functions require callbacks from DB as they need to add a new entry, auto-generate an ID, then read this back to java
-    	// so that we can enter it into the HashMap as the key. A bit fiddly, but manually generating ID is lazy and crappy. I will add this code shortly -Adam
-        for (int x = 0; x < Database.timeslotMap.size(); x++)
+    private void addBooking() throws NumberFormatException, UserRequestsExitException
+    //TODO: VALIDATION NOT DONE. Waiting until this is implemented in gui as many of the fields will be
+    // doable with a dropdown box I think, so we won't need to validate manual user input
+    
+    // also currently uses numerical IDs for all fields which is not user friendly. But you can pull
+    // details from the ID using, for example:  Database.getTimeslotMap().get(timeslotId).getTime(),
+    // .getDate(), .getStatus() and so on.
+    {
+    	int bookingId = 0;
+    	int employeeId = 0;
+    	int customerId = 0;
+    	int timeslotId = 0;
+    	int serviceId = 0;
+    	
+    	boolean valid = false;
+        
+        Booking newBooking = null;
+        
+        System.out.println("======================\n");
+        
+        // valid set to true after each field passes the validation
+        while (valid == false)
         {
-            if (Database.timeslotMap.get(x).getDate().compareTo(calendar) == 0)
-            {
-                new Booking(customer_id, employee_id, timeslot_id, service, duration);
-            }
-            else
-            {
-                System.out.println("Sorry, no timeslot available for your chosen time");
-            }
+        	employeeId = Integer.parseInt(promptAndGetString("Enter employee id: "));
+        	//valid = RegistrationValidation.validateName(name);
+        	valid = true;
+        }
+        
+        valid = false;
+        while (valid == false)
+        {
+        	customerId = Integer.parseInt(promptAndGetString("Enter customer id: "));
+        	//valid = RegistrationValidation.validatePhone(phone);
+        	valid = true;
+        }
+        
+        valid = false;
+        while (valid == false)
+        {
+        	timeslotId = Integer.parseInt(promptAndGetString("Enter timeslot id: "));
+        	//valid = RegistrationValidation.validatePhone(phone);
+        	valid = true;
+        }
+        
+        valid = false;
+        while (valid == false)
+        {
+        	serviceId = Integer.parseInt(promptAndGetString("Enter service id: "));
+        	//valid = RegistrationValidation.validatePhone(phone);
+        	valid = true;
+        }
+        
+        try
+        {
+        	// Get objects according to IDs
+        	User c = Database.getUserMap().get(customerId);
+        	Employee e = Database.getEmployeeMap().get(employeeId);
+        	Timeslot t = Database.getTimeslotMap().get(timeslotId);
+        	Service s = Database.getServiceMap().get(serviceId);
+        	
+        	// Add entry to DB, return booking ID, add to local collection
+        	bookingId = Database.addBookingToDB(employeeId, customerId, timeslotId, serviceId);
+        	newBooking = new Booking(bookingId, c, e, t, s);
+        	
+        	Database.getBookingMap().put(newBooking.getID(), newBooking);
+        	// TODO: Have not written confirmation output as this will probably done in GUI. Can show the time and day booked, and with which employee, etc.
+        	//System.out.println("\"" + name + "\" has been added as a new employee.");
+        	customerMenu();
+        }
+        catch (SQLException e)
+        {
+        	System.out.println(e.getMessage());
         }
     }
 
     private void addTimeSlots(int year, int month, int day, int startHour, int endHour)
-    {
+    {/*
         for (int start = startHour; start < endHour; start++)
         {
             Database.timeslotMap.add(new Timeslot(year, month, day, start));
@@ -518,7 +641,52 @@ public class SystemDriver
 
     public void addEmployee()
     {
+    	int id = 0;
     	String name = null;
+    	String phone = null;
+    	String address = null;
+    	
+        boolean valid = false;
+        
+        Employee newEmployee = null;
+        
+        System.out.println("======================\n");
+        
+        // valid set to true after each field passes the validation
+        while (valid == false)
+        {
+        	name = promptAndGetString("Enter employee name: ");
+        	valid = RegistrationValidation.validateName(name);
+        }
+        
+        valid = false;
+        while (valid == false)
+        {
+        	phone = promptAndGetString("Enter phone number: ");
+        	valid = RegistrationValidation.validatePhone(phone);
+        }
+        
+        valid = false;
+        while (valid == false)
+        {
+        	address = promptAndGetString("Enter address: ");
+        	// Should we have validation for address? Gets complicated with possible unit numbers etc
+        	// containing symbols and various non-standard characters.
+        	//valid = RegistrationValidation.validateAddress(address);
+        	valid = true;
+        }
+        
+        try
+        {
+        	id = Database.addEmployeeToDB(name, phone, address);
+        	newEmployee = new Employee(id, name, phone, address);
+        	Database.getEmployeeMap().put(newEmployee.getID(), newEmployee);
+        	System.out.println("\"" + name + "\" has been added as a new employee.");
+        	customerMenu();
+        }
+        catch (SQLException e)
+          
+          /* Liam's code. Uncomment, just had to comment out to merge changes above.
     	Employee newEmployee = null;
         boolean valid = true;
         
@@ -533,7 +701,7 @@ public class SystemDriver
             }
         }
         if (valid)
-        {
+        { */
         	try
         	{
         		int id = Database.addEmployeeToDB(name);
@@ -547,7 +715,7 @@ public class SystemDriver
         	}
         }
     }
-
+    
     private void viewEmployees()
     {
         System.out.println("1. View all employees\n" + "2. Search an employee\n");

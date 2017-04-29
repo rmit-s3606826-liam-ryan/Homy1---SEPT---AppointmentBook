@@ -1,5 +1,6 @@
 package bookings;
 
+import bookingSystem.Service;
 import users.Employee;
 import users.User;
 
@@ -8,18 +9,28 @@ public class Booking {
 	private User customer = null;
 	private Employee employee = null;
 	private Timeslot timeslot = null;
-	private String service = null;
-	private int duration = 0;
+	private Service service = null;
 	boolean confirmed = false;
 	
-	public Booking (int id, User c, Employee e, Timeslot t, String service, int duration)
+	/*public Booking (User c, Employee e, Timeslot t)
+	{
+		customer = c;
+		employee = e;
+		timeslot = t;
+	}*/
+	
+	public Booking (int id, User c, Employee e, Timeslot t, Service s)
 	{
 		this.id = id;
 		customer = c;
 		employee = e;
 		timeslot = t;
-		this.service = service;
-		this.duration = duration;
+		service = s;
+	}
+	
+	public int getID()
+	{
+		return id;
 	}
 	
 	public User getCustomer()
@@ -37,15 +48,9 @@ public class Booking {
 		return timeslot;
 	}
 	
-	public String getService()
+	public Service getService()
 	{
 		return service;
-	}
-	
-	public int getDuration()	// Return duration of appointment, in minutes.
-	{							// Should be multiples of 30 (half-hour intervals)
-		return duration;		// Not set in stone, can do different intervals or
-								//different system completely
 	}
 	
 	void confirm()
