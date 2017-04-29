@@ -639,7 +639,7 @@ public class SystemDriver
 		}
     }
 
-    public void addEmployee()
+    public void addEmployee() throws UserRequestsExitException
     {
     	int id = 0;
     	String name = null;
@@ -656,7 +656,8 @@ public class SystemDriver
         while (valid == false)
         {
         	name = promptAndGetString("Enter employee name: ");
-        	valid = RegistrationValidation.validateName(name);
+        	//valid = RegistrationValidation.validateName(name);
+        	valid = true;
         }
         
         valid = false;
@@ -685,8 +686,11 @@ public class SystemDriver
         	customerMenu();
         }
         catch (SQLException e)
+        {
+        	//...
+        }
           
-          /* Liam's code. Uncomment, just had to comment out to merge changes above.
+        /* TODO: Liam's code. Uncomment, just had to comment out to merge changes above.
     	Employee newEmployee = null;
         boolean valid = true;
         
@@ -701,19 +705,7 @@ public class SystemDriver
             }
         }
         if (valid)
-        { */
-        	try
-        	{
-        		int id = Database.addEmployeeToDB(name);
-        		newEmployee = new Employee(id, name);
-        		Database.getEmployeeMap().put(newEmployee.getID(), newEmployee);
-        		addEmpMessage.setText("\"" + name + "\" has been added as a new employee.");
-        	}
-        	catch (SQLException e)
-        	{
-        		System.out.println(e.getMessage());
-        	}
-        }
+        */
     }
     
     private void viewEmployees()
