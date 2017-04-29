@@ -6,6 +6,7 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.InputMismatchException;
+import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.StringTokenizer;
 import java.util.logging.*;
@@ -16,6 +17,26 @@ import users.User;
 import bookings.Booking;
 import bookings.Timeslot;
 import db.Database;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.Labeled;
+import javafx.scene.control.RadioButton;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+import javafx.scene.paint.Color;
+import javafx.stage.Stage;
+import javafx.stage.Window;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -25,12 +46,74 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 
 /**
  * System driver class - contains menus and functions used to run the system
  **/
 public class SystemDriver
 {
+	// main scene
+	@FXML private Button mainLogin;
+	@FXML private Button mainRegister;
+	
+	//register scene
+	@FXML private TextField txtUsername;
+	@FXML private Label invUsername;
+	@FXML private TextField txtPassword;
+	@FXML private TextField txtConfirmPassword;
+	@FXML private Label invPassword;
+	@FXML private TextField txtEmail;
+	@FXML private Label invEmail;
+	@FXML private TextField txtPhone;
+	@FXML private Label invPhone;
+	@FXML private TextField txtName;
+	@FXML private Label invName;
+	@FXML private Label registerMessage;
+	
+	// owner menu scene
+	@FXML private RadioButton radioNextWeek;
+	@FXML private RadioButton radioLastWeek;
+	@FXML private TextArea bookingsView;
+	@FXML private TextArea empAvailView;
+	@FXML private ComboBox<String> empSelect;
+	@FXML private ComboBox<String> empSelect2;
+	@FXML private ComboBox<String> empSelect3;
+	@FXML private ComboBox<String> selectDay;
+	@FXML private TextField txtAddEmp;
+	@FXML private Label addEmpMessage;
+	@FXML private Button empRemoveBut;
+	@FXML private Label empRemoveMessage;
+	@FXML private Label workTimeMessage;
+	@FXML private Button addTimeBut;
+	@FXML private TextField txtWorkStart;
+	@FXML private TextField txtWorkEnd;
+	
+	// customer menu scene
+	@FXML private ComboBox<String> makeBookingService;
+	@FXML private ComboBox<String> makeBookingEmployee;
+    @FXML private ComboBox<String> makeBookingDay;
+    @FXML private ComboBox<String> makeBookingTime;
+    @FXML private Button makeBookingBut;
+    @FXML private Label makeBookingMessage;
+	@FXML private ComboBox<String> availBookingsEmployee;
+    @FXML private ComboBox<String> availBookingsDay;
+    @FXML private ComboBox<String> availBookingsService;
+	@FXML private TextArea availBookingsView;
+    @FXML private Button getTimesBut;
+	@FXML private TextArea custBookingsView;
+	
+	// login scene
+	@FXML private TextField txtLoginUsername;
+	@FXML private TextField txtLoginPassword;
+	@FXML private Label invLoginName;
+	@FXML private Label invLoginPass;
+	@FXML private Button loginButton;
+	
+	
+	
+
+
     private Scanner keyboard = new Scanner(System.in);
     private static final Logger logger = Logger.getLogger("SystemDriver");
     private static final DateTimeFormatter defaultDateFormat = DateTimeFormatter.ofPattern("dd/MM/uuuu");
@@ -48,10 +131,52 @@ public class SystemDriver
     {
     	Database.extractDbFile();
     	Database.loadFromDB();
-
-        registerAndLogin();
     }
+    public void setUp()
+    {
+		ObservableList<String> oblist = FXCollections.observableArrayList();
+    	for (Employee employee : Database.getEmployeeMap().values())
+    	{
+    		oblist.add(employee.getName());
+    	}
 
+		empSelect.setItems(oblist);
+		empSelect2.setItems(oblist);
+		empSelect3.setItems(oblist);
+		
+		
+		selectDay.getItems().clear();
+		selectDay.getItems().addAll("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday");
+    }
+    
+    public void custSetUp()
+    {
+		ObservableList<String> oblist = FXCollections.observableArrayList();
+    	for (Employee employee : Database.getEmployeeMap().values())
+    	{
+    		oblist.add(employee.getName());
+    	}
+
+		availBookingsEmployee.setItems(oblist);
+		availBookingsDay.getItems().clear();
+		availBookingsDay.getItems().addAll("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday");
+    }
+    
+    public void loadLoginScene(ActionEvent event) throws Exception
+    {
+		Parent root = FXMLLoader.load(getClass().getResource("/bookingSystem/Login.fxml"));
+		Scene scene = new Scene(root, 720, 480);
+		Stage primaryStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+		primaryStage.setScene(scene);
+    }
+    
+    public void loadRegisterScene(ActionEvent event) throws Exception
+    {
+		Parent root = FXMLLoader.load(getClass().getResource("/bookingSystem/Registration.fxml"));
+		Scene scene = new Scene(root, 720, 480);
+		Stage primaryStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+		primaryStage.setScene(scene);
+    }
 
     /**
      * boolean running keeps menus looping until quit is selected
@@ -60,10 +185,12 @@ public class SystemDriver
 
     /**
      * Simple Switch statement menu for registration and login
+     * @throws Exception 
      */
-    public void registerAndLogin()
+    public void registerAndLogin() throws Exception
     {
-        while (running)
+
+    	while (running)
         {
             try
             {
@@ -80,8 +207,6 @@ public class SystemDriver
 
                 switch (answer)
                 {
-                case 1:  login();                  break;
-                case 2:  register();               break;
                 case 3:  running = false;          break;
                 case 4:  ownerMenu();              break;
                 case 5:  customerMenu();           break;
@@ -95,10 +220,6 @@ public class SystemDriver
             catch (NumberFormatException e)
             {
                 System.out.println("Please Enter a valid number");
-            }
-            catch (UserRequestsExitException e)
-            {
-                System.out.println("User requested exit. Returning to menu...");
             }
         }
     }
@@ -148,10 +269,8 @@ public class SystemDriver
                 case 1:  viewCustomerBooking();    break;
                 case 2:  viewAvailableBooking();   break;
                 case 3:  addBookingMenu();         break;
-                case 4:  logout();
-                         registerAndLogin();       break;
+                case 4:  logout();				   break;
                 case 5:  running = false;          break;
-                case 6:  registerAndLogin();       break;
                 case 7:  ownerMenu();              break;
                 case 8:  printCurrentUser();       break;
                 default: System.out.println("no"); break;
@@ -195,25 +314,14 @@ public class SystemDriver
                 case 1:  viewBookings();             break;
                 case 2:  viewEmployees();            break;
                 case 3:  addWorkingTimes();          break;
-                case 4:  viewWorkingTimes();         break;
-                case 5:  addEmployee();              break;
-                case 6:  viewEmployeeAvailability(); break;
-                case 7:  addServices();              break;
-                case 8:  viewServices();             break;
-                case 9:  removeEmployee();           break;
-                case 10:  running = false;           break;
-                case 11:  logout();
-                         registerAndLogin();         break;
-                case 12:  registerAndLogin();        break;
-                case 13: customerMenu();             break;
+                case 4:  addEmployee();              break;
+                case 5:  removeEmployee();           break;
+                case 7:  running = false;            break;
+                case 8:  logout();                   break;
+                case 10: customerMenu();             break;
                 default: System.out.println("no");   break;
                 }
             }
-            catch (UserRequestsExitException e)
-            {
-                System.out.println("User requested exit. Returning to menu...");
-            }
-            
             catch (NumberFormatException e)
             {
                 System.out.println("Please Enter a valid number");
@@ -221,24 +329,27 @@ public class SystemDriver
         }
     }
     
-    private void viewEmployeeAvailability()
+    public void viewEmployeeAvailability()
     {
-    	System.out.println("======================\n"
-    						+ "Employee Availability\n"
-    						+ "======================\n"
-    						+ "Enter employee ID:\n");
-    	
-    	int input = keyboard.nextInt();
-    	keyboard.nextLine();
-    	Employee employee = Database.getEmployeeMap().get(input);
+    	empAvailView.setText("");
+    	Employee employee = null;
+        for (Entry<Integer, Employee> entry : Database.getEmployeeMap().entrySet())
+        {
+        	Integer key = entry.getKey();
+        	Employee value = entry.getValue();
+        	if (empSelect.getValue().equals(value.getName()))
+        	{
+            	employee = Database.getEmployeeMap().get(key);
+        	}
+        }
+
+        
     	HashMap<String, LocalTime[]> availability = employee.getAvailability();
-    	System.out.println(employee.getName() + " is available for the following times:\n");
-    	
     	for (HashMap.Entry<String, LocalTime[]> entry : availability.entrySet())
     	{
     	    String dayOfWeek = entry.getKey();
     	    LocalTime[] times = entry.getValue();
-    	    System.out.println(dayOfWeek + ": " + times[0] + " - " + times[1]);
+    	    empAvailView.appendText(dayOfWeek + ": " + times[0].toString() + " - " + times[1].toString() + "\n");
     	}
     }
 
@@ -448,113 +559,87 @@ public class SystemDriver
     }
 
     // TODO mock up function - not yet implemented
-    private void viewAvailableBooking()
-    {/*
-        System.out.println("=================================================\n" 
-                         + "Available Bookings:\n"
-                         + "=================================================\n");
-        for (int index = 0; index < Database.timeslotMap.size(); ++index)
-        {
-            if (Database.timeslotMap.get(index).returnStatus() == false)
-            {
-                System.out.println(Database.timeslotMap.get(index).getDate() + "-" + Database.timeslotMap.get(index).getEmployee() + "\n");
-            }
-        }*/
-    }
-
-    private void viewCustomerBooking()
+    public void viewAvailableBooking()
     {
-        /*Connection c = Database.getDBConnection();
-        Statement stmt = null;
-        try
+    	availBookingsView.setText("");
+        for (Timeslot timeslot : Database.getTimeslotMap().values())
         {
-            stmt = c.createStatement();
-
-            String currentUser = getAuthUser().getName();
-            System.out.println("Welcome " + currentUser);
-            System.out.println("You Have a booking(s) with us on:\n");
-
-            ResultSet rs = stmt.executeQuery("SELECT * FROM BOOKINGS WHERE username ='" + currentUser + "'");
-            while (rs.next())
+            if (availBookingsDay.getValue() != null
+             && !availBookingsDay.getValue().equalsIgnoreCase(timeslot.getDate().getDayOfWeek().name()))
             {
-                System.out.println(rs.getString("date") + " at " + " with " + rs.getString("employee"));
+            	continue;
             }
-            c.close();
+            
+            if (timeslot.getStatus() != false)
+            {
+            	continue;
+            }
+        	availBookingsView.appendText(timeslot.getDate() + " : " + timeslot.getTime() + "\n");
         }
-        catch (SQLException e)
-        {
-            e.printStackTrace();
-        }*/
     }
 
-    private void removeEmployee()
+    public void viewCustomerBooking()
     {
-    	int id = 0;
-    	boolean valid = false;
-    	
-    	while (true)
-    	{
-        	try
+    	custBookingsView.setText("");
+        for (Booking booking : Database.getBookingMap().values())
+        {
+        	if (authUser.getID() == booking.getCustomer().getID())
         	{
-        		System.out.println("Please enter employee ID\n");
-        		id = keyboard.nextInt(); // may throw InputMismatchException
-        		keyboard.nextLine();
-        		Employee employee = Database.getEmployeeMap().get(id); // may throw NullPointerException
-                System.out.println(
-                        "Are you sure you wish to remove " + employee.getName() + " from the system? Y/N");
-                
-                while (!valid)
-                {
-                    String k = keyboard.nextLine();
-                    if (k.equalsIgnoreCase("Y"))
-                    {
-                    	Boolean success = Database.removeEmployeeFromDB(id); // may throw SQLException
-                    	if (success)
-                    	{
-                        	Database.getEmployeeMap().remove(id);
-                        	System.out.println("Sucessfully removed \"" + employee.getName() + "\".");
-                        	ownerMenu();
-                    	}
-                    	else
-                    	{
-                    		throw new Exception("Error: Employee currently has bookings and cannot be deleted.");
-                    	}
-                    }
-                    else if (k.equalsIgnoreCase("N"))
-                    {
-                    	System.out.println("Cancelled remove employee. Returning to menu...");
-                    	ownerMenu();
-                    }
-                    else
-                    {
-                    	System.out.println("Invalid input - please enter Y or N.");
-                    }
-                }
+        		custBookingsView.appendText(
+        				  "DATE: "
+        				+ booking.getTimeslot().getDate().toString()
+        				+ "\nAT: " 
+        				+ booking.getTimeslot().getTime().toString()
+        				+ "\nFOR: "
+        				+ booking.getService()
+        				+ "\nWITH: "
+        				+ booking.getEmployee().getName()
+        				+ "\n==========================\n");	
         	}
-        	catch (InputMismatchException e)
-        	{
-        		System.out.println("Error: Invalid ID.");
-        	}
-        	catch (NullPointerException e)
-        	{
-        		System.out.println("Error: Employee with id=" + id + " doesn't exist!");
-        	}
-        	catch (SQLException e)
-        	{
-        		System.out.println(e.getMessage());
-        	}
-        	catch (Exception e)
-        	{
-        		System.out.println(e.getMessage());
+        }
+    }
+    public void removeEmployee()
+    {
+		int id = 0;
+		try
+		{
+			Employee employee = null;
+			for (Entry<Integer, Employee> entry : Database.getEmployeeMap().entrySet())
+			{
+				Integer key = entry.getKey();
+				Employee value = entry.getValue();
+				if (empSelect3.getValue().equals(value.getName()))
+				{
+					employee = Database.getEmployeeMap().get(key);
+					id = key;
+				}
 			}
-        	finally
-        	{
-        		keyboard.nextLine(); // Remove trailing endline char, even if exception is thrown
-        	}
-    	}
+
+			Boolean success = Database.removeEmployeeFromDB(id); 
+			
+			if (success)
+			{
+				Database.getEmployeeMap().remove(id);
+				empRemoveMessage.setText("Sucessfully removed \"" + employee.getName() + "\".");
+				setUp();
+			}
+			else
+			{
+				empRemoveMessage.setText("Error: Employee currently has bookings and cannot be deleted.");
+				throw new Exception("Error: Employee currently has bookings and cannot be deleted.");
+			}
+		}
+		catch (SQLException e)
+		{
+			System.out.println(e.getMessage());
+		}
+		catch (Exception e)
+		{
+			System.out.println(e.getMessage());
+		}
     }
 
-    private void addEmployee() throws UserRequestsExitException
+    public void addEmployee()
     {
     	int id = 0;
     	String name = null;
@@ -600,8 +685,34 @@ public class SystemDriver
         	customerMenu();
         }
         catch (SQLException e)
+          
+          /* Liam's code. Uncomment, just had to comment out to merge changes above.
+    	Employee newEmployee = null;
+        boolean valid = true;
+        
+        name = txtAddEmp.getText();
+        //valid = RegistrationValidation.validateName(name);
+        for (Employee employee : Database.getEmployeeMap().values())
         {
-        	System.out.println(e.getMessage());
+        	if (employee.getName().equals(name))
+            {
+        		addEmpMessage.setText("Employee already exists");
+                valid = false;
+            }
+        }
+        if (valid)
+        { */
+        	try
+        	{
+        		int id = Database.addEmployeeToDB(name);
+        		newEmployee = new Employee(id, name);
+        		Database.getEmployeeMap().put(newEmployee.getID(), newEmployee);
+        		addEmpMessage.setText("\"" + name + "\" has been added as a new employee.");
+        	}
+        	catch (SQLException e)
+        	{
+        		System.out.println(e.getMessage());
+        	}
         }
     }
     
@@ -631,50 +742,52 @@ public class SystemDriver
      * for viewing future and past bookings, displays all bookings made with in
      * range of seven days before or after the current date
      */
-    private void viewBookings()
+    public void viewBookings()
     {
-    	String currentUser = "testUser";
-    	LocalDate today = LocalDate.now().plusDays(10); // TODO remove +10 days
-		LocalDate lastWeek = today.minus(Period.ofDays(7));
+		ObservableList<String> oblist = FXCollections.observableArrayList();
+    	for (Employee employee : Database.getEmployeeMap().values())
+    	{
+    		oblist.add(employee.getName());
+    	}
+
+		empSelect.setItems(oblist);
+
+    	LocalDate today = LocalDate.now(); // TODO remove +10 days
+		LocalDate lastWeek = today.minus(Period.ofDays(100));
 		LocalDate nextWeek = today.plus(Period.ofDays(7));
 		boolean noResults = true;
     	//String currentUser = getAuthUser().getUsername();
-    	System.out.println("Welcome " + currentUser);
-    	System.out.println("1. View last week's bookings\n2. View this weeks bookings");
-    	String input = keyboard.nextLine();
     	
     	
     	// input 1 - view last weeks bookings
-        if (input.equals("1"))
+        if (radioLastWeek.isSelected())
         {
-        	System.out.println("The booking(s) for last week were:\n");
-        	
-        	for (Booking b : Database.getBookingMap().values())
+        	bookingsView.setText("");
+        	for (Booking booking : Database.getBookingMap().values())
         	{
-        		LocalDate date = b.getTimeslot().getDate();
+        		LocalDate date = booking.getTimeslot().getDate();
         		if (date.isAfter(lastWeek) && date.isBefore(today))
         		{
-        			LocalTime t = b.getTimeslot().getTime();
-                    System.out.println(
-                            b.getCustomer().getUsername() + " on " + date.format(defaultDateFormat) + " at " + t.format(defaultTimeFormat) + " with " + b.getEmployee().getName());
+        			LocalTime t = booking.getTimeslot().getTime();
+                    bookingsView.appendText(
+                            booking.getCustomer().getUsername() + " on " + date.format(defaultDateFormat) + " at " + t.format(defaultTimeFormat) + " with " + booking.getEmployee().getName() + "\n");
                     noResults = false;
         		}
         	}
         }
         //input 2 - view next weeks bookings
-        else if (input.equals("2"))
+        else if (radioNextWeek.isSelected())
         {
-        	System.out.println("The booking(s) for next week are:\n");
-        	
-        	for (Booking b : Database.getBookingMap().values())
+        	bookingsView.setText("");
+        	for (Booking booking : Database.getBookingMap().values())
         	{
-        		LocalDate date = b.getTimeslot().getDate();
+        		LocalDate date = booking.getTimeslot().getDate();
         		if (date.isBefore(nextWeek) && date.isAfter(today))
         		{
-        			LocalTime t = b.getTimeslot().getTime();
+        			LocalTime t = booking.getTimeslot().getTime();
         			DateTimeFormatter tf = DateTimeFormatter.ofPattern("hh:mm a");
-                    System.out.println(
-                            b.getCustomer().getUsername() + " on " + date.format(defaultDateFormat) + " at " + t.format(tf) + " with " + b.getEmployee().getName());
+                    bookingsView.appendText(
+                            booking.getCustomer().getUsername() + " on " + date.format(defaultDateFormat) + " at " + t.format(tf) + " with " + booking.getEmployee().getName() + "\n");
                     noResults = false;
         		}
         	}
@@ -684,47 +797,45 @@ public class SystemDriver
             System.out.println("Invalid Input");
         }
         if (noResults)
-        	System.out.println("NONE");
+        {
+        	bookingsView.setText("NONE");
+        }
     }
     
     /**
      * login - sets the current authorised user and determines if
      * they are the owner or a customer - directs to appropriate menu
+     * @throws IOException 
      */
-    public void login()
+    public void login(ActionEvent event) throws IOException
     {
+        invLoginPass.setText("");
+    	invLoginName.setText("");
         User authUser = null;
-        String username, password = null;
-        System.out.println("======================\n" + "Enter username: ");
-        username = keyboard.nextLine();
-
-        System.out.println("\nEnter password: ");
-        password = keyboard.nextLine();
-
         try
         {
-            authUser = auth(username, password);
-            setAuthUser(authUser);
+            authUser = auth(txtLoginUsername.getText(), txtLoginPassword.getText());
             System.out.println("\nSuccessfully logged in as " + authUser.getUsername() + ".\n");
-
-
-            if (authUser.getUsername().equals("Owner"))
-            {
-                System.out.println("Directing to Owners menu.");
-                ownerMenu();
-            }
-            else
-            {
-                customerMenu();
-            }
+            setAuthUser(authUser);
+            String sceneToDisplay = authUser.getUsername().equals("Owner") 
+        				          ? "/bookingSystem/OwnerMenu.fxml"
+        				          : "/bookingSystem/CustomerMenu.fxml";
+       		
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(sceneToDisplay));
+    		Parent root = loader.load();
+    		SystemDriver c = loader.getController();
+    		c.setAuthUser(authUser);
+    		Scene scene = new Scene(root, 720, 480);
+    		Stage primaryStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+    		primaryStage.setScene(scene);
         }
         catch (AuthException e)
         {
-            System.out.println("\nAuthorisation error - " + e.getMessage() + ".\n");
+            invLoginPass.setText("\nAuthorisation error - " + e.getMessage() + ".\n");
         }
         catch (NullPointerException e)
         {
-        	System.out.println("Error: User '" + username + "' does not exist.");
+        	invLoginName.setText("Error: User '" + txtLoginUsername.getText() + "' does not exist.");
         }
 
     }
@@ -755,112 +866,159 @@ public class SystemDriver
     	return null; // no matching user found
     }
 
-    public void logout()
+    public void logout(ActionEvent event)
     {
         setAuthUser(null);
+        backToMain(event);
     }
+
+    /**
+     * Username does not allow special characters
+     * Alphanumeric and punctuation
+     **/
+    public boolean validateUsername(String username)
+    {
+        boolean validUsername = username.matches("[a-zA-Z0-9'., -]+");
+        boolean taken = false;
+    	for (User user : Database.getUserMap().values())
+    	{
+    		if (user.getUsername().equals(username))
+    		{	
+    			taken = true;
+    		}
+    	}
+
+        if (!validUsername) //need a regex that accepts only alphanumeric only
+        {
+	        invUsername.setText(" Invalid Username");				
+	    }
+        else if (taken)
+        {
+	        invUsername.setText(" Username Taken");	
+	        validUsername = false;
+        }
+		else
+		{
+	        invUsername.setText("");				
+		}
+        return validUsername;
+    }
+    
+    /**
+     * Password can be any format
+     * function checks whether passwords match
+     **/
+    public boolean validatePassword(String password, String confirmPassword)
+    {
+        boolean validPassword = password.equals(confirmPassword);
+        if (!validPassword)
+        {
+	        invPassword.setText(" Passwords do not match");				
+	    }
+		else
+		{
+	        invPassword.setText("");				
+		}
+        return validPassword;
+    }
+
+    /**
+     *  Validate email regex requires format of <alphaNum/punc>@<alphanum/punc>.<alphanum/punc>  
+     **/
+    public boolean validateEmail(String email)
+    {
+        boolean validEmail = email.matches("[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+[.]{1,1}+[a-zA-Z0-9-.]+");
+        if (!validEmail) //need a regex that accepts  alphanumeric + a few special characters
+        {
+	        invEmail.setText(" Invalid email format");				
+	    }
+		else
+		{
+	        invEmail.setText("");				
+		}
+        return validEmail;
+    }
+    
+    /**
+     * Currently only requires using between 8 and 10 characters 
+     **/
+    public boolean validatePhone(String phone)
+    {
+        boolean validNumber = phone.matches("[0-9]{8,10}+");
+        if (!validNumber)
+        {
+	        invPhone.setText(" Invalid phone number");				
+	    }
+		else
+		{
+	        invPhone.setText("");				
+		}
+        return validNumber;
+    }
+
+    /**
+     *  Full name allows only alphabetical characters and common punctuation used in names 
+     **/
+    public boolean validateName(String name)
+    {
+        boolean validName = name.matches("[a-zA-Z'., -]+");
+        if (!validName)
+        {
+	        invName.setText(" Like no name I've seen");				
+	    }
+		else
+		{
+	        invName.setText("");				
+		}
+        return validName;
+    }
+
 
     /**
      * Registration function with simple validation
      * makes calls to validation functions within RegistrationValidation 
-     * object
-     * @throws UserRequestsExitException
      */
-	private void register() throws UserRequestsExitException
+	public void register(ActionEvent event) throws Exception
 	{
-        String username = null, password = null, email = null, 
-               fullName = null, phoneNumber = null, confirmPassword = null;
-        LocalDate dob = null;
-        User newUser = null;
-
-        System.out.println("======================\n");
-
-        // valid set to false after each field is correctly entered
-        // only single boolean instead of 6
-        // prompt and get username
-        boolean valid = false;
-        while (valid == false)
-        {
-            username = promptAndGetString("Enter username: ");
-            valid = RegistrationValidation.validateUserName(username);
-            if (valid)
-            {
-            	for (User user : Database.getUserMap().values())
-                {
-                	if (user.getUsername().equals(username))
-                	{
-                		System.out.println("Username Taken, Try Again");
-                		valid = false;
-                	}
-                }
-            }
-        }
-
-        // prompt and get password
-        valid = false;
-        while (valid == false)
-        {
-            password = promptAndGetString("Enter password: ");
-            confirmPassword = promptAndGetString("Confirm password: ");
-            valid = RegistrationValidation.validatePassword(password, confirmPassword);
-        }
-
-        // prompt and get email
-        valid = false;
-        while (valid == false)
-        {
-            email = promptAndGetString("Enter email address: ");
-            valid = RegistrationValidation.validateEmail(email);
-        }
-
-        // prompt and get full name
-        valid = false;
-        while (valid == false)
-        {
-            fullName = promptAndGetString("Enter full name: ");
-            valid = RegistrationValidation.validateName(fullName);
-        }
-
-        // prompt and get phone number
-        valid = false;
-        while (valid == false)
-        {
-            phoneNumber = promptAndGetString("Enter phone number: ");
-            valid = RegistrationValidation.validatePhone(phoneNumber);
-        }
-
-        // prompt and get date of birth
-        valid = false;
-        while(valid == false)
-        {
-            try
-            {
-                System.out.println("Enter date of birth: ");
-                String dobString = keyboard.nextLine();
-                dob = parseDate(dobString);
-                
-                if (dob != null)
-                {
-                	valid = true;
-                }
-            }
-            catch (NumberFormatException e)
-            {
-                System.out.println("Please only enter numbers");
-            }
-        }
+		boolean validUsername = txtUsername.getLength() != 0 ? validateUsername(txtUsername.getText()) : false;
+		boolean validPassword = txtConfirmPassword.getLength() != 0 ? validatePassword(txtPassword.getText(), txtConfirmPassword.getText()) : false;
+		boolean validEmail = txtEmail.getLength() != 0 ? validateEmail(txtEmail.getText()) : false;
+		boolean validPhone = txtPhone.getLength() != 0 ? validatePhone(txtPhone.getText()) : false;
+		boolean validName = txtName.getLength() != 0 ? validateName(txtName.getText()) : false;
         
-        // if user hasn't quit registation and all fields are valid, assign to user
-        try
+		boolean validRegistration = validUsername 
+								 && validPassword
+								 && validEmail
+								 && validPhone
+								 && validName;
+		
+		try
         {
-        	int id = Database.addUserToDB(username, password, email, fullName, phoneNumber);
-            newUser = new User(id, username, password, email, fullName, phoneNumber);
-            Database.getUserMap().put(newUser.getID(), newUser);
-        	System.out.println("User Registered. Welcome " + newUser.getUsername());
-            setAuthUser(newUser);
-            customerMenu();
+			if (validRegistration)
+			{
+				registerMessage.setText("all is well");
+				/*
+				int id = Database.addUserToDB(txtUsername.getText(),
+											  txtPassword.getText(),
+											  txtEmail.getText(),
+											  txtName.getText(),
+											  txtPhone.getText());
+            	User newUser = new User(id,
+            					   txtUsername.getText(),
+            					   txtPassword.getText(),
+            					   txtEmail.getText(),
+            					   txtName.getText(),
+            					   txtPhone.getText());
+            	Database.getUserMap().put(newUser.getID(), newUser);
+        		System.out.println("User Registered. Welcome " + newUser.getUsername());
+        		setAuthUser(newUser);
+			*/}
+			else
+			{
+				registerMessage.setText("Invalid Field(s): Can not Register");
+			}
         }
-        catch (SQLException e)
+        catch (Exception e)
         {
         	System.out.println(e.getMessage());
         }
@@ -874,6 +1032,23 @@ public class SystemDriver
     public User getAuthUser()
     {
         return authUser;
+    }
+    
+    public void backToMain(ActionEvent event)
+    {
+		try
+		{
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/bookingSystem/Main.fxml"));
+    		Parent root = loader.load();
+    		Scene scene = new Scene(root, 720, 480);
+    		Stage primaryStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+    		primaryStage.setScene(scene);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+
     }
 
     /**
