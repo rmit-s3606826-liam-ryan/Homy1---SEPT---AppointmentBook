@@ -59,117 +59,80 @@ import bookingSystem.NotSeptLogger;
 public class SystemDriver
 {
 	// main scene
-	@FXML
-	private Button mainLogin;
-	@FXML
-	private Button mainRegister;
+	@FXML private Button mainLogin;
+	@FXML private Button mainRegister;
 
 	// register scene
-	@FXML
-	private TextField txtUsername;
-	@FXML
-	private Label invUsername;
-	@FXML
-	private TextField txtPassword;
-	@FXML
-	private TextField txtConfirmPassword;
-	@FXML
-	private Label invPassword;
-	@FXML
-	private TextField txtEmail;
-	@FXML
-	private Label invEmail;
-	@FXML
-	private TextField txtPhone;
-	@FXML
-	private Label invPhone;
-	@FXML
-	private TextField txtName;
-	@FXML
-	private Label invName;
-	@FXML
-	private Label registerMessage;
+	@FXML private TextField txtUsername;
+	@FXML private Label invUsername;
+	@FXML private TextField txtPassword;
+	@FXML private TextField txtConfirmPassword;
+	@FXML private Label invPassword;
+	@FXML private TextField txtEmail;
+	@FXML private Label invEmail;
+	@FXML private TextField txtPhone;
+	@FXML private Label invPhone;
+	@FXML private TextField txtName;
+	@FXML private Label invName;
+	@FXML private Label registerMessage;
+	@FXML private Button regBack;
+	@FXML private Button btRegister;
 
 	// owner menu scene
-	@FXML
-	private RadioButton radioNextWeek;
-	@FXML
-	private RadioButton radioLastWeek;
-	@FXML
-	private TextArea bookingsView;
-	@FXML
-	private TextArea empAvailView;
-	@FXML
-	private ComboBox<String> empSelect;
-	@FXML
-	private ComboBox<String> empSelect2;
-	@FXML
-	private ComboBox<String> empSelect3;
-	@FXML
-	private ComboBox<String> selectDay;
-	@FXML
-	private TextField txtAddEmp;
-	@FXML
-	private Label addEmpMessage;
-	@FXML
-	private Button empRemoveBut;
-	@FXML
-	private Label empRemoveMessage;
-	@FXML
-	private Label workTimeMessage;
-	@FXML
-	private Button addTimeBut;
-	@FXML
-	private TextField txtWorkStart;
-	@FXML
-	private TextField txtWorkEnd;
+	@FXML private RadioButton radioNextWeek;
+	@FXML private RadioButton radioLastWeek;
+	@FXML private TextArea bookingsView;
+	@FXML private TextArea empAvailView;
+	@FXML private ComboBox<String> empSelect;
+	@FXML private ComboBox<String> empSelect2;
+	@FXML private ComboBox<String> empSelect3;
+	@FXML private ComboBox<String> selectDay;
+	@FXML private TextField txtAddEmp;
+	@FXML private Label addEmpMessage;
+	@FXML private Button empRemoveBut;
+	@FXML private Label empRemoveMessage;
+	@FXML private Label workTimeMessage;
+	@FXML private Button addTimeBut;
+	@FXML private TextField txtWorkStart;
+	@FXML private TextField txtWorkEnd;
+	@FXML private Button ownerLogoutOne;
+	@FXML private Button ownerLogoutTwo;
+	@FXML private Button ownerLogoutThree;
+	@FXML private Button ownerLogoutFour;
+	@FXML private Button ownerLogoutFive;
+	@FXML private Label wtday;
+	@FXML private Label wtemp;
+	@FXML private Label wtstart;
+	@FXML private Label wtend;
 
 	// customer menu scene
-	@FXML
-	private ComboBox<String> makeBookingService;
-	@FXML
-	private ComboBox<String> makeBookingEmployee;
-	@FXML
-	private ComboBox<String> makeBookingDay;
-	@FXML
-	private ComboBox<String> makeBookingTime;
-	@FXML
-	private Button makeBookingBut;
-	@FXML
-	private Label makeBookingMessage;
-	@FXML
-	private Label mbs;
-	@FXML
-	private Label mbe;
-	@FXML
-	private Label mbt;
-	@FXML
-	private Label mbd;
-
-	@FXML
-	private ComboBox<String> availBookingsEmployee;
-	@FXML
-	private ComboBox<String> availBookingsDay;
-	@FXML
-	private ComboBox<String> availBookingsService;
-	@FXML
-	private TextArea availBookingsView;
-	@FXML
-	private Button getTimesBut;
-	@FXML
-	private TextArea custBookingsView;
+	@FXML private ComboBox<String> makeBookingService;
+	@FXML private ComboBox<String> makeBookingEmployee;
+	@FXML private ComboBox<String> makeBookingDay;
+	@FXML private ComboBox<String> makeBookingTime;
+	@FXML private Button makeBookingBut;
+	@FXML private Label makeBookingMessage;
+	@FXML private Label mbs;
+	@FXML private Label mbe;
+	@FXML private Label mbt;
+	@FXML private Label mbd;
+	@FXML private ComboBox<String> availBookingsEmployee;
+	@FXML private ComboBox<String> availBookingsDay;
+	@FXML private ComboBox<String> availBookingsService;
+	@FXML private TextArea availBookingsView;
+	@FXML private Button getTimesBut;
+	@FXML private TextArea custBookingsView;
+	@FXML private Button customerLogoutThree;
+	@FXML private Button customerLogoutTwo;
+	@FXML private Button customerLogoutOne;
 
 	// login scene
-	@FXML
-	private TextField txtLoginUsername;
-	@FXML
-	private TextField txtLoginPassword;
-	@FXML
-	private Label invLoginName;
-	@FXML
-	private Label invLoginPass;
-	@FXML
-	private Button loginButton;
+	@FXML private TextField txtLoginUsername;
+	@FXML private TextField txtLoginPassword;
+	@FXML private Label invLoginName;
+	@FXML private Label invLoginPass;
+	@FXML private Button loginButton;
+	@FXML private Button loginBack;
 
 	private Scanner keyboard = new Scanner(System.in);
 	private static final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
@@ -204,6 +167,8 @@ public class SystemDriver
 
 	public void setUp()
 	{
+		try
+		{
 		ObservableList<String> emplist = FXCollections.observableArrayList();
 		for (Employee employee : Database.getEmployeeMap().values())
 		{
@@ -221,6 +186,12 @@ public class SystemDriver
 		selectDay.getItems().addAll("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday");
 
 		logger.info("Owner Menu: Employee/Day Comboboxes refilled");
+		}
+		catch (Exception e)
+		{
+			logger.severe("some horrible shit went down");
+		}
+		
 
 	}
 
@@ -299,25 +270,32 @@ public class SystemDriver
 
 	public void viewEmployeeAvailability()
 	{
-		empAvailView.setText("");
-		Employee employee = null;
-		for (Entry<Integer, Employee> entry : Database.getEmployeeMap().entrySet())
+		try
 		{
-			Integer key = entry.getKey();
-			Employee value = entry.getValue();
-			if (empSelect.getValue().equals(value.getName()))
+			empAvailView.setText("");
+			Employee employee = null;
+			for (Entry<Integer, Employee> entry : Database.getEmployeeMap().entrySet())
 			{
-				employee = Database.getEmployeeMap().get(key);
-				logger.info("Viewing availability for " + empSelect.getValue());
+				Integer key = entry.getKey();
+				Employee value = entry.getValue();
+				if (empSelect.getValue().equals(value.getName()))
+				{
+					employee = Database.getEmployeeMap().get(key);
+					logger.info("Viewing availability for " + empSelect.getValue());
+				}
+			}
+
+			HashMap<String, LocalTime[]> availability = employee.getAvailability();
+			for (HashMap.Entry<String, LocalTime[]> entry : availability.entrySet())
+			{
+				String dayOfWeek = entry.getKey();
+				LocalTime[] times = entry.getValue();
+				empAvailView.appendText(dayOfWeek + ": " + times[0].toString() + " - " + times[1].toString() + "\n");
 			}
 		}
-
-		HashMap<String, LocalTime[]> availability = employee.getAvailability();
-		for (HashMap.Entry<String, LocalTime[]> entry : availability.entrySet())
+		catch (NullPointerException e)
 		{
-			String dayOfWeek = entry.getKey();
-			LocalTime[] times = entry.getValue();
-			empAvailView.appendText(dayOfWeek + ": " + times[0].toString() + " - " + times[1].toString() + "\n");
+			logger.severe("terrible shit just happened");
 		}
 	}
 
@@ -365,42 +343,58 @@ public class SystemDriver
 				employeeId = key;
 			}
 		}
+		if (employee == null)
+		{
+			wtemp.setText("select an employee");
+		}
+		else
+		{
+			wtemp.setText("");
+		}
 
 		boolean validStart = false;
 		boolean validEnd = false;
-
+		boolean validDay = false;
+		if (selectDay.getValue() == null)
+		{
+			wtday.setText("select a day");
+			validDay = false;
+		}
+		else
+		{
+			wtday.setText("enter a start time");
+			validDay = true;
+		}
+		
 		start = validateTime(txtWorkStart.getText());
 		if (start != null)
 		{
+			wtstart.setText("");
 			validStart = true;
+		}
+		else
+		{
+			wtstart.setText("enter a start time");
 		}
 
 		finish = validateTime(txtWorkEnd.getText());
 		if (finish != null)
 		{
+			wtend.setText("");
 			validEnd = true;
+		}
+		else
+		{
+			wtend.setText("enter an end time");
 		}
 
 		try
 		{
-			if (validStart && validEnd)
+			if (validStart && validEnd && validDay)
 			{
 				// Add entry to DB, return ID, add to local collection
-				id = Database.addWorkingTimesToDB(employeeId, selectDay.getValue(), start, finish); // TODO:
-																									// Need
-																									// to
-																									// validate
-																									// to
-																									// check
-																									// for
-																									// current
-																									// working
-																									// times
-																									// overlapping,
-																									// already
-																									// in
-																									// system.
-
+				// TODO: Need to validate to check for current working times overlapping, already in system.
+				id = Database.addWorkingTimesToDB(employeeId, selectDay.getValue(), start, finish); 
 				employee.addAvailability(selectDay.getValue(), start, finish);
 				workTimeMessage.setText(selectDay.getValue() + ", " + start + "-" + finish + " has been added to "
 						+ employee.getName() + "'s availability.");
@@ -760,7 +754,7 @@ public class SystemDriver
 	 * 
 	 * @throws IOException
 	 */
-	public void login(ActionEvent event) throws IOException
+	public void login(ActionEvent event) throws Exception
 	{
 		invLoginPass.setText("");
 		invLoginName.setText("");
@@ -1004,22 +998,6 @@ public class SystemDriver
 	public void quit()
 	{
 		System.exit(0);
-	}
-
-	/**
-	 * used to get user string input - names/ID/password whenever required
-	 * throws exception when e or exit are entered at any prompt, allows user to
-	 * quit to main menu at any time
-	 **/
-	private String promptAndGetString(final String PROMPT) throws UserRequestsExitException
-	{
-		System.out.println(PROMPT);
-		String answer = keyboard.nextLine();
-		if (answer.equalsIgnoreCase("e") || answer.equalsIgnoreCase("exit"))
-		{
-			throw new UserRequestsExitException();
-		}
-		return answer;
 	}
 
 	public static LocalDate parseDate(String dateString)
