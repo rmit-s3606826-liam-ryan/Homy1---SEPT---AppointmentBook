@@ -100,6 +100,10 @@ public class SystemDriver
 	@FXML private Button ownerLogoutThree;
 	@FXML private Button ownerLogoutFour;
 	@FXML private Button ownerLogoutFive;
+	@FXML private Label wtday;
+	@FXML private Label wtemp;
+	@FXML private Label wtstart;
+	@FXML private Label wtend;
 
 	// customer menu scene
 	@FXML private ComboBox<String> makeBookingService;
@@ -174,9 +178,9 @@ public class SystemDriver
 		empSelect.setItems(emplist);
 		empSelect2.setItems(emplist);
 		empSelect3.setItems(emplist);
-//		empSelect.getSelectionModel().selectFirst();
-//		empSelect2.getSelectionModel().selectFirst();
-//		empSelect3.getSelectionModel().selectFirst();
+		empSelect.getSelectionModel().selectFirst();
+		empSelect2.getSelectionModel().selectFirst();
+		empSelect3.getSelectionModel().selectFirst();
 
 		selectDay.getItems().clear();
 		selectDay.getItems().addAll("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday");
@@ -266,25 +270,32 @@ public class SystemDriver
 
 	public void viewEmployeeAvailability()
 	{
-		empAvailView.setText("");
-		Employee employee = null;
-		for (Entry<Integer, Employee> entry : Database.getEmployeeMap().entrySet())
+		try
 		{
-			Integer key = entry.getKey();
-			Employee value = entry.getValue();
-			if (empSelect.getValue().equals(value.getName()))
+			empAvailView.setText("");
+			Employee employee = null;
+			for (Entry<Integer, Employee> entry : Database.getEmployeeMap().entrySet())
 			{
-				employee = Database.getEmployeeMap().get(key);
-				logger.info("Viewing availability for " + empSelect.getValue());
+				Integer key = entry.getKey();
+				Employee value = entry.getValue();
+				if (empSelect.getValue().equals(value.getName()))
+				{
+					employee = Database.getEmployeeMap().get(key);
+					logger.info("Viewing availability for " + empSelect.getValue());
+				}
+			}
+
+			HashMap<String, LocalTime[]> availability = employee.getAvailability();
+			for (HashMap.Entry<String, LocalTime[]> entry : availability.entrySet())
+			{
+				String dayOfWeek = entry.getKey();
+				LocalTime[] times = entry.getValue();
+				empAvailView.appendText(dayOfWeek + ": " + times[0].toString() + " - " + times[1].toString() + "\n");
 			}
 		}
-
-		HashMap<String, LocalTime[]> availability = employee.getAvailability();
-		for (HashMap.Entry<String, LocalTime[]> entry : availability.entrySet())
+		catch (NullPointerException e)
 		{
-			String dayOfWeek = entry.getKey();
-			LocalTime[] times = entry.getValue();
-			empAvailView.appendText(dayOfWeek + ": " + times[0].toString() + " - " + times[1].toString() + "\n");
+			logger.severe("terrible shit just happened");
 		}
 	}
 
@@ -332,42 +343,58 @@ public class SystemDriver
 				employeeId = key;
 			}
 		}
+		if (employee == null)
+		{
+			wtemp.setText("select an employee");
+		}
+		else
+		{
+			wtemp.setText("");
+		}
 
 		boolean validStart = false;
 		boolean validEnd = false;
-
+		boolean validDay = false;
+		if (selectDay.getValue() == null)
+		{
+			wtday.setText("select a day");
+			validDay = false;
+		}
+		else
+		{
+			wtday.setText("enter a start time");
+			validDay = true;
+		}
+		
 		start = validateTime(txtWorkStart.getText());
 		if (start != null)
 		{
+			wtstart.setText("");
 			validStart = true;
+		}
+		else
+		{
+			wtstart.setText("enter a start time");
 		}
 
 		finish = validateTime(txtWorkEnd.getText());
 		if (finish != null)
 		{
+			wtend.setText("");
 			validEnd = true;
+		}
+		else
+		{
+			wtend.setText("enter an end time");
 		}
 
 		try
 		{
-			if (validStart && validEnd)
+			if (validStart && validEnd && validDay)
 			{
 				// Add entry to DB, return ID, add to local collection
-				id = Database.addWorkingTimesToDB(employeeId, selectDay.getValue(), start, finish); // TODO:
-																									// Need
-																									// to
-																									// validate
-																									// to
-																									// check
-																									// for
-																									// current
-																									// working
-																									// times
-																									// overlapping,
-																									// already
-																									// in
-																									// system.
-
+				// TODO: Need to validate to check for current working times overlapping, already in system.
+				id = Database.addWorkingTimesToDB(employeeId, selectDay.getValue(), start, finish); 
 				employee.addAvailability(selectDay.getValue(), start, finish);
 				workTimeMessage.setText(selectDay.getValue() + ", " + start + "-" + finish + " has been added to "
 						+ employee.getName() + "'s availability.");

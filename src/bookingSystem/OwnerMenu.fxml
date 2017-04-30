@@ -37,31 +37,25 @@
             </AnchorPane>
         </content>
       </Tab>
-    <Tab onSelectionChanged="#setUp" text="Employee Availability">
-      <content>
-        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-               <children>
-                  <ComboBox fx:id="empSelect" layoutX="28.0" layoutY="147.0" onAction="#viewEmployeeAvailability" prefWidth="150.0" />
-                  <TextArea fx:id="empAvailView" layoutX="226.0" layoutY="37.0" prefHeight="357.0" prefWidth="455.0" />
-                  <Button fx:id="ownerLogoutTwo" layoutX="14.0" layoutY="382.0" mnemonicParsing="false" onAction="#logout" text="Log Out" />
-               </children></AnchorPane>
-      </content>
-    </Tab>
       <Tab onSelectionChanged="#setUp" text="Employee Working Times">
         <content>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                <children>
-                  <ComboBox fx:id="empSelect2" layoutX="175.0" layoutY="106.0" prefWidth="150.0" />
-                  <Label layoutX="176.0" layoutY="79.0" text="Select Employee" />
-                  <TextField fx:id="txtWorkStart" layoutX="175.0" layoutY="248.0" />
-                  <TextField fx:id="txtWorkEnd" layoutX="175.0" layoutY="318.0" />
-                  <Label layoutX="175.0" layoutY="221.0" text="Start time" />
-                  <Label layoutX="175.0" layoutY="291.0" text="End Time" />
+                  <ComboBox fx:id="empSelect2" layoutX="215.0" layoutY="57.0" prefWidth="150.0" />
+                  <Label layoutX="216.0" layoutY="30.0" text="Select Employee" />
+                  <TextField fx:id="txtWorkStart" layoutX="215.0" layoutY="199.0" />
+                  <TextField fx:id="txtWorkEnd" layoutX="215.0" layoutY="269.0" />
+                  <Label layoutX="215.0" layoutY="172.0" text="Start time" />
+                  <Label layoutX="215.0" layoutY="242.0" text="End Time" />
                   <Label fx:id="workTimeMessage" layoutX="174.0" layoutY="388.0" prefHeight="27.0" prefWidth="529.0" textFill="RED" />
-                  <Button fx:id="addTimeBut" layoutX="474.0" layoutY="200.0" mnemonicParsing="false" onAction="#addWorkingTimes" text="Add times" />
-                  <Label layoutX="175.0" layoutY="151.0" text="Day" />
-                  <ComboBox fx:id="selectDay" layoutX="174.0" layoutY="178.0" prefWidth="150.0" />
-                  <Button fx:id="ownerLogoutThree" layoutX="14.0" layoutY="382.0" mnemonicParsing="false" onAction="#logout" text="Log Out" />
+                  <Button fx:id="addTimeBut" layoutX="216.0" layoutY="343.0" mnemonicParsing="false" onAction="#addWorkingTimes" text="Add times" />
+                  <Label layoutX="215.0" layoutY="102.0" text="Day" />
+                  <ComboBox fx:id="selectDay" layoutX="214.0" layoutY="129.0" prefWidth="150.0" />
+                  <Button fx:id="ownerLogoutThree" layoutX="13.0" layoutY="382.0" mnemonicParsing="false" onAction="#logout" text="Log Out" />
+                  <Label fx:id="wtemp" layoutX="388.0" layoutY="63.0" textFill="RED" />
+                  <Label fx:id="wtday" layoutX="388.0" layoutY="135.0" textFill="RED" />
+                  <Label fx:id="wtstart" layoutX="451.0" layoutY="205.0" textFill="RED" />
+                  <Label fx:id="wtend" layoutX="451.0" layoutY="275.0" textFill="RED" />
                </children></AnchorPane>
         </content>
       </Tab>
@@ -85,6 +79,16 @@
                   <Label layoutX="236.0" layoutY="136.0" text="Enter the new Employees name" />
                   <Label fx:id="addEmpMessage" layoutX="248.0" layoutY="239.0" prefHeight="27.0" prefWidth="224.0" />
                   <Button fx:id="ownerLogoutFive" layoutX="14.0" layoutY="382.0" mnemonicParsing="false" onAction="#logout" text="Log Out" />
+               </children></AnchorPane>
+      </content>
+    </Tab>
+    <Tab onSelectionChanged="#setUp" text="Employee Availability">
+      <content>
+        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+               <children>
+                  <ComboBox fx:id="empSelect" layoutX="28.0" layoutY="147.0" onAction="#viewEmployeeAvailability" prefWidth="150.0" />
+                  <TextArea fx:id="empAvailView" layoutX="226.0" layoutY="37.0" prefHeight="357.0" prefWidth="455.0" />
+                  <Button fx:id="ownerLogoutTwo" layoutX="14.0" layoutY="382.0" mnemonicParsing="false" onAction="#logout" text="Log Out" />
                </children></AnchorPane>
       </content>
     </Tab>
