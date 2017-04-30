@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.text.*?>
 <?import java.lang.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
@@ -9,46 +10,68 @@
    <children>
       <TabPane prefHeight="480.0" prefWidth="720.0" tabClosingPolicy="UNAVAILABLE">
         <tabs>
-          <Tab text="My Bookings">
-            <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="480.0" prefWidth="720.0">
+            <Tab text="Welcome">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
-                        <TextArea fx:id="custBookingsView" layoutX="179.0" layoutY="75.0" prefHeight="285.0" prefWidth="363.0" />
-                     </children></AnchorPane>
-            </content>
-          </Tab>
-            <Tab text="Available Bookings">
+                        <Label layoutX="310.0" layoutY="91.0" text="Welcome">
+                           <font>
+                              <Font size="24.0" />
+                           </font>
+                        </Label>
+                        <Button layoutX="316.0" layoutY="179.0" mnemonicParsing="false" onAction="#logout" text="Log Out" />
+                     </children>
+                  </AnchorPane>
+              </content>
+            </Tab>
+            <Tab onSelectionChanged="#custSetUp" text="Available Bookings">
               <content>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
                         <TextArea fx:id="availBookingsView" layoutX="342.0" layoutY="14.0" prefHeight="404.0" prefWidth="364.0" />
                         <ComboBox fx:id="availBookingsDay" layoutX="85.0" layoutY="71.0" prefWidth="150.0" />
-                        <ComboBox fx:id="availBookingsEmployee" layoutX="85.0" layoutY="179.0" prefWidth="150.0" />
-                        <ComboBox fx:id="availBookingsService" layoutX="85.0" layoutY="292.0" prefWidth="150.0" />
+                        <ComboBox fx:id="availBookingsEmployee" layoutX="85.0" layoutY="146.0" prefWidth="150.0" />
+                        <ComboBox fx:id="availBookingsService" layoutX="85.0" layoutY="226.0" prefWidth="150.0" />
                         <Label layoutX="85.0" layoutY="44.0" text="Day" />
-                        <Label layoutX="85.0" layoutY="152.0" text="Employee" />
-                        <Label layoutX="85.0" layoutY="265.0" text="Service" />
+                        <Label layoutX="85.0" layoutY="119.0" text="Employee" />
+                        <Label layoutX="85.0" layoutY="199.0" text="Service" />
+                        <Button fx:id="getTimesBut" layoutX="108.0" layoutY="296.0" mnemonicParsing="false" onAction="#viewAvailableBooking" text="Get Times" />
+                        <Button fx:id="customerLogoutThree" layoutX="14.0" layoutY="382.0" mnemonicParsing="false" onAction="#logout" text="Log Out" />
                      </children></AnchorPane>
               </content>
             </Tab>
-            <Tab text="Make Booking">
+            <Tab onSelectionChanged="#custSetUp" text="Make Booking">
               <content>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
-                        <ComboBox fx:id="makeBookingService" layoutX="176.0" layoutY="90.0" prefWidth="150.0" />
-                        <Label layoutX="176.0" layoutY="63.0" text="Select Service Type" />
-                        <ComboBox fx:id="makeBookingEmployee" layoutX="176.0" layoutY="168.0" prefWidth="150.0" />
-                        <ComboBox fx:id="makeBookingDay" layoutX="177.0" layoutY="247.0" prefWidth="150.0" />
-                        <ComboBox fx:id="makeBookingTime" layoutX="177.0" layoutY="334.0" prefWidth="150.0" />
-                        <Label layoutX="176.0" layoutY="141.0" text="Select Employee" />
-                        <Label layoutX="176.0" layoutY="220.0" text="Select Day" />
-                        <Label layoutX="176.0" layoutY="307.0" text="Select Time" />
-                        <Button fx:id="makeBookingBut" layoutX="412.0" layoutY="188.0" mnemonicParsing="false" onAction="#addBooking" text="Create Booking" />
-                        <Label fx:id="makeBookingMessage" layoutX="412.0" layoutY="286.0" textFill="RED" />
+                        <ComboBox fx:id="makeBookingService" layoutX="250.0" layoutY="51.0" prefWidth="150.0" />
+                        <Label layoutX="250.0" layoutY="24.0" text="Select Service Type" />
+                        <ComboBox fx:id="makeBookingEmployee" layoutX="250.0" layoutY="129.0" prefWidth="150.0" />
+                        <ComboBox fx:id="makeBookingDay" layoutX="251.0" layoutY="208.0" prefWidth="150.0" />
+                        <ComboBox fx:id="makeBookingTime" layoutX="251.0" layoutY="295.0" prefWidth="150.0" />
+                        <Label layoutX="250.0" layoutY="102.0" text="Select Employee" />
+                        <Label layoutX="250.0" layoutY="181.0" text="Select Day" />
+                        <Label layoutX="250.0" layoutY="268.0" text="Select Time" />
+                        <Button fx:id="makeBookingBut" layoutX="253.0" layoutY="363.0" mnemonicParsing="false" onAction="#addBooking" text="Create Booking" />
+                        <Label fx:id="makeBookingMessage" layoutX="412.0" layoutY="369.0" textFill="RED" />
+                        <Button fx:id="customerLogoutTwo" layoutX="14.0" layoutY="382.0" mnemonicParsing="false" onAction="#logout" text="Log Out" />
+                        <Label fx:id="mbs" layoutX="412.0" layoutY="57.0" textFill="RED" />
+                        <Label fx:id="mbe" layoutX="412.0" layoutY="135.0" textFill="RED" />
+                        <Label fx:id="mbd" layoutX="412.0" layoutY="214.0" textFill="RED" />
+                        <Label fx:id="mbt" layoutX="412.0" layoutY="301.0" textFill="RED" />
                      </children>
                   </AnchorPane>
               </content>
             </Tab>
+          <Tab onSelectionChanged="#viewCustomerBooking" text="My Bookings">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="480.0" prefWidth="720.0">
+                     <children>
+                        <TextArea fx:id="custBookingsView" layoutX="179.0" layoutY="75.0" prefHeight="285.0" prefWidth="363.0" />
+                        <Button fx:id="customerLogoutOne" layoutX="14.0" layoutY="382.0" mnemonicParsing="false" onAction="#logout" text="Log Out" />
+                     </children></AnchorPane>
+            </content>
+          </Tab>
         </tabs>
       </TabPane>
    </children>
