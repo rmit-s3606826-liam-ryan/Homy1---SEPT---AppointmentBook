@@ -157,7 +157,7 @@ public class SystemDriver
 		}
 		catch (IOException e)
 		{
-			e.printStackTrace();
+			System.out.println("no file bro");
 		}
 
 		Database.extractDbFile();
@@ -362,7 +362,7 @@ public class SystemDriver
 		}
 		else
 		{
-			wtday.setText("enter a start time");
+			wtday.setText("");
 			validDay = true;
 		}
 		
