@@ -311,6 +311,7 @@ public class SystemDriver
 		catch (NullPointerException e)
 		{
 			logger.severe("terrible shit just happened");
+			System.out.println(e.getStackTrace());
 		}
 	}
 
@@ -712,7 +713,7 @@ public class SystemDriver
 
 		empSelect.setItems(oblist);
 
-		LocalDate today = LocalDate.now(); // TODO remove +10 days
+		LocalDate today = LocalDate.now();
 		LocalDate lastWeek = today.minus(Period.ofDays(100));
 		LocalDate nextWeek = today.plus(Period.ofDays(7));
 		boolean noResults = true;

@@ -833,7 +833,7 @@ public class Database
 											+ " FROM " + TABLE_AVAILABILITY
 											+ " WHERE " + HEADER_AVAILABILITY_EMPLOYEE_ID
 											+ "=" + employeeId + " AND "
-											+ HEADER_AVAILABILITY_DAY + "=" + dayOfWeek + ";");
+											+ HEADER_AVAILABILITY_DAY + "=\'" + dayOfWeek + "\';");
 			
 			ResultSet rs = selectStmt.executeQuery();
 			rs.next();	// increment resultset to first result.
