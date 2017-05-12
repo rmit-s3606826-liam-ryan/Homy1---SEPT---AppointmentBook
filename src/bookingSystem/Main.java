@@ -11,9 +11,6 @@ import javafx.stage.Stage;
 
 public class Main extends Application
 {
-	Stage window;
-	Scene startMenu, ownerMenu, customerMenu, login, registration;
-	
 	public static void main(String[] args)
 	{
 		SystemDriver system = new SystemDriver();
