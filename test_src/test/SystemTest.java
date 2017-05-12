@@ -1,4 +1,4 @@
-package bookingSystem;
+package test;
 
 import static org.junit.Assert.*;
 import static org.junit.contrib.java.lang.system.TextFromStandardInputStream.*;
@@ -11,6 +11,8 @@ import org.junit.*;
 import org.junit.contrib.java.lang.system.TextFromStandardInputStream;
 import org.junit.rules.TemporaryFolder;
 
+import bookingSystem.DuplicateUserException;
+import bookingSystem.SystemDriver;
 import bookings.Timeslot;
 
 import java.util.ArrayList;
@@ -19,10 +21,9 @@ import java.util.List;
 
 import users.User;
 
-public class SystemTests
+public class SystemTest
 {
     private SystemDriver testSystem;
-    private RegistrationValidation testRegVal;
    
     @Rule
     public TemporaryFolder testFolder = new TemporaryFolder();
