@@ -6,16 +6,18 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
-import java.time.*;
-import java.time.format.DateTimeFormatter;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 
+import bookingSystem.Business;
 import bookingSystem.Service;
 import bookingSystem.SystemDriver;
 import bookings.Booking;
@@ -43,6 +45,7 @@ public class Database
     static final String TABLE_AVAILABILITY = "AVAILABILITY";
     static final String TABLE_TIMESLOTS = "TIMESLOTS";
     static final String TABLE_BOOKINGS = "BOOKINGS";
+    static final String TABLE_BUSINESS = "BUSINESS";
     //
     // DB column names:
     //
@@ -87,6 +90,13 @@ public class Database
     static final String HEADER_BOOKINGS_TIMESLOT_ID = "TIMESLOT_ID";
     static final String HEADER_BOOKINGS_SERVICE_ID = "SERVICE_ID";
     //
+    // BUSINESS Table
+    static final String HEADER_BUSINESS_NAME = "NAME";
+    static final String HEADER_BUSINESS_OWNER = "OWNER_NAME";
+    static final String HEADER_BUSINESS_ADDRESS = "ADDRESS";
+    static final String HEADER_BUSINESS_PHONE = "PHONE";
+    static final String HEADER_BUSINESS_ADMIN = "ADMIN_USERNAME";
+    //
     // ***************************************************************
     
     
@@ -125,6 +135,19 @@ public class Database
     private static HashMap<Integer, Booking> bookingMap = new HashMap<Integer, Booking>();
     private static HashMap<Integer, Service> serviceMap = new HashMap<Integer, Service>();
     
+    private static Database db = null;
+    
+    private Database() { }
+    
+    public static Database getDb()
+    {
+    	if (db == null)
+    	{
+    		db = new Database();
+    	}
+    return db;
+    }
+    
     
     private static boolean runningFromJar()
     {
@@ -146,11 +169,11 @@ public class Database
      *  If running from within eclipse or any other file system, no need to do this,
      *  we can connect to the bin/db/database.mv.db file directly.
      */
-    public static void extractDbFile()
+    public void extractDbFile()
     {
     	if (runningFromJar())
     	{
-    		//System.out.println("RUNNING FROM JAR!");
+    		//System.out.println("RUNNING FROM JAR");
         	String path = "db/database.mv.db";
 
         	InputStream ddlStream = Database.class
@@ -179,12 +202,10 @@ public class Database
             	}
         		catch (FileNotFoundException e)
         		{
-        			// TODO Auto-generated catch block
         			e.printStackTrace();
         		}
         		catch (IOException e)
         		{
-        			// TODO Auto-generated catch block
         			e.printStackTrace();
         		}
         	}
@@ -192,11 +213,11 @@ public class Database
     	}
     	else
     	{
-    		//System.out.println("RUNNING FROM ECLIPSE");
+    		//System.out.println("RUNNING FROM ECLIPSE (or other IDE)");
     	}
     }
     
-	static Connection getDBConnection()
+	Connection getDBConnection()
 	
 	{
 	    Connection dbConnection = null;
@@ -227,10 +248,11 @@ public class Database
 	    return dbConnection;
 	}
 	
-	public static void loadFromDB()
+	public void loadFromDB()
 	{
 		try
 		{
+			getBusinessInfo();
 			getUsers(); // MUST do in this order, so that the required collections are populated
 			getServices(); // for adding object links to.
 			getEmployees();
@@ -245,7 +267,7 @@ public class Database
 		}
 	}
 
-	static void getUsers() throws SQLException
+	void getUsers() throws SQLException
 	{
 		Connection c = getDBConnection();
 		Statement stmt = null;
@@ -267,6 +289,17 @@ public class Database
 				User user = new User(id, username, password, email, name, phone);
 				userMap.put(id, user);
 			}
+			
+			Business business = SystemDriver.getBusiness();
+			String adminUsername = business.getAdminUsername();
+			for (User u : userMap.values())
+			{
+				if (u.getUsername().equals(adminUsername))
+				{
+					u.setAdmin();
+				}
+			}
+			
 			stmt.close();
 			c.commit();
 		}
@@ -284,7 +317,7 @@ public class Database
 	    }
 	}
 	
-	static void getServices() throws SQLException
+	void getServices() throws SQLException
 	{
 		Connection c = getDBConnection();
 		Statement stmt = null;
@@ -320,7 +353,7 @@ public class Database
 	    }
 	}
 	
-	static void getEmployees() throws SQLException
+	void getEmployees() throws SQLException
 	{
 		Connection c = getDBConnection();
 		Statement stmt = null;
@@ -357,7 +390,7 @@ public class Database
 	    }
 	}
 	
-	static void getEmployeeServices() throws SQLException
+	void getEmployeeServices() throws SQLException
 	{
 		Connection c = getDBConnection();
 		Statement stmt = null;
@@ -394,7 +427,7 @@ public class Database
 	    }
 	}
 	
-	static void getAvailability() throws SQLException
+	void getAvailability() throws SQLException
 	{
 		Connection c = getDBConnection();
 		Statement stmt = null;
@@ -436,7 +469,7 @@ public class Database
 	    }
 	}
 	
-	static void getTimeslots() throws SQLException
+	void getTimeslots() throws SQLException
 	{
 		Connection c = getDBConnection();
 		Statement stmt = null;
@@ -478,7 +511,7 @@ public class Database
 	    }
 	}
 	
-	static void getBookings() throws SQLException
+	void getBookings() throws SQLException
 	{
 		Connection c = getDBConnection();
 		Statement stmt = null;
@@ -524,7 +557,46 @@ public class Database
 	    }
 	}
 	
-	public static int addUserToDB(String username, String password, String email, String name, String phone) throws SQLException
+	void getBusinessInfo() throws SQLException
+	{
+		Connection c = getDBConnection();
+		Statement stmt = null;
+		String getBusInfoQuery = "select * from " + TABLE_BUSINESS;
+		try
+		{
+			c.setAutoCommit(false);
+			stmt = c.createStatement();
+			ResultSet rs = stmt.executeQuery(getBusInfoQuery);
+			
+			while (rs.next())
+			{			
+				String businessName = rs.getString(HEADER_BUSINESS_NAME);
+				String ownerName = rs.getString(HEADER_BUSINESS_OWNER);
+				String address = rs.getString(HEADER_BUSINESS_ADDRESS);
+				String phone = rs.getString(HEADER_BUSINESS_PHONE);
+				String admin = rs.getString(HEADER_BUSINESS_ADMIN);
+				Business business = Business.getBusiness();
+				business.updateBusiness(businessName, ownerName, address, phone, admin);
+				SystemDriver.setBusiness(business);
+			}
+			stmt.close();
+			c.commit();
+		}
+		catch (SQLException e)
+	    {
+	        System.out.println(e.getMessage());
+	    }
+	    catch (Exception e)
+	    {
+	        e.printStackTrace();
+	    }
+	    finally
+	    {
+	        c.close();
+	    }
+	}
+	
+	public int addUserToDB(String username, String password, String email, String name, String phone) throws SQLException
 	{
 		Connection c = getDBConnection();
 		PreparedStatement insertStmt = null;
@@ -598,7 +670,7 @@ public class Database
 		return id;
 	}
 	
-	public static int addEmployeeToDB(String name, String phone, String address) throws SQLException
+	public int addEmployeeToDB(String name, String phone, String address) throws SQLException
 	{
 		Connection c = getDBConnection();
 		PreparedStatement insertStmt = null;
@@ -651,7 +723,7 @@ public class Database
 		return id;
 	}
 	
-	public static boolean removeEmployeeFromDB(int id) throws SQLException
+	public boolean removeEmployeeFromDB(int id) throws SQLException
 	{
 		Connection c = getDBConnection();
 		Statement stmt = null;
@@ -680,7 +752,7 @@ public class Database
 		return true;
 	}
 	
-	static int addTimeslotToDB(LocalDate date, LocalTime time, Boolean booked) throws SQLException
+	int addTimeslotToDB(LocalDate date, LocalTime time, Boolean booked) throws SQLException
 	{
 		Connection c = getDBConnection();
 		PreparedStatement insertStmt = null;
@@ -738,7 +810,7 @@ public class Database
 		return id;
 	}
 	
-	public static int addBookingToDB(int employeeId, int customerId, int timeslotId, int serviceId) throws SQLException
+	public int addBookingToDB(int employeeId, int customerId, int timeslotId, int serviceId) throws SQLException
 	{
 		Connection c = getDBConnection();
 		PreparedStatement insertStmt = null;
@@ -797,7 +869,7 @@ public class Database
 		return id;
 	}
 	
-	public static int addWorkingTimesToDB(int employeeId, String dayOfWeek, LocalTime start, LocalTime finish) throws SQLException
+	public int addWorkingTimesToDB(int employeeId, String dayOfWeek, LocalTime start, LocalTime finish) throws SQLException
 	{
 		Connection c = getDBConnection();
 		PreparedStatement insertStmt = null;
@@ -858,27 +930,69 @@ public class Database
 		return id;
 	}
 	
-	public static HashMap<Integer, User> getUserMap()
+	public void updateBusiness(String businessName, String ownerName, String address, String phone, String adminUsername) throws SQLException
+	{
+		Connection c = getDBConnection();
+		PreparedStatement insertStmt = null;
+		String updateStatement = "UPDATE " + TABLE_BUSINESS + " SET "
+											+ HEADER_BUSINESS_NAME
+								+ "='?', " + HEADER_BUSINESS_OWNER
+								+ "='?', " + HEADER_BUSINESS_ADDRESS
+								+ "='?', " + HEADER_BUSINESS_PHONE
+								+ "='?', " + HEADER_BUSINESS_ADMIN
+								+ "='?'";
+		try
+		{
+			c.setAutoCommit(false);
+			
+			insertStmt = c.prepareStatement(updateStatement);
+			
+			// fill in variables into sql statement
+			insertStmt.setString(1, businessName);
+			insertStmt.setString(2, ownerName);
+			insertStmt.setString(3, address);
+			insertStmt.setString(4, phone);
+			insertStmt.setString(5, adminUsername);
+			
+			insertStmt.executeUpdate();
+			insertStmt.close();
+			c.commit();
+		}
+		catch (SQLException e)
+		{
+			System.out.println("Exception Message " + e.getLocalizedMessage());
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		finally
+		{
+			c.close();
+		}
+	}
+	
+	public HashMap<Integer, User> getUserMap()
 	{
 		return userMap;
 	}
 	
-	public static HashMap<Integer, Employee> getEmployeeMap()
+	public HashMap<Integer, Employee> getEmployeeMap()
 	{
 		return employeeMap;
 	}
 	
-	public static HashMap<Integer, Timeslot> getTimeslotMap()
+	public HashMap<Integer, Timeslot> getTimeslotMap()
 	{
 		return timeslotMap;
 	}
 	
-	public static HashMap<Integer, Booking> getBookingMap()
+	public HashMap<Integer, Booking> getBookingMap()
 	{
 		return bookingMap;
 	}
 	
-	public static HashMap<Integer, Service> getServiceMap()
+	public HashMap<Integer, Service> getServiceMap()
 	{
 		return serviceMap;
 	}

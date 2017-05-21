@@ -1,8 +1,7 @@
 package bookingSystem;
 
 
-import java.io.IOException;
-
+import db.Database;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -11,13 +10,10 @@ import javafx.stage.Stage;
 
 public class Main extends Application
 {
-	Stage window;
-	Scene startMenu, ownerMenu, customerMenu, login, registration;
-	
 	public static void main(String[] args)
 	{
-		SystemDriver system = new SystemDriver();
-		system.loadSystem();
+		SystemDriver system = SystemDriver.getSystemDriver();
+		SeptFacade.getFacade().loadSystem();
 	    launch(args);
 	}
 	

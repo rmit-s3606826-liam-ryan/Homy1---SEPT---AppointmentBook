@@ -1,28 +1,33 @@
-package bookingSystem;
+package test;
 
-import static org.junit.Assert.*;
-import static org.junit.contrib.java.lang.system.TextFromStandardInputStream.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.contrib.java.lang.system.TextFromStandardInputStream.emptyStandardInputStream;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
-
-import org.junit.*;
-import org.junit.contrib.java.lang.system.TextFromStandardInputStream;
-import org.junit.rules.TemporaryFolder;
-
-import bookings.Timeslot;
-
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.contrib.java.lang.system.TextFromStandardInputStream;
+import org.junit.rules.TemporaryFolder;
 
+import bookingSystem.DuplicateUserException;
+import bookingSystem.SystemDriver;
 import users.User;
 
-public class SystemTests
+public class SystemTest
 {
     private SystemDriver testSystem;
-    private RegistrationValidation testRegVal;
    
     @Rule
     public TemporaryFolder testFolder = new TemporaryFolder();
@@ -121,7 +126,7 @@ public class SystemTests
     @Test
     public void testThatEmailValidationFunctionReturnsFalseWithIllegalSymbol()
     {
-        assertFalse(testSystem.validateEmail("dont.lookÃ@me.now"));
+        assertFalse(testSystem.validateEmail("dont.lookï¿½@me.now"));
     }
 
     @Test
