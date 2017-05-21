@@ -16,6 +16,7 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.util.HashMap;
 
+import bookingSystem.Business;
 import bookingSystem.Service;
 import bookingSystem.SystemDriver;
 import bookings.Booking;
@@ -43,6 +44,7 @@ public class Database
     static final String TABLE_AVAILABILITY = "AVAILABILITY";
     static final String TABLE_TIMESLOTS = "TIMESLOTS";
     static final String TABLE_BOOKINGS = "BOOKINGS";
+    static final String TABLE_BUSINESS = "BUSINESS";
     //
     // DB column names:
     //
@@ -86,6 +88,14 @@ public class Database
     static final String HEADER_BOOKINGS_EMPLOYEE_ID = "EMPLOYEE_ID";
     static final String HEADER_BOOKINGS_TIMESLOT_ID = "TIMESLOT_ID";
     static final String HEADER_BOOKINGS_SERVICE_ID = "SERVICE_ID";
+    //
+    // BUSINESS Table
+    static final String HEADER_BUSINESS_NAME = "NAME";
+    static final String HEADER_BUSINESS_OWNER = "OWNER_NAME";
+    static final String HEADER_BUSINESS_ADDRESS = "ADDRESS";
+    static final String HEADER_BUSINESS_PHONE = "PHONE";
+    static final String HEADER_BUSINESS_ADMIN = "ADMIN_USERNAME";
+    static final String HEADER_BUSINESS_ADMINPW = "ADMIN_PASSWORD";
     //
     // ***************************************************************
     
@@ -150,7 +160,7 @@ public class Database
     {
     	if (runningFromJar())
     	{
-    		//System.out.println("RUNNING FROM JAR!");
+    		//System.out.println("RUNNING FROM JAR");
         	String path = "db/database.mv.db";
 
         	InputStream ddlStream = Database.class
@@ -179,12 +189,10 @@ public class Database
             	}
         		catch (FileNotFoundException e)
         		{
-        			// TODO Auto-generated catch block
         			e.printStackTrace();
         		}
         		catch (IOException e)
         		{
-        			// TODO Auto-generated catch block
         			e.printStackTrace();
         		}
         	}
@@ -192,7 +200,7 @@ public class Database
     	}
     	else
     	{
-    		//System.out.println("RUNNING FROM ECLIPSE");
+    		//System.out.println("RUNNING FROM ECLIPSE (or other IDE)");
     	}
     }
     
@@ -231,6 +239,7 @@ public class Database
 	{
 		try
 		{
+			getBusinessInfo();
 			getUsers(); // MUST do in this order, so that the required collections are populated
 			getServices(); // for adding object links to.
 			getEmployees();
@@ -267,6 +276,17 @@ public class Database
 				User user = new User(id, username, password, email, name, phone);
 				userMap.put(id, user);
 			}
+			
+			Business business = SystemDriver.getBusiness();
+			String adminUsername = business.getAdminUsername();
+			for (User u : userMap.values())
+			{
+				if (u.getUsername().equals(adminUsername))
+				{
+					u.setAdmin();
+				}
+			}
+			
 			stmt.close();
 			c.commit();
 		}
@@ -506,6 +526,45 @@ public class Database
 				
 				Booking booking = new Booking(id, customer, employee, timeslot, service);
 				bookingMap.put(id, booking);
+			}
+			stmt.close();
+			c.commit();
+		}
+		catch (SQLException e)
+	    {
+	        System.out.println(e.getMessage());
+	    }
+	    catch (Exception e)
+	    {
+	        e.printStackTrace();
+	    }
+	    finally
+	    {
+	        c.close();
+	    }
+	}
+	
+	static void getBusinessInfo() throws SQLException
+	{
+		Connection c = getDBConnection();
+		Statement stmt = null;
+		String getBusInfoQuery = "select * from " + TABLE_BUSINESS;
+		try
+		{
+			c.setAutoCommit(false);
+			stmt = c.createStatement();
+			ResultSet rs = stmt.executeQuery(getBusInfoQuery);
+			
+			while (rs.next())
+			{			
+				String businessName = rs.getString(HEADER_BUSINESS_NAME);
+				String ownerName = rs.getString(HEADER_BUSINESS_OWNER);
+				String address = rs.getString(HEADER_BUSINESS_ADDRESS);
+				String phone = rs.getString(HEADER_BUSINESS_PHONE);
+				String admin = rs.getString(HEADER_BUSINESS_ADMIN);
+				String adminPW = rs.getString(HEADER_BUSINESS_ADMINPW);
+				Business business = new Business(businessName, ownerName, address, phone, admin, adminPW);
+				SystemDriver.setBusiness(business);
 			}
 			stmt.close();
 			c.commit();

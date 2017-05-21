@@ -152,6 +152,7 @@ public class SystemDriver
 	private static final DateTimeFormatter defaultTimeFormat = DateTimeFormatter.ofPattern("hh:mm a");
 
 	User authUser = null; // TODO Add logout options to menus?
+	static Business currentBusiness = null; // are we supposed to "login" as a business?? How are we supposed to implement/track this?
 
 	public SystemDriver()
 	{
@@ -270,18 +271,30 @@ public class SystemDriver
 		Business newBusiness = null;
 		
 		String businessName = txtBusName.getText();
+		//String ownerName = txtOwnerName.getText(); // ADD FIELD
+		//String address = txtAddress.getText(); // ADD FIELD
+		String phone = txtPhone.getText(); // ADD FIELD.. one with name txtPhone already seems to exist?
 		String adminUsername = txtAdminUsername.getText();
 		String adminPassword = txtAdminPassword.getText();
 		Service service = new Service(1, txtServiceOne.getText(), Integer.parseInt(durationOne.getValue()));
 		Service service2 = new Service(1, txtServiceTwo.getText(), Integer.parseInt(durationTwo.getValue()));
 		Service service3 = new Service(1, txtServiceThree.getText(), Integer.parseInt(durationThree.getValue()));
 	
-		newBusiness = new Business(businessName, adminUsername, adminPassword);
+		newBusiness = new Business(businessName, ownerName, address, phone, adminUsername, adminPassword);
 		newBusiness.service.add(service);
 		newBusiness.service.add(service2);
 		newBusiness.service.add(service3);
 	}
+		
+	public static void setBusiness(Business business)
+	{
+		currentBusiness = business;
+	}
 	
+	public static Business getBusiness()
+	{
+		return currentBusiness;
+	}
 	
 	public void viewEmployeeAvailability()
 	{
