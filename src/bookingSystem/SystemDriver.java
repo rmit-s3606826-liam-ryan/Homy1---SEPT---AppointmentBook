@@ -1,19 +1,15 @@
 package bookingSystem;
 
-import java.time.*;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.Period;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.InputMismatchException;
 import java.util.Map.Entry;
 import java.util.Scanner;
-import java.util.StringTokenizer;
-import java.util.logging.*;
-
-import users.Employee;
-import users.User;
+import java.util.logging.Logger;
 
 //import com.sun.org.apache.xerces.internal.impl.xpath.regex.ParseException;
 
@@ -31,28 +27,13 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.Labeled;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.RadioButton;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import javafx.stage.Window;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URL;
-import java.sql.SQLException;
-import java.text.SimpleDateFormat;
-
-import bookingSystem.NotSeptLogger;
+import users.Employee;
+import users.User;
 
 /**
  * System driver class - contains menus and functions used to run the system
@@ -63,6 +44,9 @@ public class SystemDriver
 	@FXML private TextField txtBusName;
     @FXML private TextField txtAdminUsername;
     @FXML private PasswordField txtAdminPassword;
+    @FXML private TextField txtOwnerName; // Add to GUI
+    @FXML private TextField txtBusAddress; // ^
+    @FXML private TextField txtBusPhone;	// ^
     @FXML private TextField txtServiceOne;
     @FXML private TextField txtServiceTwo;
     @FXML private TextField txtServiceThree;
@@ -150,12 +134,15 @@ public class SystemDriver
 	private static final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	private static final DateTimeFormatter defaultDateFormat = DateTimeFormatter.ofPattern("dd/MM/uuuu");
 	private static final DateTimeFormatter defaultTimeFormat = DateTimeFormatter.ofPattern("hh:mm a");
+	
+	private static Database db = Database.getDb();
 
 	User authUser = null; // TODO Add logout options to menus?
 	static Business currentBusiness = null; // are we supposed to "login" as a business?? How are we supposed to implement/track this?
 
 	public SystemDriver()
 	{
+		SeptFacade sept = new SeptFacade();
 	}
 
 	/**
@@ -173,8 +160,8 @@ public class SystemDriver
 			System.out.println("no file bro");
 		}
 
-		Database.extractDbFile();
-		Database.loadFromDB();
+		db.extractDbFile();
+		db.loadFromDB();
 		logger.info("database loaded into system");
 	}
 
@@ -183,7 +170,7 @@ public class SystemDriver
 		try
 		{
 		ObservableList<String> emplist = FXCollections.observableArrayList();
-		for (Employee employee : Database.getEmployeeMap().values())
+		for (Employee employee : db.getEmployeeMap().values())
 		{
 			emplist.add(employee.getName());
 		}
@@ -211,12 +198,12 @@ public class SystemDriver
 	public void custSetUp()
 	{
 		ObservableList<String> oblist = FXCollections.observableArrayList();
-		for (Employee employee : Database.getEmployeeMap().values())
+		for (Employee employee : db.getEmployeeMap().values())
 		{
 			oblist.add(employee.getName());
 		}
 		ObservableList<String> servicelist = FXCollections.observableArrayList();
-		for (Service service : Database.getServiceMap().values())
+		for (Service service : db.getServiceMap().values())
 		{
 			servicelist.add(service.getName());
 		}
@@ -261,19 +248,14 @@ public class SystemDriver
 	 **/
 	static Boolean running = true;
 
-	public void adamTest() // TODO marker to find code easily
-	{
-
-	}
-
 	public void createNewBusiness()
 	{
 		Business newBusiness = null;
 		
 		String businessName = txtBusName.getText();
-		//String ownerName = txtOwnerName.getText(); // ADD FIELD
-		//String address = txtAddress.getText(); // ADD FIELD
-		String phone = txtPhone.getText(); // ADD FIELD.. one with name txtPhone already seems to exist?
+		String ownerName = txtOwnerName.getText();
+		String address = txtBusAddress.getText();
+		String phone = txtBusPhone.getText();
 		String adminUsername = txtAdminUsername.getText();
 		String adminPassword = txtAdminPassword.getText();
 		Service service = new Service(1, txtServiceOne.getText(), Integer.parseInt(durationOne.getValue()));
@@ -302,13 +284,13 @@ public class SystemDriver
 		{
 			empAvailView.setText("");
 			Employee employee = null;
-			for (Entry<Integer, Employee> entry : Database.getEmployeeMap().entrySet())
+			for (Entry<Integer, Employee> entry : db.getEmployeeMap().entrySet())
 			{
 				Integer key = entry.getKey();
 				Employee value = entry.getValue();
 				if (empSelect.getValue().equals(value.getName()))
 				{
-					employee = Database.getEmployeeMap().get(key);
+					employee = db.getEmployeeMap().get(key);
 					logger.info("Viewing availability for " + empSelect.getValue());
 				}
 			}
@@ -362,13 +344,13 @@ public class SystemDriver
 		LocalTime finish = null;
 
 		Employee employee = null;
-		for (Entry<Integer, Employee> entry : Database.getEmployeeMap().entrySet())
+		for (Entry<Integer, Employee> entry : db.getEmployeeMap().entrySet())
 		{
 			Integer key = entry.getKey();
 			Employee value = entry.getValue();
 			if (empSelect2.getValue().equals(value.getName()))
 			{
-				employee = Database.getEmployeeMap().get(key);
+				employee = db.getEmployeeMap().get(key);
 				employeeId = key;
 			}
 		}
@@ -423,7 +405,7 @@ public class SystemDriver
 			{
 				// Add entry to DB, return ID, add to local collection
 				// TODO: Need to validate to check for current working times overlapping, already in system.
-				id = Database.addWorkingTimesToDB(employeeId, selectDay.getValue(), start, finish); 
+				id = db.addWorkingTimesToDB(employeeId, selectDay.getValue(), start, finish); 
 				employee.addAvailability(selectDay.getValue(), start, finish);
 				workTimeMessage.setText(selectDay.getValue() + ", " + start + "-" + finish + " has been added to "
 						+ employee.getName() + "'s availability.");
@@ -441,7 +423,7 @@ public class SystemDriver
 	 */
 	private void displayTimeSlots()
 	{
-		for (Timeslot timeslot : Database.getTimeslotMap().values())
+		for (Timeslot timeslot : db.getTimeslotMap().values())
 		{
 			LocalDate date = timeslot.getDate();
 			LocalTime time = timeslot.getTime();
@@ -460,7 +442,7 @@ public class SystemDriver
 	// also currently uses numerical IDs for all fields which is not user
 	// friendly. But you can pull
 	// details from the ID using, for example:
-	// Database.getTimeslotMap().get(timeslotId).getTime(),
+	// db.getTimeslotMap().get(timeslotId).getTime(),
 	// .getDate(), .getStatus() and so on.
 	{
 		int bookingId = 0;
@@ -475,13 +457,13 @@ public class SystemDriver
 		{
 			mbe.setText("");
 
-			for (Entry<Integer, Employee> entry : Database.getEmployeeMap().entrySet())
+			for (Entry<Integer, Employee> entry : db.getEmployeeMap().entrySet())
 			{
 				Integer key = entry.getKey();
 				Employee value = entry.getValue();
 				if (makeBookingEmployee.getValue().equals(value.getName()))
 				{
-					employee = Database.getEmployeeMap().get(key);
+					employee = db.getEmployeeMap().get(key);
 					employeeId = key;
 				}
 			}
@@ -497,13 +479,13 @@ public class SystemDriver
 		{
 			mbs.setText("");
 
-			for (Entry<Integer, Service> entry : Database.getServiceMap().entrySet())
+			for (Entry<Integer, Service> entry : db.getServiceMap().entrySet())
 			{
 				Integer key = entry.getKey();
 				Service value = entry.getValue();
 				if (makeBookingService.getValue().equals(value.getName()))
 				{
-					service = Database.getServiceMap().get(key);
+					service = db.getServiceMap().get(key);
 					serviceId = key;
 				}
 			}
@@ -519,14 +501,14 @@ public class SystemDriver
 		{
 			mbd.setText("");
 
-			for (Entry<Integer, Timeslot> entry : Database.getTimeslotMap().entrySet())
+			for (Entry<Integer, Timeslot> entry : db.getTimeslotMap().entrySet())
 			{
 				Integer key = entry.getKey();
 				Timeslot value = entry.getValue();
 				if (makeBookingTime.getValue().equals(value.getTime())
 						&& makeBookingDay.getValue().equalsIgnoreCase(timeslot.getDate().getDayOfWeek().name()))
 				{
-					timeslot = Database.getTimeslotMap().get(key);
+					timeslot = db.getTimeslotMap().get(key);
 					timeslotId = key;
 				}
 			}
@@ -546,10 +528,10 @@ public class SystemDriver
 			if (valid)
 			{
 				// Add entry to DB, return booking ID, add to local collection
-				bookingId = Database.addBookingToDB(employeeId, customerId, timeslotId, serviceId);
+				bookingId = db.addBookingToDB(employeeId, customerId, timeslotId, serviceId);
 				newBooking = new Booking(bookingId, authUser, employee, timeslot, service);
 
-				Database.getBookingMap().put(newBooking.getID(), newBooking);
+				db.getBookingMap().put(newBooking.getID(), newBooking);
 				// TODO: Have not written confirmation output as this will
 				// probably done in GUI. Can show the time and day booked, and
 				// with which employee, etc.
@@ -571,7 +553,7 @@ public class SystemDriver
 	private void addTimeSlots(int year, int month, int day, int startHour, int endHour)
 	{/*
 		 * for (int start = startHour; start < endHour; start++) {
-		 * Database.timeslotMap.add(new Timeslot(year, month, day, start)); }
+		 * db.timeslotMap.add(new Timeslot(year, month, day, start)); }
 		 */
 	}
 
@@ -579,7 +561,7 @@ public class SystemDriver
 	public void viewAvailableBooking()
 	{
 		availBookingsView.setText("");
-		for (Timeslot timeslot : Database.getTimeslotMap().values())
+		for (Timeslot timeslot : db.getTimeslotMap().values())
 		{
 			if (availBookingsDay.getValue() != null
 					&& !availBookingsDay.getValue().equalsIgnoreCase(timeslot.getDate().getDayOfWeek().name()))
@@ -600,7 +582,7 @@ public class SystemDriver
 	public void viewCustomerBooking()
 	{
 		custBookingsView.setText("");
-		for (Booking booking : Database.getBookingMap().values())
+		for (Booking booking : db.getBookingMap().values())
 		{
 			if (authUser.getID() == booking.getCustomer().getID())
 			{
@@ -618,23 +600,23 @@ public class SystemDriver
 		try
 		{
 			Employee employee = null;
-			for (Entry<Integer, Employee> entry : Database.getEmployeeMap().entrySet())
+			for (Entry<Integer, Employee> entry : db.getEmployeeMap().entrySet())
 			{
 				Integer key = entry.getKey();
 				Employee value = entry.getValue();
 				if (empSelect3.getValue().equals(value.getName()))
 				{
-					employee = Database.getEmployeeMap().get(key);
+					employee = db.getEmployeeMap().get(key);
 					id = key;
 				}
 			}
 
-			Boolean success = Database.removeEmployeeFromDB(id);
+			Boolean success = db.removeEmployeeFromDB(id);
 
 			if (success)
 			{
 				logger.info("removed employee " + employee.getName());
-				Database.getEmployeeMap().remove(id);
+				db.getEmployeeMap().remove(id);
 				empRemoveMessage.setText("Sucessfully removed \"" + employee.getName() + "\".");
 				setUp();
 			}
@@ -666,7 +648,7 @@ public class SystemDriver
 
 		name = txtAddEmp.getText();
 		// valid = RegistrationValidation.validateName(name);
-		for (Employee employee : Database.getEmployeeMap().values())
+		for (Employee employee : db.getEmployeeMap().values())
 		{
 			if (employee.getName().equals(name))
 			{
@@ -678,9 +660,9 @@ public class SystemDriver
 		{
 			try
 			{
-				int id = Database.addEmployeeToDB(name, null, null);
+				int id = db.addEmployeeToDB(name, null, null);
 				newEmployee = new Employee(id, name, null, null);
-				Database.getEmployeeMap().put(newEmployee.getID(), newEmployee);
+				db.getEmployeeMap().put(newEmployee.getID(), newEmployee);
 				addEmpMessage.setText("\"" + name + "\" has been added as a new employee.");
 			}
 			catch (SQLException e)
@@ -696,7 +678,7 @@ public class SystemDriver
 		String input = keyboard.nextLine();
 		if (input.equals("1"))
 		{
-			for (Employee employee : Database.getEmployeeMap().values())
+			for (Employee employee : db.getEmployeeMap().values())
 			{
 				System.out.println(employee.getID() + "-" + employee.getName() + "\n");
 			}
@@ -707,7 +689,7 @@ public class SystemDriver
 			int id = keyboard.nextInt();
 			keyboard.nextLine();
 
-			Employee employee = Database.getEmployeeMap().get(id);
+			Employee employee = db.getEmployeeMap().get(id);
 			System.out.println(employee.getID() + "-" + employee.getName() + "\n");
 		}
 	}
@@ -719,7 +701,7 @@ public class SystemDriver
 	public void viewBookings()
 	{
 		ObservableList<String> oblist = FXCollections.observableArrayList();
-		for (Employee employee : Database.getEmployeeMap().values())
+		for (Employee employee : db.getEmployeeMap().values())
 		{
 			oblist.add(employee.getName());
 		}
@@ -730,13 +712,12 @@ public class SystemDriver
 		LocalDate lastWeek = today.minus(Period.ofDays(100));
 		LocalDate nextWeek = today.plus(Period.ofDays(7));
 		boolean noResults = true;
-		// String currentUser = getAuthUser().getUsername();
 
 		// input 1 - view last weeks bookings
 		if (radioLastWeek.isSelected())
 		{
 			bookingsView.setText("");
-			for (Booking booking : Database.getBookingMap().values())
+			for (Booking booking : db.getBookingMap().values())
 			{
 				LocalDate date = booking.getTimeslot().getDate();
 				if (date.isAfter(lastWeek) && date.isBefore(today))
@@ -753,7 +734,7 @@ public class SystemDriver
 		else if (radioNextWeek.isSelected())
 		{
 			bookingsView.setText("");
-			for (Booking booking : Database.getBookingMap().values())
+			for (Booking booking : db.getBookingMap().values())
 			{
 				LocalDate date = booking.getTimeslot().getDate();
 				if (date.isBefore(nextWeek) && date.isAfter(today))
@@ -791,9 +772,8 @@ public class SystemDriver
 		try
 		{
 			authUser = auth(txtLoginUsername.getText(), txtLoginPassword.getText());
-			System.out.println("\nSuccessfully logged in as " + authUser.getUsername() + ".\n");
 			setAuthUser(authUser);
-			String sceneToDisplay = authUser.getUsername().equals("Owner") ? "/bookingSystem/OwnerMenu.fxml"
+			String sceneToDisplay = authUser.isAdmin() ? "/bookingSystem/OwnerMenu.fxml"
 					: "/bookingSystem/CustomerMenu.fxml";
 
 			FXMLLoader loader = new FXMLLoader(getClass().getResource(sceneToDisplay));
@@ -831,7 +811,7 @@ public class SystemDriver
 	 **/
 	public User getUser(String username)
 	{
-		for (User user : Database.getUserMap().values())
+		for (User user : db.getUserMap().values())
 		{
 			if (user.getUsername().equals(username))
 			{
@@ -854,7 +834,7 @@ public class SystemDriver
 	{
 		boolean validUsername = username.matches("[a-zA-Z0-9'., -]+");
 		boolean taken = false;
-		for (User user : Database.getUserMap().values())
+		for (User user : db.getUserMap().values())
 		{
 			if (user.getUsername().equals(username))
 			{
@@ -970,11 +950,11 @@ public class SystemDriver
 			{
 				registerMessage.setText("all is well");
 
-				int id = Database.addUserToDB(txtUsername.getText(), txtPassword.getText(), txtEmail.getText(),
+				int id = db.addUserToDB(txtUsername.getText(), txtPassword.getText(), txtEmail.getText(),
 						txtName.getText(), txtPhone.getText());
 				User newUser = new User(id, txtUsername.getText(), txtPassword.getText(), txtEmail.getText(),
 						txtName.getText(), txtPhone.getText());
-				Database.getUserMap().put(newUser.getID(), newUser);
+				db.getUserMap().put(newUser.getID(), newUser);
 				System.out.println("User Registered. Welcome " + newUser.getUsername());
 				setAuthUser(newUser);
 

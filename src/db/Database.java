@@ -6,14 +6,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
-import java.time.*;
-import java.time.format.DateTimeFormatter;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 
 import bookingSystem.Business;
@@ -135,6 +136,19 @@ public class Database
     private static HashMap<Integer, Booking> bookingMap = new HashMap<Integer, Booking>();
     private static HashMap<Integer, Service> serviceMap = new HashMap<Integer, Service>();
     
+    private static Database db;
+    
+    private Database() { }
+    
+    public static Database getDb()
+    {
+    	if (db == null)
+    	{
+    		db = new Database();
+    	}
+    return db;
+    }
+    
     
     private static boolean runningFromJar()
     {
@@ -156,7 +170,7 @@ public class Database
      *  If running from within eclipse or any other file system, no need to do this,
      *  we can connect to the bin/db/database.mv.db file directly.
      */
-    public static void extractDbFile()
+    public void extractDbFile()
     {
     	if (runningFromJar())
     	{
@@ -204,7 +218,7 @@ public class Database
     	}
     }
     
-	static Connection getDBConnection()
+	Connection getDBConnection()
 	
 	{
 	    Connection dbConnection = null;
@@ -235,7 +249,7 @@ public class Database
 	    return dbConnection;
 	}
 	
-	public static void loadFromDB()
+	public void loadFromDB()
 	{
 		try
 		{
@@ -254,7 +268,7 @@ public class Database
 		}
 	}
 
-	static void getUsers() throws SQLException
+	void getUsers() throws SQLException
 	{
 		Connection c = getDBConnection();
 		Statement stmt = null;
@@ -304,7 +318,7 @@ public class Database
 	    }
 	}
 	
-	static void getServices() throws SQLException
+	void getServices() throws SQLException
 	{
 		Connection c = getDBConnection();
 		Statement stmt = null;
@@ -340,7 +354,7 @@ public class Database
 	    }
 	}
 	
-	static void getEmployees() throws SQLException
+	void getEmployees() throws SQLException
 	{
 		Connection c = getDBConnection();
 		Statement stmt = null;
@@ -377,7 +391,7 @@ public class Database
 	    }
 	}
 	
-	static void getEmployeeServices() throws SQLException
+	void getEmployeeServices() throws SQLException
 	{
 		Connection c = getDBConnection();
 		Statement stmt = null;
@@ -414,7 +428,7 @@ public class Database
 	    }
 	}
 	
-	static void getAvailability() throws SQLException
+	void getAvailability() throws SQLException
 	{
 		Connection c = getDBConnection();
 		Statement stmt = null;
@@ -456,7 +470,7 @@ public class Database
 	    }
 	}
 	
-	static void getTimeslots() throws SQLException
+	void getTimeslots() throws SQLException
 	{
 		Connection c = getDBConnection();
 		Statement stmt = null;
@@ -498,7 +512,7 @@ public class Database
 	    }
 	}
 	
-	static void getBookings() throws SQLException
+	void getBookings() throws SQLException
 	{
 		Connection c = getDBConnection();
 		Statement stmt = null;
@@ -544,7 +558,7 @@ public class Database
 	    }
 	}
 	
-	static void getBusinessInfo() throws SQLException
+	void getBusinessInfo() throws SQLException
 	{
 		Connection c = getDBConnection();
 		Statement stmt = null;
@@ -583,7 +597,7 @@ public class Database
 	    }
 	}
 	
-	public static int addUserToDB(String username, String password, String email, String name, String phone) throws SQLException
+	public int addUserToDB(String username, String password, String email, String name, String phone) throws SQLException
 	{
 		Connection c = getDBConnection();
 		PreparedStatement insertStmt = null;
@@ -657,7 +671,7 @@ public class Database
 		return id;
 	}
 	
-	public static int addEmployeeToDB(String name, String phone, String address) throws SQLException
+	public int addEmployeeToDB(String name, String phone, String address) throws SQLException
 	{
 		Connection c = getDBConnection();
 		PreparedStatement insertStmt = null;
@@ -710,7 +724,7 @@ public class Database
 		return id;
 	}
 	
-	public static boolean removeEmployeeFromDB(int id) throws SQLException
+	public boolean removeEmployeeFromDB(int id) throws SQLException
 	{
 		Connection c = getDBConnection();
 		Statement stmt = null;
@@ -739,7 +753,7 @@ public class Database
 		return true;
 	}
 	
-	static int addTimeslotToDB(LocalDate date, LocalTime time, Boolean booked) throws SQLException
+	int addTimeslotToDB(LocalDate date, LocalTime time, Boolean booked) throws SQLException
 	{
 		Connection c = getDBConnection();
 		PreparedStatement insertStmt = null;
@@ -797,7 +811,7 @@ public class Database
 		return id;
 	}
 	
-	public static int addBookingToDB(int employeeId, int customerId, int timeslotId, int serviceId) throws SQLException
+	public int addBookingToDB(int employeeId, int customerId, int timeslotId, int serviceId) throws SQLException
 	{
 		Connection c = getDBConnection();
 		PreparedStatement insertStmt = null;
@@ -856,7 +870,7 @@ public class Database
 		return id;
 	}
 	
-	public static int addWorkingTimesToDB(int employeeId, String dayOfWeek, LocalTime start, LocalTime finish) throws SQLException
+	public int addWorkingTimesToDB(int employeeId, String dayOfWeek, LocalTime start, LocalTime finish) throws SQLException
 	{
 		Connection c = getDBConnection();
 		PreparedStatement insertStmt = null;
@@ -917,27 +931,27 @@ public class Database
 		return id;
 	}
 	
-	public static HashMap<Integer, User> getUserMap()
+	public HashMap<Integer, User> getUserMap()
 	{
 		return userMap;
 	}
 	
-	public static HashMap<Integer, Employee> getEmployeeMap()
+	public HashMap<Integer, Employee> getEmployeeMap()
 	{
 		return employeeMap;
 	}
 	
-	public static HashMap<Integer, Timeslot> getTimeslotMap()
+	public HashMap<Integer, Timeslot> getTimeslotMap()
 	{
 		return timeslotMap;
 	}
 	
-	public static HashMap<Integer, Booking> getBookingMap()
+	public HashMap<Integer, Booking> getBookingMap()
 	{
 		return bookingMap;
 	}
 	
-	public static HashMap<Integer, Service> getServiceMap()
+	public HashMap<Integer, Service> getServiceMap()
 	{
 		return serviceMap;
 	}
