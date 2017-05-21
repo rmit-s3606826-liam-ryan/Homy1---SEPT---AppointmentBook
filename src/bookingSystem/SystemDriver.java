@@ -1,19 +1,15 @@
 package bookingSystem;
 
-import java.time.*;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.Period;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.InputMismatchException;
 import java.util.Map.Entry;
 import java.util.Scanner;
-import java.util.StringTokenizer;
-import java.util.logging.*;
-
-import users.Employee;
-import users.User;
+import java.util.logging.Logger;
 
 //import com.sun.org.apache.xerces.internal.impl.xpath.regex.ParseException;
 
@@ -31,28 +27,13 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.Labeled;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.RadioButton;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import javafx.stage.Window;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URL;
-import java.sql.SQLException;
-import java.text.SimpleDateFormat;
-
-import bookingSystem.NotSeptLogger;
+import users.Employee;
+import users.User;
 
 /**
  * System driver class - contains menus and functions used to run the system
@@ -63,6 +44,9 @@ public class SystemDriver
 	@FXML private TextField txtBusName;
     @FXML private TextField txtAdminUsername;
     @FXML private PasswordField txtAdminPassword;
+    @FXML private TextField txtOwnerName; // Add to GUI
+    @FXML private TextField txtBusAddress; // ^
+    @FXML private TextField txtBusPhone;	// ^
     @FXML private TextField txtServiceOne;
     @FXML private TextField txtServiceTwo;
     @FXML private TextField txtServiceThree;
@@ -261,19 +245,14 @@ public class SystemDriver
 	 **/
 	static Boolean running = true;
 
-	public void adamTest() // TODO marker to find code easily
-	{
-
-	}
-
 	public void createNewBusiness()
 	{
 		Business newBusiness = null;
 		
 		String businessName = txtBusName.getText();
-		//String ownerName = txtOwnerName.getText(); // ADD FIELD
-		//String address = txtAddress.getText(); // ADD FIELD
-		String phone = txtPhone.getText(); // ADD FIELD.. one with name txtPhone already seems to exist?
+		String ownerName = txtOwnerName.getText();
+		String address = txtBusAddress.getText();
+		String phone = txtBusPhone.getText();
 		String adminUsername = txtAdminUsername.getText();
 		String adminPassword = txtAdminPassword.getText();
 		Service service = new Service(1, txtServiceOne.getText(), Integer.parseInt(durationOne.getValue()));
