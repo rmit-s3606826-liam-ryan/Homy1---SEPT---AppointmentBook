@@ -43,6 +43,7 @@ public class Database
     static final String TABLE_AVAILABILITY = "AVAILABILITY";
     static final String TABLE_TIMESLOTS = "TIMESLOTS";
     static final String TABLE_BOOKINGS = "BOOKINGS";
+    static final String TABLE_BUSINESS = "BUSINESS";
     //
     // DB column names:
     //
@@ -86,6 +87,14 @@ public class Database
     static final String HEADER_BOOKINGS_EMPLOYEE_ID = "EMPLOYEE_ID";
     static final String HEADER_BOOKINGS_TIMESLOT_ID = "TIMESLOT_ID";
     static final String HEADER_BOOKINGS_SERVICE_ID = "SERVICE_ID";
+    //
+    // BUSINESS Table
+    static final String HEADER_BUSINESS_NAME = "NAME";
+    static final String HEADER_BUSINESS_OWNER = "OWNER_NAME";
+    static final String HEADER_BUSINESS_ADDRESS = "ADDRESS";
+    static final String HEADER_BUSINESS_PHONE = "PHONE";
+    static final String HEADER_BUSINESS_ADMIN = "ADMIN_USERNAME";
+    static final String HEADER_BUSINESS_ADMINPW = "ADMIN_PASSWORD";
     //
     // ***************************************************************
     
@@ -150,7 +159,7 @@ public class Database
     {
     	if (runningFromJar())
     	{
-    		//System.out.println("RUNNING FROM JAR!");
+    		//System.out.println("RUNNING FROM JAR");
         	String path = "db/database.mv.db";
 
         	InputStream ddlStream = Database.class
@@ -179,12 +188,10 @@ public class Database
             	}
         		catch (FileNotFoundException e)
         		{
-        			// TODO Auto-generated catch block
         			e.printStackTrace();
         		}
         		catch (IOException e)
         		{
-        			// TODO Auto-generated catch block
         			e.printStackTrace();
         		}
         	}
@@ -192,7 +199,7 @@ public class Database
     	}
     	else
     	{
-    		//System.out.println("RUNNING FROM ECLIPSE");
+    		//System.out.println("RUNNING FROM ECLIPSE (or other IDE)");
     	}
     }
     
