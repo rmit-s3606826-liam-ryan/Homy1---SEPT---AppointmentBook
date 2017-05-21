@@ -2,10 +2,13 @@ package bookingSystem;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Scanner;
@@ -34,6 +37,8 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import users.Employee;
 import users.User;
+
+import static java.time.temporal.ChronoUnit.MINUTES;
 
 /**
  * System driver class - contains menus and functions used to run the system
@@ -121,6 +126,8 @@ public class SystemDriver
 	@FXML private Button customerLogoutThree;
 	@FXML private Button customerLogoutTwo;
 	@FXML private Button customerLogoutOne;
+	
+	private static final String comboBoxAccepted_Format = "-fx-opacity: 1; -fx-background-color: rgba(155,255,155,0.6)";
 
 	// login scene
 	@FXML private TextField txtLoginUsername;
@@ -183,33 +190,23 @@ public class SystemDriver
 
 	}
 
-	public void custSetUp()
+	public void custSetUp() //TODO
 	{
-		ObservableList<String> oblist = FXCollections.observableArrayList();
-		for (Employee employee : db.getEmployeeMap().values())
-		{
-			oblist.add(employee.getName());
-		}
-		ObservableList<String> servicelist = FXCollections.observableArrayList();
+		ObservableList<String> serviceList = FXCollections.observableArrayList();
 		for (Service service : db.getServiceMap().values())
 		{
-			servicelist.add(service.getName());
+			serviceList.add(service.getName());
 		}
-		availBookingsService.setItems(servicelist);
-		makeBookingService.setItems(servicelist);
+		availBookingsService.setItems(serviceList);
+		makeBookingService.setItems(serviceList);
+		
 
-		makeBookingEmployee.setItems(oblist);
-		availBookingsEmployee.setItems(oblist);
+		//availBookingsEmployee.setItems(employeeList);
+		String[] days = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
 		availBookingsDay.getItems().clear();
-		availBookingsDay.getItems().addAll("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
-				"Sunday");
+		availBookingsDay.getItems().addAll(days);
 		makeBookingDay.getItems().clear();
-		makeBookingDay.getItems().addAll("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday");
-		makeBookingTime.getItems().clear();
-		makeBookingTime.getItems().addAll("09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00",
-				"17:00");
-
-		logger.info("Customer Menu: Employee/Day Comboboxes refilled");
+		makeBookingDay.getItems().addAll(days);
 	}
 
 	public void loadLoginScene(ActionEvent event) throws Exception
@@ -414,114 +411,88 @@ public class SystemDriver
 		{
 			LocalDate date = timeslot.getDate();
 			LocalTime time = timeslot.getTime();
-			Boolean booked = timeslot.getStatus();
-			System.out.println(date.format(defaultDateFormat) + ", " + time.format(defaultTimeFormat) + " - "
-					+ "booked = " + booked);
+			//Boolean booked = timeslot.getStatus();
+			System.out.println(date.format(defaultDateFormat) + ", " + time.format(defaultTimeFormat));
 		}
 	}
 
 	public void addBooking() throws NumberFormatException, UserRequestsExitException
-	// TODO: VALIDATION NOT DONE. Waiting until this is implemented in gui as
-	// many of the fields will be
-	// doable with a dropdown box I think, so we won't need to validate manual
-	// user input
-
-	// also currently uses numerical IDs for all fields which is not user
-	// friendly. But you can pull
-	// details from the ID using, for example:
-	// db.getTimeslotMap().get(timeslotId).getTime(),
-	// .getDate(), .getStatus() and so on.
 	{
 		int bookingId = 0;
 		int employeeId = 0;
 		int customerId = authUser.getID();
 		int timeslotId = 0;
 		int serviceId = 0;
+		
+		Database db = Database.getDb();
 
 		boolean valid = false;
-		Employee employee = null;
-		if (makeBookingEmployee.getValue() != null)
+		Employee employee = db.getEmployeeByName(makeBookingEmployee.getValue());
+		if (employee != null)
 		{
 			mbe.setText("");
-
-			for (Entry<Integer, Employee> entry : db.getEmployeeMap().entrySet())
-			{
-				Integer key = entry.getKey();
-				Employee value = entry.getValue();
-				if (makeBookingEmployee.getValue().equals(value.getName()))
-				{
-					employee = db.getEmployeeMap().get(key);
-					employeeId = key;
-				}
-			}
+			employeeId = employee.getID();
 		}
 		else
 		{
 			mbe.setText(" select employee");
-
 		}
 
-		Service service = null;
-		if (makeBookingService.getValue() != null)
+		Service service = db.getServiceByName(makeBookingService.getValue());
+		if (service != null)
 		{
 			mbs.setText("");
-
-			for (Entry<Integer, Service> entry : db.getServiceMap().entrySet())
-			{
-				Integer key = entry.getKey();
-				Service value = entry.getValue();
-				if (makeBookingService.getValue().equals(value.getName()))
-				{
-					service = db.getServiceMap().get(key);
-					serviceId = key;
-				}
-			}
+			serviceId = service.getID();
 		}
 		else
 		{
 			mbs.setText(" select service");
-
 		}
-
-		Timeslot timeslot = null;
-		if (makeBookingDay.getValue() != null && makeBookingTime.getValue() != null)
+		
+		if (makeBookingDay.getValue() == null || makeBookingTime.getValue() == null)
 		{
-			mbd.setText("");
-
-			for (Entry<Integer, Timeslot> entry : db.getTimeslotMap().entrySet())
-			{
-				Integer key = entry.getKey();
-				Timeslot value = entry.getValue();
-				if (makeBookingTime.getValue().equals(value.getTime())
-						&& makeBookingDay.getValue().equalsIgnoreCase(timeslot.getDate().getDayOfWeek().name()))
-				{
-					timeslot = db.getTimeslotMap().get(key);
-					timeslotId = key;
-				}
-			}
+			mbd.setText(" select day/time");
 		}
 		else
 		{
-			mbd.setText(" select day/time");
-
+			mbd.setText("");
+			
+			// start bookings from tomorrow onwards, cannot book remainder of
+			// current day, to prevent booking times that have already passed
+			LocalDate bookingDate = LocalDate.now().plusDays(1);
+			DayOfWeek futureBooking = DayOfWeek.valueOf(makeBookingDay.getValue().toUpperCase());
+			
+			// iterate the booking date forward through the next week until the
+			// day of week matches that chosen by the user.
+			while (bookingDate.getDayOfWeek().equals(futureBooking) == false)
+			{
+				bookingDate.plusDays(1);
+			}
+			
+			LocalTime bookingTime = LocalTime.parse(makeBookingTime.getValue());
+			Timeslot timeslot = db.getTimeslot(bookingDate, bookingTime);
+			if (timeslot == null)
+			{
+				addTimeslot(bookingDate, bookingTime);
+			}
+			timeslotId = timeslot.getID();
 		}
-
+		
 		Booking newBooking = null;
 
-		valid = timeslot != null && service != null && employee != null;
-
+		valid = (serviceId > 0) && (employeeId > 0) && (timeslotId > 0);
 		try
 		{
-			if (valid)
+			Timeslot timeslot = db.getTimeslotMap().get(timeslotId);
+			if (valid && !isBooked(employee, timeslot))
 			{
+				
 				// Add entry to DB, return booking ID, add to local collection
 				bookingId = db.addBookingToDB(employeeId, customerId, timeslotId, serviceId);
 				newBooking = new Booking(bookingId, authUser, employee, timeslot, service);
-
 				db.getBookingMap().put(newBooking.getID(), newBooking);
-				// TODO: Have not written confirmation output as this will
-				// probably done in GUI. Can show the time and day booked, and
-				// with which employee, etc.
+				addChildBookings(newBooking);
+				
 				makeBookingMessage.setText("Booking for " + makeBookingService.getValue() + " made for "
 						+ makeBookingTime.getValue() + " on " + makeBookingDay.getValue());
 
@@ -536,12 +507,67 @@ public class SystemDriver
 			System.out.println(e.getMessage());
 		}
 	}
+	
+	private void addChildBookings(Booking parentBooking)
+	{
+		Employee employee = parentBooking.getEmployee();
+		Service service = parentBooking.getService();
+		User customer = parentBooking.getCustomer();
+		Timeslot timeslot = parentBooking.getTimeslot();
+		LocalDate date = timeslot.getDate();
+		int duration = service.getDuration();
+		int bookingsToAdd = (duration / 30) - 1;
+		
+		for (int i=1; i<=bookingsToAdd; i++)
+		{
+			int bookingId = 0;
+			Booking newBooking = null;
+			LocalTime newTime = timeslot.getTime().plusMinutes(30 * i);
+			timeslot = db.getTimeslot(timeslot.getDate(), newTime);
+			if (timeslot == null)
+			{
+				addTimeslot(date, newTime);
+			}
+			try // Add entry to DB, return booking ID, add to local collection
+			{
+				bookingId = db.addBookingToDB(employee.getID(), customer.getID(), timeslot.getID(), service.getID(), parentBooking.getID());
+				newBooking = new Booking(bookingId, timeslot, parentBooking);
+				db.getBookingMap().put(newBooking.getID(), newBooking);
+			}
+			catch (SQLException e)
+			{
+				e.printStackTrace();
+			}
+		}
+	}
 
-	private void addTimeSlots(int year, int month, int day, int startHour, int endHour)
-	{/*
-		 * for (int start = startHour; start < endHour; start++) {
-		 * db.timeslotMap.add(new Timeslot(year, month, day, start)); }
-		 */
+	private void addTimeslot(LocalDate date, LocalTime time)
+	{
+		Timeslot t = new Timeslot(date, time, false);
+		int timeslotId;
+		try
+		{
+			timeslotId = db.addTimeslotToDB(date, time, false);
+			db.getTimeslotMap().put(timeslotId, t);
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	public boolean isBooked(Employee e, Timeslot t)
+	{
+		for (Booking booking : db.getBookingMap().values())
+		{
+			Employee employee = booking.getEmployee();
+			Timeslot timeslot = booking.getTimeslot();
+			if (employee.equals(e) && timeslot.equals(t))
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	// TODO mock up function - not yet implemented
@@ -556,10 +582,10 @@ public class SystemDriver
 				continue;
 			}
 
-			if (timeslot.getStatus() != false)
-			{
-				continue;
-			}
+			//if (timeslot.getStatus() != false)
+			//{
+				//continue;
+			//}
 			availBookingsView.appendText(timeslot.getDate() + " : " + timeslot.getTime() + "\n");
 
 		}
@@ -574,7 +600,7 @@ public class SystemDriver
 			if (authUser.getID() == booking.getCustomer().getID())
 			{
 				custBookingsView.appendText("DATE: " + booking.getTimeslot().getDate().toString() + "\nAT: "
-						+ booking.getTimeslot().getTime().toString() + "\nFOR: " + booking.getService() + "\nWITH: "
+						+ booking.getTimeslot().getTime().toString() + "\nFOR: " + booking.getService().getName() + "\nWITH: "
 						+ booking.getEmployee().getName() + "\n==========================\n");
 			}
 		}
@@ -812,6 +838,158 @@ public class SystemDriver
 	{
 		setAuthUser(null);
 		backToMain(event);
+	}
+	
+	public void resetAddBookingForm(ActionEvent event)
+	{
+		makeBookingService.setValue("");
+		makeBookingEmployee.setValue("");
+		makeBookingDay.setValue("");
+		makeBookingTime.setValue("");
+		
+		makeBookingService.setDisable(false);
+		makeBookingEmployee.setDisable(true);
+		makeBookingDay.setDisable(true);
+		makeBookingTime.setDisable(true);
+		
+		makeBookingService.setStyle("");
+		makeBookingEmployee.setStyle("");
+		makeBookingDay.setStyle("");
+		makeBookingTime.setStyle("");
+		
+		logger.info("Customer Menu: form reset");
+	}
+	
+	public void updateMakeBooking_Service(ActionEvent event)
+	{
+		Service selectedService = db.getServiceByName(makeBookingService.getValue());
+		
+		if (selectedService != null)
+		{
+			makeBookingService.setDisable(true); // accept input, disable box and enable next box
+			makeBookingService.setStyle(comboBoxAccepted_Format);
+			makeBookingEmployee.setDisable(false);
+			
+			populateEmployees(selectedService);
+			createTimeslotIncrements(selectedService);
+		}
+	}
+	
+	public void populateEmployees(Service s)
+	{
+		ObservableList<String> employeeList = FXCollections.observableArrayList();
+		for (Employee employee : db.getEmployeeMap().values())
+		{
+			if (employee.getServices().contains(s))
+			{
+				employeeList.add(employee.getName());
+			}
+		}
+		// populate employee list with all employees who provide the selected service
+		makeBookingEmployee.getItems().clear();
+		makeBookingEmployee.setItems(employeeList);
+		
+		logger.info("Customer Menu: Employee Combobox refilled");
+	}
+	
+	public void createTimeslotIncrements (Service s)
+	{
+		Business b = Business.getBusiness();
+		LocalTime open = b.getEarliestOpen();
+		LocalTime close = b.getLatestClose();
+		
+		if (open.getMinute() != 0)
+		{
+			if (open.getMinute() > 30)
+			{ // round to next hour
+				open = open.withMinute(0);
+				open.withHour(open.getHour() + 1);
+			}
+			else
+			{ // round to next 30 mins
+				open = open.withMinute(30);
+			}
+		}
+		
+		// create booking times in increments of 30 minutes, between open and close times
+		int timeSlots = (int) (MINUTES.between(open, close) / 30);
+		
+		/* if the last possible booking slot + duration of the appointment would
+		 * book past the business closing time, drop the last appointment slot,
+		 * then repeat until the last appointment time would fit in before close.
+		 */
+		while (open.plusMinutes(((timeSlots - 1) * 30) + s.getDuration()).isAfter(close))
+		{
+			timeSlots--;
+		}
+		
+        String[] times = new String[timeSlots];
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+        
+        for (int i=0; i<timeSlots; i++)
+        {
+        	LocalTime adjusted = open.plusMinutes(i * 30);
+        	String timeSlot = adjusted.format(formatter);
+        	times[i] = timeSlot;
+        }
+        
+        makeBookingTime.getItems().clear();
+		makeBookingTime.getItems().addAll(times);
+
+		logger.info("Customer Menu: Time Combobox refilled");
+	}
+	
+	public void updateMakeBooking_Employee(ActionEvent event)
+	{
+		String employee = makeBookingEmployee.getValue();
+		Employee selectedEmployee = db.getEmployeeByName(employee);
+		
+		if (selectedEmployee != null)
+		{
+			makeBookingEmployee.setDisable(true); // accept input, disable box and enable next boxes
+			makeBookingEmployee.setStyle(comboBoxAccepted_Format);
+			makeBookingDay.setDisable(false);
+			makeBookingTime.setDisable(false);
+			
+			ObservableList<String> dayList = FXCollections.observableArrayList();
+			
+			for (String dayOfWeek : selectedEmployee.getAvailability().keySet())
+			{
+				dayList.add(dayOfWeek);
+			}
+			// populate day list with all days when the selected employee is working
+			makeBookingDay.getItems().clear();
+			makeBookingDay.setItems(dayList);
+			
+			logger.info("Customer Menu: Day Combobox refilled");
+		}
+	}
+	
+	public void updateMakeBooking_Day(ActionEvent event)
+	{
+		String employee = makeBookingEmployee.getValue();
+		Employee selectedEmployee = db.getEmployeeByName(employee);
+		Service selectedService = db.getServiceByName(makeBookingService.getValue());
+		
+		if (selectedEmployee != null && selectedService != null
+				&& makeBookingDay.getValue() != null)
+		{
+			makeBookingDay.setStyle(comboBoxAccepted_Format);
+		}
+	}
+	
+	public void updateMakeBooking_Time(ActionEvent event)
+	{
+		String employee = makeBookingEmployee.getValue();
+		Employee selectedEmployee = db.getEmployeeByName(employee);
+		Service selectedService = db.getServiceByName(makeBookingService.getValue());
+		
+		if (selectedEmployee != null && selectedService != null
+				&& makeBookingDay.getValue() != null
+				&& makeBookingTime.getValue() != null)
+		{
+			makeBookingTime.setStyle(comboBoxAccepted_Format);
+		}
 	}
 
 	/**
