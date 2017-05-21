@@ -136,35 +136,23 @@ public class SystemDriver
 	private static final DateTimeFormatter defaultTimeFormat = DateTimeFormatter.ofPattern("hh:mm a");
 	
 	private static Database db = Database.getDb();
+	private static SystemDriver systemDriver = null;
 
 	User authUser = null; // TODO Add logout options to menus?
 	static Business currentBusiness = null; // are we supposed to "login" as a business?? How are we supposed to implement/track this?
 
 	public SystemDriver()
-	{
-		SeptFacade sept = new SeptFacade();
-	}
-
-	/**
-	 * loads the system at start up, call functions to load users currently will
-	 * be used to load all data
-	 **/
-	public void loadSystem()
-	{
-		try
-		{
-			NotSeptLogger.setup();
-		}
-		catch (IOException e)
-		{
-			System.out.println("no file bro");
-		}
-
-		db.extractDbFile();
-		db.loadFromDB();
-		logger.info("database loaded into system");
-	}
-
+	{ }
+    
+    public static SystemDriver getSystemDriver()
+    {
+    	if (systemDriver == null)
+    	{
+    		systemDriver = new SystemDriver();
+    	}
+    return systemDriver;
+    }
+    
 	public void setUp()
 	{
 		try
@@ -249,23 +237,22 @@ public class SystemDriver
 	static Boolean running = true;
 
 	public void createNewBusiness()
-	{
-		Business newBusiness = null;
-		
+	{		
 		String businessName = txtBusName.getText();
 		String ownerName = txtOwnerName.getText();
 		String address = txtBusAddress.getText();
 		String phone = txtBusPhone.getText();
 		String adminUsername = txtAdminUsername.getText();
+		/*
 		String adminPassword = txtAdminPassword.getText();
-		Service service = new Service(1, txtServiceOne.getText(), Integer.parseInt(durationOne.getValue()));
+		Service service1 = new Service(1, txtServiceOne.getText(), Integer.parseInt(durationOne.getValue()));
 		Service service2 = new Service(1, txtServiceTwo.getText(), Integer.parseInt(durationTwo.getValue()));
 		Service service3 = new Service(1, txtServiceThree.getText(), Integer.parseInt(durationThree.getValue()));
-	
-		newBusiness = new Business(businessName, ownerName, address, phone, adminUsername, adminPassword);
-		newBusiness.service.add(service);
-		newBusiness.service.add(service2);
-		newBusiness.service.add(service3);
+		Service[] services = {service1, service2, service3};
+		*/
+		
+		SeptFacade sept = SeptFacade.getFacade();
+		sept.addBusiness(businessName, ownerName, address, phone, adminUsername);
 	}
 		
 	public static void setBusiness(Business business)

@@ -96,7 +96,6 @@ public class Database
     static final String HEADER_BUSINESS_ADDRESS = "ADDRESS";
     static final String HEADER_BUSINESS_PHONE = "PHONE";
     static final String HEADER_BUSINESS_ADMIN = "ADMIN_USERNAME";
-    static final String HEADER_BUSINESS_ADMINPW = "ADMIN_PASSWORD";
     //
     // ***************************************************************
     
@@ -136,7 +135,7 @@ public class Database
     private static HashMap<Integer, Booking> bookingMap = new HashMap<Integer, Booking>();
     private static HashMap<Integer, Service> serviceMap = new HashMap<Integer, Service>();
     
-    private static Database db;
+    private static Database db = null;
     
     private Database() { }
     
@@ -576,8 +575,8 @@ public class Database
 				String address = rs.getString(HEADER_BUSINESS_ADDRESS);
 				String phone = rs.getString(HEADER_BUSINESS_PHONE);
 				String admin = rs.getString(HEADER_BUSINESS_ADMIN);
-				String adminPW = rs.getString(HEADER_BUSINESS_ADMINPW);
-				Business business = new Business(businessName, ownerName, address, phone, admin, adminPW);
+				Business business = Business.getBusiness();
+				business.updateBusiness(businessName, ownerName, address, phone, admin);
 				SystemDriver.setBusiness(business);
 			}
 			stmt.close();
@@ -929,6 +928,48 @@ public class Database
 			c.close();
 		}
 		return id;
+	}
+	
+	public void updateBusiness(String businessName, String ownerName, String address, String phone, String adminUsername) throws SQLException
+	{
+		Connection c = getDBConnection();
+		PreparedStatement insertStmt = null;
+		String updateStatement = "UPDATE " + TABLE_BUSINESS + " SET "
+											+ HEADER_BUSINESS_NAME
+								+ "='?', " + HEADER_BUSINESS_OWNER
+								+ "='?', " + HEADER_BUSINESS_ADDRESS
+								+ "='?', " + HEADER_BUSINESS_PHONE
+								+ "='?', " + HEADER_BUSINESS_ADMIN
+								+ "='?'";
+		try
+		{
+			c.setAutoCommit(false);
+			
+			insertStmt = c.prepareStatement(updateStatement);
+			
+			// fill in variables into sql statement
+			insertStmt.setString(1, businessName);
+			insertStmt.setString(2, ownerName);
+			insertStmt.setString(3, address);
+			insertStmt.setString(4, phone);
+			insertStmt.setString(5, adminUsername);
+			
+			insertStmt.executeUpdate();
+			insertStmt.close();
+			c.commit();
+		}
+		catch (SQLException e)
+		{
+			System.out.println("Exception Message " + e.getLocalizedMessage());
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		finally
+		{
+			c.close();
+		}
 	}
 	
 	public HashMap<Integer, User> getUserMap()
