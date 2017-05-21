@@ -494,7 +494,7 @@ public class SystemDriver
 				bookingId = db.addBookingToDB(employeeId, customerId, timeslotId, serviceId);
 				newBooking = new Booking(bookingId, authUser, employee, timeslot, service);
 				db.getBookingMap().put(newBooking.getID(), newBooking);
-				addChildBookings(newBooking);
+				//addChildBookings(newBooking);
 				
 				makeBookingMessage.setText("Booking for " + makeBookingService.getValue() + " made for "
 						+ makeBookingTime.getValue() + " on " + makeBookingDay.getValue());
