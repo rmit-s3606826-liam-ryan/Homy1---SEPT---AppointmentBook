@@ -44,17 +44,18 @@
               <content>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
-                        <ComboBox fx:id="makeBookingService" layoutX="250.0" layoutY="51.0" prefWidth="150.0" />
+                        <ComboBox fx:id="makeBookingService" layoutX="250.0" layoutY="51.0" prefWidth="150.0" onAction="#updateMakeBooking_Service" />
                         <Label layoutX="250.0" layoutY="24.0" text="Select Service Type" />
-                        <ComboBox fx:id="makeBookingEmployee" layoutX="250.0" layoutY="129.0" prefWidth="150.0" />
-                        <ComboBox fx:id="makeBookingDay" layoutX="251.0" layoutY="208.0" prefWidth="150.0" />
-                        <ComboBox fx:id="makeBookingTime" layoutX="251.0" layoutY="295.0" prefWidth="150.0" />
+                        <ComboBox fx:id="makeBookingEmployee" layoutX="250.0" layoutY="129.0" prefWidth="150.0" onAction="#updateMakeBooking_Employee" />
                         <Label layoutX="250.0" layoutY="102.0" text="Select Employee" />
+                        <ComboBox fx:id="makeBookingDay" layoutX="251.0" layoutY="208.0" prefWidth="150.0" onAction="#updateMakeBooking_Day" />
                         <Label layoutX="250.0" layoutY="181.0" text="Select Day" />
+                        <ComboBox fx:id="makeBookingTime" layoutX="251.0" layoutY="295.0" prefWidth="150.0" onAction="#updateMakeBooking_Time" />
                         <Label layoutX="250.0" layoutY="268.0" text="Select Time" />
                         <Button fx:id="makeBookingBut" layoutX="253.0" layoutY="363.0" mnemonicParsing="false" onAction="#addBooking" text="Create Booking" />
                         <Label fx:id="makeBookingMessage" layoutX="412.0" layoutY="369.0" textFill="RED" />
                         <Button fx:id="customerLogoutTwo" layoutX="14.0" layoutY="382.0" mnemonicParsing="false" onAction="#logout" text="Log Out" />
+                        <Button fx:id="reset" layoutX="100.0" layoutY="382.0" mnemonicParsing="false" onAction="#resetAddBookingForm" text="Reset Form" />
                         <Label fx:id="mbs" layoutX="412.0" layoutY="57.0" textFill="RED" />
                         <Label fx:id="mbe" layoutX="412.0" layoutY="135.0" textFill="RED" />
                         <Label fx:id="mbd" layoutX="412.0" layoutY="214.0" textFill="RED" />

@@ -1,6 +1,9 @@
 package bookingSystem;
 
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+
 import db.Database;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -12,11 +15,17 @@ public class Main extends Application
 {
 	public static void main(String[] args)
 	{
+		test();
 		SystemDriver system = SystemDriver.getSystemDriver();
 		SeptFacade.getFacade().loadSystem();
 	    launch(args);
 	}
 	
+	private static void test() {
+//TODO
+		
+	}
+
 	@Override
 	public void start(Stage primaryStage) 
 	{

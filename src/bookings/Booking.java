@@ -12,6 +12,8 @@ public class Booking {
 	private Service service = null;
 	boolean confirmed = false;
 	
+	private Booking parentBooking = null;
+	
 	/*public Booking (User c, Employee e, Timeslot t)
 	{
 		customer = c;
@@ -26,6 +28,18 @@ public class Booking {
 		employee = e;
 		timeslot = t;
 		service = s;
+		t.book();
+	}
+	
+	public Booking (int id, Timeslot t, Booking parent)
+	{
+		this.id = id;
+		customer = parent.getCustomer();
+		employee = parent.getEmployee();
+		timeslot = t;
+		service = parent.getService();
+		parentBooking = parent;
+		t.book();
 	}
 	
 	public int getID()
