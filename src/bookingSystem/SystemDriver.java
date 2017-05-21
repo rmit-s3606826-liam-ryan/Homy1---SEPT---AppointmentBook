@@ -32,6 +32,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Labeled;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -58,6 +59,17 @@ import bookingSystem.NotSeptLogger;
  **/
 public class SystemDriver
 {
+	// new business scene
+	@FXML private TextField txtBusName;
+    @FXML private TextField txtAdminUsername;
+    @FXML private PasswordField txtAdminPassword;
+    @FXML private TextField txtServiceOne;
+    @FXML private TextField txtServiceTwo;
+    @FXML private TextField txtServiceThree;
+    @FXML private ComboBox<String> durationOne;
+    @FXML private ComboBox<String> durationTwo;
+    @FXML private ComboBox<String> durationThree;
+
 	// main scene
 	@FXML private Button mainLogin;
 	@FXML private Button mainRegister;
@@ -65,8 +77,8 @@ public class SystemDriver
 	// register scene
 	@FXML private TextField txtUsername;
 	@FXML private Label invUsername;
-	@FXML private TextField txtPassword;
-	@FXML private TextField txtConfirmPassword;
+	@FXML private PasswordField txtPassword;
+	@FXML private PasswordField txtConfirmPassword;
 	@FXML private Label invPassword;
 	@FXML private TextField txtEmail;
 	@FXML private Label invEmail;
@@ -128,7 +140,7 @@ public class SystemDriver
 
 	// login scene
 	@FXML private TextField txtLoginUsername;
-	@FXML private TextField txtLoginPassword;
+	@FXML private PasswordField txtLoginPassword;
 	@FXML private Label invLoginName;
 	@FXML private Label invLoginPass;
 	@FXML private Button loginButton;
@@ -157,7 +169,7 @@ public class SystemDriver
 		}
 		catch (IOException e)
 		{
-			e.printStackTrace();
+			System.out.println("no file bro");
 		}
 
 		Database.extractDbFile();
@@ -253,21 +265,24 @@ public class SystemDriver
 
 	}
 
-	/**
-	 * Display current user, for now as a test, later maybe for user use
-	 */
-	private void printCurrentUser()
+	public void createNewBusiness()
 	{
-		User user = getAuthUser();
-		System.out.println("======================\n" + "Current User: ");
-		if (user != null)
-		{
-			System.out.println(user.getUsername() + "\n");
-		}
-		else
-			System.out.println("NONE\n");
+		Business newBusiness = null;
+		
+		String businessName = txtBusName.getText();
+		String adminUsername = txtAdminUsername.getText();
+		String adminPassword = txtAdminPassword.getText();
+		Service service = new Service(1, txtServiceOne.getText(), Integer.parseInt(durationOne.getValue()));
+		Service service2 = new Service(1, txtServiceTwo.getText(), Integer.parseInt(durationTwo.getValue()));
+		Service service3 = new Service(1, txtServiceThree.getText(), Integer.parseInt(durationThree.getValue()));
+	
+		newBusiness = new Business(businessName, adminUsername, adminPassword);
+		newBusiness.service.add(service);
+		newBusiness.service.add(service2);
+		newBusiness.service.add(service3);
 	}
-
+	
+	
 	public void viewEmployeeAvailability()
 	{
 		try
@@ -363,7 +378,7 @@ public class SystemDriver
 		}
 		else
 		{
-			wtday.setText("enter a start time");
+			wtday.setText("");
 			validDay = true;
 		}
 		
