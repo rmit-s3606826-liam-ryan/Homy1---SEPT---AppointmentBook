@@ -16,6 +16,7 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.util.HashMap;
 
+import bookingSystem.Business;
 import bookingSystem.Service;
 import bookingSystem.SystemDriver;
 import bookings.Booking;
@@ -238,6 +239,7 @@ public class Database
 	{
 		try
 		{
+			getBusinessInfo();
 			getUsers(); // MUST do in this order, so that the required collections are populated
 			getServices(); // for adding object links to.
 			getEmployees();
@@ -274,6 +276,17 @@ public class Database
 				User user = new User(id, username, password, email, name, phone);
 				userMap.put(id, user);
 			}
+			
+			Business business = SystemDriver.getBusiness();
+			String adminUsername = business.getAdminUsername();
+			for (User u : userMap.values())
+			{
+				if (u.getUsername().equals(adminUsername))
+				{
+					u.setAdmin();
+				}
+			}
+			
 			stmt.close();
 			c.commit();
 		}
@@ -513,6 +526,45 @@ public class Database
 				
 				Booking booking = new Booking(id, customer, employee, timeslot, service);
 				bookingMap.put(id, booking);
+			}
+			stmt.close();
+			c.commit();
+		}
+		catch (SQLException e)
+	    {
+	        System.out.println(e.getMessage());
+	    }
+	    catch (Exception e)
+	    {
+	        e.printStackTrace();
+	    }
+	    finally
+	    {
+	        c.close();
+	    }
+	}
+	
+	static void getBusinessInfo() throws SQLException
+	{
+		Connection c = getDBConnection();
+		Statement stmt = null;
+		String getBusInfoQuery = "select * from " + TABLE_BUSINESS;
+		try
+		{
+			c.setAutoCommit(false);
+			stmt = c.createStatement();
+			ResultSet rs = stmt.executeQuery(getBusInfoQuery);
+			
+			while (rs.next())
+			{			
+				String businessName = rs.getString(HEADER_BUSINESS_NAME);
+				String ownerName = rs.getString(HEADER_BUSINESS_OWNER);
+				String address = rs.getString(HEADER_BUSINESS_ADDRESS);
+				String phone = rs.getString(HEADER_BUSINESS_PHONE);
+				String admin = rs.getString(HEADER_BUSINESS_ADMIN);
+				String adminPW = rs.getString(HEADER_BUSINESS_ADMINPW);
+				Business business = new Business(businessName, ownerName, address, phone, admin, adminPW);
+				SystemDriver.setBusiness(business);
 			}
 			stmt.close();
 			c.commit();

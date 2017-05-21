@@ -1,7 +1,5 @@
 package users;
 
-import java.time.LocalDate;
-
 public class User
 {
 	private int id = 0;
@@ -10,6 +8,7 @@ public class User
     private String email;
     private String fullName;
     private String phoneNumber;
+    private boolean isAdmin = false;
     
     public User(int id, String username, String password, String email, String fullName, String phoneNumber)
     {
@@ -49,5 +48,15 @@ public class User
     public String getPhoneNumber()
     {
     	return phoneNumber;
+    }
+    
+    public boolean isAdmin()
+    {
+    	return isAdmin;
+    }
+    
+    public void setAdmin()
+    {
+    	isAdmin = true;
     }
 }

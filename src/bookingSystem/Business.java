@@ -41,4 +41,9 @@ public class Business
 	{
 		return phone;
 	}
+	
+	public String getAdminUsername()
+	{
+		return adminUsername;
+	}
 }
