@@ -190,7 +190,7 @@ public class SystemDriver
 
 	}
 
-	public void custSetUp() //TODO
+	public void custSetUp()
 	{
 		ObservableList<String> serviceList = FXCollections.observableArrayList();
 		for (Service service : db.getServiceMap().values())
@@ -207,6 +207,8 @@ public class SystemDriver
 		availBookingsDay.getItems().addAll(days);
 		makeBookingDay.getItems().clear();
 		makeBookingDay.getItems().addAll(days);
+		
+		resetAddBookingForm();
 	}
 
 	public void loadLoginScene(ActionEvent event) throws Exception
@@ -437,7 +439,7 @@ public class SystemDriver
 		{
 			mbe.setText(" select employee");
 		}
-
+		
 		Service service = db.getServiceByName(makeBookingService.getValue());
 		if (service != null)
 		{
@@ -464,23 +466,24 @@ public class SystemDriver
 			
 			// iterate the booking date forward through the next week until the
 			// day of week matches that chosen by the user.
-			while (bookingDate.getDayOfWeek().equals(futureBooking) == false)
+			while (bookingDate.getDayOfWeek().getValue() != (futureBooking.getValue()))
 			{
-				bookingDate.plusDays(1);
+				bookingDate = bookingDate.plusDays(1);
 			}
 			
 			LocalTime bookingTime = LocalTime.parse(makeBookingTime.getValue());
 			Timeslot timeslot = db.getTimeslot(bookingDate, bookingTime);
 			if (timeslot == null)
 			{
-				addTimeslot(bookingDate, bookingTime);
+				timeslotId = addTimeslot(bookingDate, bookingTime);
+				timeslot = db.getTimeslotMap().get(timeslotId);
 			}
-			timeslotId = timeslot.getID();
 		}
 		
 		Booking newBooking = null;
 
 		valid = (serviceId > 0) && (employeeId > 0) && (timeslotId > 0);
+		System.out.println("sid="+serviceId + "eid=" + employeeId + "tid="+timeslotId);
 		try
 		{
 			Timeslot timeslot = db.getTimeslotMap().get(timeslotId);
@@ -495,7 +498,6 @@ public class SystemDriver
 				
 				makeBookingMessage.setText("Booking for " + makeBookingService.getValue() + " made for "
 						+ makeBookingTime.getValue() + " on " + makeBookingDay.getValue());
-
 			}
 			else
 			{
@@ -541,10 +543,10 @@ public class SystemDriver
 		}
 	}
 
-	private void addTimeslot(LocalDate date, LocalTime time)
+	private int addTimeslot(LocalDate date, LocalTime time)
 	{
 		Timeslot t = new Timeslot(date, time, false);
-		int timeslotId;
+		int timeslotId = 0;
 		try
 		{
 			timeslotId = db.addTimeslotToDB(date, time, false);
@@ -554,6 +556,7 @@ public class SystemDriver
 		{
 			e.printStackTrace();
 		}
+		return timeslotId;
 	}
 	
 	public boolean isBooked(Employee e, Timeslot t)
@@ -840,7 +843,7 @@ public class SystemDriver
 		backToMain(event);
 	}
 	
-	public void resetAddBookingForm(ActionEvent event)
+	public void resetAddBookingForm()
 	{
 		makeBookingService.setValue("");
 		makeBookingEmployee.setValue("");
