@@ -142,6 +142,7 @@ public class SystemDriver
 
 	public SystemDriver()
 	{
+		SeptFacade sept = new SeptFacade();
 	}
 
 	/**
@@ -711,7 +712,6 @@ public class SystemDriver
 		LocalDate lastWeek = today.minus(Period.ofDays(100));
 		LocalDate nextWeek = today.plus(Period.ofDays(7));
 		boolean noResults = true;
-		// String currentUser = getAuthUser().getUsername();
 
 		// input 1 - view last weeks bookings
 		if (radioLastWeek.isSelected())
@@ -772,9 +772,8 @@ public class SystemDriver
 		try
 		{
 			authUser = auth(txtLoginUsername.getText(), txtLoginPassword.getText());
-			System.out.println("\nSuccessfully logged in as " + authUser.getUsername() + ".\n");
 			setAuthUser(authUser);
-			String sceneToDisplay = authUser.getUsername().equals("Owner") ? "/bookingSystem/OwnerMenu.fxml"
+			String sceneToDisplay = authUser.isAdmin() ? "/bookingSystem/OwnerMenu.fxml"
 					: "/bookingSystem/CustomerMenu.fxml";
 
 			FXMLLoader loader = new FXMLLoader(getClass().getResource(sceneToDisplay));
