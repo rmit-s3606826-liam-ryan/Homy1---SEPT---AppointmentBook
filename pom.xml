@@ -10,17 +10,7 @@
   </properties>
   <build>
     <sourceDirectory>src</sourceDirectory>
-    <resources>
-      <resource>
-        <directory>src</directory>
-      </resource>
-      <resource>
-        <directory>test_src/test</directory>
-        <includes>
-          <include>**/SystemTest.java</include>
-        </includes>
-      </resource>
-    </resources>
+    <testSourceDirectory>src/test</testSourceDirectory>
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -31,6 +21,15 @@
         </configuration>
       </plugin>
     </plugins>
+    <resources>
+    	<resource>
+    	<filtering>false</filtering>
+    	<directory>src</directory>
+    	<includes>
+    	<include>*.fxml</include>
+    	</includes>
+    	</resource>
+    </resources>
   </build>
   <dependencies>
   	<dependency>
