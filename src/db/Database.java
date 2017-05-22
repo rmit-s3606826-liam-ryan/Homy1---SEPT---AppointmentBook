@@ -46,6 +46,7 @@ public class Database
     static final String TABLE_TIMESLOTS = "TIMESLOTS";
     static final String TABLE_BOOKINGS = "BOOKINGS";
     static final String TABLE_BUSINESS = "BUSINESS";
+    static final String TABLE_BUSINESSHRS = "BUSINESS_HOURS";
     //
     // DB column names:
     //
@@ -89,6 +90,7 @@ public class Database
     static final String HEADER_BOOKINGS_EMPLOYEE_ID = "EMPLOYEE_ID";
     static final String HEADER_BOOKINGS_TIMESLOT_ID = "TIMESLOT_ID";
     static final String HEADER_BOOKINGS_SERVICE_ID = "SERVICE_ID";
+    static final String HEADER_BOOKINGS_PARENT_ID = "PARENT_ID";
     //
     // BUSINESS Table
     static final String HEADER_BUSINESS_NAME = "NAME";
@@ -96,7 +98,11 @@ public class Database
     static final String HEADER_BUSINESS_ADDRESS = "ADDRESS";
     static final String HEADER_BUSINESS_PHONE = "PHONE";
     static final String HEADER_BUSINESS_ADMIN = "ADMIN_USERNAME";
-    static final String HEADER_BUSINESS_ADMINPW = "ADMIN_PASSWORD";
+    //
+    static final String HEADER_BUSINESSHRS_BUSINESS = "BUSINESS";
+    static final String HEADER_BUSINESSHRS_DAY = "DAYOFWEEK";
+    static final String HEADER_BUSINESSHRS_OPEN = "OPEN";
+    static final String HEADER_BUSINESSHRS_CLOSE = "CLOSE";
     //
     // ***************************************************************
     
@@ -136,7 +142,7 @@ public class Database
     private static HashMap<Integer, Booking> bookingMap = new HashMap<Integer, Booking>();
     private static HashMap<Integer, Service> serviceMap = new HashMap<Integer, Service>();
     
-    private static Database db;
+    private static Database db = null;
     
     private Database() { }
     
@@ -254,6 +260,7 @@ public class Database
 		try
 		{
 			getBusinessInfo();
+			getBusinessHours();
 			getUsers(); // MUST do in this order, so that the required collections are populated
 			getServices(); // for adding object links to.
 			getEmployees();
@@ -532,13 +539,23 @@ public class Database
 				int employeeId = rs.getInt(HEADER_BOOKINGS_EMPLOYEE_ID);
 				int timeslotId = rs.getInt(HEADER_BOOKINGS_TIMESLOT_ID);
 				int serviceId = rs.getInt(HEADER_BOOKINGS_SERVICE_ID);
+				int parentId = rs.getInt(HEADER_BOOKINGS_PARENT_ID);
 				
 				User customer = userMap.get(customerId);
 				Employee employee = employeeMap.get(employeeId);
 				Timeslot timeslot = timeslotMap.get(timeslotId);
 				Service service = serviceMap.get(serviceId);
+				Booking booking = null;
 				
-				Booking booking = new Booking(id, customer, employee, timeslot, service);
+				if (parentId == 0)
+				{
+					booking = new Booking(id, customer, employee, timeslot, service);
+				}
+				else
+				{
+					booking = new Booking(id, timeslot, bookingMap.get(parentId));
+				}
+				
 				bookingMap.put(id, booking);
 			}
 			stmt.close();
@@ -576,9 +593,50 @@ public class Database
 				String address = rs.getString(HEADER_BUSINESS_ADDRESS);
 				String phone = rs.getString(HEADER_BUSINESS_PHONE);
 				String admin = rs.getString(HEADER_BUSINESS_ADMIN);
-				String adminPW = rs.getString(HEADER_BUSINESS_ADMINPW);
-				Business business = new Business(businessName, ownerName, address, phone, admin, adminPW);
+				Business business = Business.getBusiness();
+				business.updateBusiness(businessName, ownerName, address, phone, admin);
 				SystemDriver.setBusiness(business);
+			}
+			stmt.close();
+			c.commit();
+		}
+		catch (SQLException e)
+	    {
+	        System.out.println(e.getMessage());
+	    }
+	    catch (Exception e)
+	    {
+	        e.printStackTrace();
+	    }
+	    finally
+	    {
+	        c.close();
+	    }
+	}
+	
+	void getBusinessHours() throws SQLException //TODO
+	{
+		Connection c = getDBConnection();
+		Statement stmt = null;
+		String getBusHrsQuery = "select * from " + TABLE_BUSINESSHRS
+								+ " where " + HEADER_BUSINESSHRS_BUSINESS
+								+ "='" + Business.getBusiness().getName() + "';";
+		Business business = Business.getBusiness();
+		try
+		{
+			c.setAutoCommit(false);
+			stmt = c.createStatement();
+			ResultSet rs = stmt.executeQuery(getBusHrsQuery);
+			
+			while (rs.next())
+			{			
+				String dayOfWeek = rs.getString(HEADER_BUSINESSHRS_DAY);
+				java.sql.Time sqlOpenTime = rs.getTime(HEADER_BUSINESSHRS_OPEN);
+				LocalTime open = sqlOpenTime.toLocalTime();
+				java.sql.Time sqlCloseTime = rs.getTime(HEADER_BUSINESSHRS_CLOSE);
+				LocalTime close = sqlCloseTime.toLocalTime();
+
+				business.updateBusinessTimes(dayOfWeek.toLowerCase(), open, close);
 			}
 			stmt.close();
 			c.commit();
@@ -753,7 +811,7 @@ public class Database
 		return true;
 	}
 	
-	int addTimeslotToDB(LocalDate date, LocalTime time, Boolean booked) throws SQLException
+	public int addTimeslotToDB(LocalDate date, LocalTime time, Boolean booked) throws SQLException
 	{
 		Connection c = getDBConnection();
 		PreparedStatement insertStmt = null;
@@ -813,6 +871,11 @@ public class Database
 	
 	public int addBookingToDB(int employeeId, int customerId, int timeslotId, int serviceId) throws SQLException
 	{
+		return addBookingToDB(employeeId, customerId, timeslotId, serviceId, 0);
+	}
+	
+	public int addBookingToDB(int employeeId, int customerId, int timeslotId, int serviceId, int parentBookingId) throws SQLException
+	{
 		Connection c = getDBConnection();
 		PreparedStatement insertStmt = null;
 		PreparedStatement selectStmt = null;
@@ -823,7 +886,8 @@ public class Database
 								+ ", " + HEADER_BOOKINGS_CUSTOMER_ID
 								+ ", " + HEADER_BOOKINGS_TIMESLOT_ID
 								+ ", " + HEADER_BOOKINGS_SERVICE_ID
-								+ ") values (?, ?, ?, ?)";
+								+ ", " + HEADER_BOOKINGS_PARENT_ID
+								+ ") values (?, ?, ?, ?, ?)";
 		try
 		{
 			c.setAutoCommit(false);
@@ -835,6 +899,14 @@ public class Database
 			insertStmt.setInt(2, customerId);
 			insertStmt.setInt(3, timeslotId);
 			insertStmt.setInt(4, serviceId);
+			if (parentBookingId == 0)
+			{
+				insertStmt.setNull(5, Types.INTEGER);
+			}
+			else
+			{
+				insertStmt.setInt(5, parentBookingId);
+			}
 			
 			insertStmt.executeUpdate();
 			insertStmt.close();
@@ -929,6 +1001,100 @@ public class Database
 			c.close();
 		}
 		return id;
+	}
+	
+	public void updateBusiness(String businessName, String ownerName, String address, String phone, String adminUsername) throws SQLException
+	{
+		Connection c = getDBConnection();
+		PreparedStatement insertStmt = null;
+		String updateStatement = "UPDATE " + TABLE_BUSINESS + " SET "
+											+ HEADER_BUSINESS_NAME
+								+ "='?', " + HEADER_BUSINESS_OWNER
+								+ "='?', " + HEADER_BUSINESS_ADDRESS
+								+ "='?', " + HEADER_BUSINESS_PHONE
+								+ "='?', " + HEADER_BUSINESS_ADMIN
+								+ "='?'";
+		try
+		{
+			c.setAutoCommit(false);
+			
+			insertStmt = c.prepareStatement(updateStatement);
+			
+			// fill in variables into sql statement
+			insertStmt.setString(1, businessName);
+			insertStmt.setString(2, ownerName);
+			insertStmt.setString(3, address);
+			insertStmt.setString(4, phone);
+			insertStmt.setString(5, adminUsername);
+			
+			insertStmt.executeUpdate();
+			insertStmt.close();
+			c.commit();
+		}
+		catch (SQLException e)
+		{
+			System.out.println("Exception Message " + e.getLocalizedMessage());
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		finally
+		{
+			c.close();
+		}
+	}
+	
+	public Service getServiceByName (String name)
+	{
+		Service service = null;
+		for (Service s : getServiceMap().values())
+		{
+			if (s.getName().equalsIgnoreCase(name))
+			{
+				service = s;
+			}
+		}
+		return service;
+	}
+	
+	public User getUserByName (String name)
+	{
+		User user = null;
+		for (User u : getUserMap().values())
+		{
+			if (u.getUsername().equalsIgnoreCase(name))
+			{
+				user = u;
+			}
+		}
+		return user;
+	}
+	
+	public Employee getEmployeeByName (String name)
+	{
+		Employee employee = null;
+		for (Employee e : getEmployeeMap().values())
+		{
+			if (e.getName().equalsIgnoreCase(name))
+			{
+				employee = e;
+			}
+		}
+		return employee;
+	}
+	
+	public Timeslot getTimeslot (LocalDate date, LocalTime time)
+	{
+		Timeslot timeslot = null;
+		for (Timeslot t : getTimeslotMap().values())
+		{
+			if (t.getDate().equals(date) && t.getTime().equals(time))
+			{
+				timeslot = t;
+			}
+		}
+		return timeslot;
 	}
 	
 	public HashMap<Integer, User> getUserMap()

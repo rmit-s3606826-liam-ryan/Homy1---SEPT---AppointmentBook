@@ -1,3 +1,62 @@
+Liam moved Cancel bookingss from Week Nine to Week Ten5 minutes ago
+LLiam moved working times validation from Week Nine to Week Ten5 minutes ago
+LLiam moved fix add bookings from Week Nine to Week Ten5 minutes ago
+LLiam moved persistant working times from Week Nine to Week Ten5 minutes ago
+LLiam moved owner add bookings from Week Nine to Week Ten5 minutes ago
+LLiam moved pitch video from Week Ten to Week Eleven5 minutes ago
+LLiam moved finish Documentation from Week Ten to Week Eleven5 minutes ago
+LLiam moved release notes from Week Ten to Week Eleven5 minutes ago
+LLiam moved Postmortem from Week Ten to Week Eleven5 minutes ago
+LLiam added Week Eleven to this board6 minutes ago
+L
+Liam attached MM17.png to Meeting 17 3/5/2017 
+7 minutes ago
+L
+Liam attached MM18.png to Meeting 18 10/7/2017 
+7 minutes ago
+L
+Liam attached MM19.png to Meeting 19 17/7/2017 
+7 minutes ago
+LLiam added Meeting 19 17/7/2017 to Week Eleven Meeting Minutes7 minutes ago
+LLiam added Meeting 18 10/7/2017 to Week Ten Meeting Minutes7 minutes ago
+LLiam added Meeting 17 3/5/2017 to Week Nine Meeting Minutes8 minutes ago
+LLiam added Week Eleven Meeting Minutes to this board8 minutes ago
+LLiam added Week Ten Meeting Minutes to this board8 minutes ago
+LLiam added Week Nine Meeting Minutes to this board8 minutes ago
+ASAdam Simankowicz joined new business databaseyesterday at 12:06 PM
+LLiam added pitch video to Week TenMay 17 at 11:35 PM
+LLiam added finish Documentation to Week TenMay 17 at 11:34 PM
+LLiam added release notes to Week TenMay 17 at 11:34 PM
+LLiam added Postmortem to Week TenMay 17 at 11:33 PM
+LLiam added Week Ten to this boardMay 17 at 11:32 PM
+LLiam joined maven buildMay 17 at 11:26 PM
+LLiam added maven build to Week NineMay 17 at 11:26 PM
+LLiam joined new business sceneMay 17 at 11:25 PM
+LLiam added new business database to Week NineMay 17 at 11:25 PM
+LLiam added new business scene to Week NineMay 17 at 11:25 PM
+LLiam added add facade or factory to project to Week NineMay 9 at 11:14 AM
+LLiam added owner add bookings to Week NineMay 6 at 8:27 AM
+LLiam added persistant working times to Week NineMay 6 at 8:27 AM
+LLiam added fix add bookings to Week NineMay 6 at 8:26 AM
+LLiam added working times validation to Week NineMay 6 at 8:26 AM
+LLiam added Cancel bookingss to Week NineMay 6 at 8:26 AM
+LLiam added Week Nine to this boardMay 6 at 8:26 AM
+LLiam marked the due date on Wednesday 3rd - Part B Demo. 10:30 completeMay 5 at 1:55 PM
+LLiam added Marcy to Wednesday 3rd - Part B Demo. 10:30May 3 at 11:26 AM
+LLiam added Nhat Ho to Wednesday 3rd - Part B Demo. 10:30May 3 at 11:26 AM
+LLiam added Adam Simankowicz to Wednesday 3rd - Part B Demo. 10:30May 3 at 11:26 AM
+LLiam joined Wednesday 3rd - Part B Demo. 10:30May 3 at 11:26 AM
+LLiam moved Wednesday 3rd - Part B Demo. 10:30 from Team members to Week EightMay 3 at 11:25 AM
+NHNhat Ho joined Add Employee testingMay 1 at 1:32 AM
+NHNhat Ho joined Remove Employee testingMay 1 at 1:32 AM
+NHNhat Ho added Add Employee testing to Week EightMay 1 at 1:32 AM
+NHNhat Ho added Remove Employee testing to Week EightMay 1 at 1:32 AM
+NHNhat Ho joined Test Case for Add BookingMay 1 at 1:16 AM
+NHNhat Ho added Test Case for Add Booking to Week EightMay 1 at 1:16 AM
+NHNhat Ho marked the due date on Add business name and change services to be appropriate to business completeMay 1 at 1:13 AM
+NHNhat Ho marked the due date on Give detailed error feedback: eg. "Password should be format xxxx" completeMay 1 at 1:13 AM
+NHNhat Ho marked the due date on complete missing functionality from part A (add working times) completeMay 1 at 1:13 AM
+NHNhat Ho marked the due date on catch up on testing complete
 Liam attached Story 13.png to Customer makes booking 
 4 minutes ago
 LLiam added Customer makes booking to Week Seven Mock ups/User stories4 minutes ago
