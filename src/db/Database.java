@@ -99,7 +99,6 @@ public class Database
     static final String HEADER_BUSINESS_PHONE = "PHONE";
     static final String HEADER_BUSINESS_ADMIN = "ADMIN_USERNAME";
     //
-    static final String HEADER_BUSINESSHRS_BUSINESS = "BUSINESS";
     static final String HEADER_BUSINESSHRS_DAY = "DAYOFWEEK";
     static final String HEADER_BUSINESSHRS_OPEN = "OPEN";
     static final String HEADER_BUSINESSHRS_CLOSE = "CLOSE";
@@ -618,9 +617,7 @@ public class Database
 	{
 		Connection c = getDBConnection();
 		Statement stmt = null;
-		String getBusHrsQuery = "select * from " + TABLE_BUSINESSHRS
-								+ " where " + HEADER_BUSINESSHRS_BUSINESS
-								+ "='" + Business.getBusiness().getName() + "';";
+		String getBusHrsQuery = "select * from " + TABLE_BUSINESSHRS;
 		Business business = Business.getBusiness();
 		try
 		{
@@ -1009,11 +1006,12 @@ public class Database
 		PreparedStatement insertStmt = null;
 		String updateStatement = "UPDATE " + TABLE_BUSINESS + " SET "
 											+ HEADER_BUSINESS_NAME
-								+ "='?', " + HEADER_BUSINESS_OWNER
-								+ "='?', " + HEADER_BUSINESS_ADDRESS
-								+ "='?', " + HEADER_BUSINESS_PHONE
-								+ "='?', " + HEADER_BUSINESS_ADMIN
-								+ "='?'";
+								+ "=?, " + HEADER_BUSINESS_OWNER
+								+ "=?, " + HEADER_BUSINESS_ADDRESS
+								+ "=?, " + HEADER_BUSINESS_PHONE
+								+ "=?, " + HEADER_BUSINESS_ADMIN
+								+ "=?";
+		
 		try
 		{
 			c.setAutoCommit(false);
