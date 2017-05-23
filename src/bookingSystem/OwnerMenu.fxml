@@ -22,8 +22,8 @@
                            </font>
                         </Label>
                         <Button layoutX="316.0" layoutY="179.0" mnemonicParsing="false" onAction="#logout" text="Log Out" />
-                        <Button fx:id="changeImage" layoutX="316.0" layoutY="247.0" mnemonicParsing="false" onAction="#chooseFile" text="Change Image" />
-                        <ImageView fx:id="image1" fitHeight="90.0" fitWidth="720.0" layoutY="436.0" pickOnBounds="true" preserveRatio="true" />
+                        <Button fx:id="changeImage" layoutX="290.0" layoutY="247.0" mnemonicParsing="false" onAction="#chooseFile" text="Change Image" />
+                        <Button fx:id="updateBusBut" layoutX="249.0" layoutY="313.0" mnemonicParsing="false" onAction="#loadMakeBusinessScene" text="Change/Update Business" />
                      </children>
                   </AnchorPane>
               </content>
@@ -114,5 +114,6 @@
           </Tab>
         </tabs>
       </TabPane>
+      <ImageView fx:id="image1" fitHeight="90.0" fitWidth="720.0" layoutY="480.0" pickOnBounds="true" preserveRatio="true" />
    </children>
 </AnchorPane>

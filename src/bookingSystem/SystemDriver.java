@@ -258,6 +258,16 @@ public class SystemDriver
 		resetAddBookingForm();
 	}
 
+	public void loadMakeBusinessScene(ActionEvent event) throws Exception
+	{
+		Parent root = FXMLLoader.load(getClass().getResource("/bookingSystem/MakeBusiness.fxml"));
+		Scene scene = new Scene(root, 720, 480);
+		Stage primaryStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+		primaryStage.setScene(scene);
+		logger.info("Changed to Make Business Scene");
+
+	}
+
 	public void loadLoginScene(ActionEvent event) throws Exception
 	{
 		Parent root = FXMLLoader.load(getClass().getResource("/bookingSystem/Login.fxml"));

@@ -22,7 +22,6 @@ public class Main extends Application
 	}
 	
 	private static void test() {
-//TODO
 		
 	}
 
@@ -31,20 +30,15 @@ public class Main extends Application
 	{
 		try
 		{
-			if (SystemDriver.getBusiness() == null)
-			{
-				Parent root = FXMLLoader.load(getClass().getResource("/bookingSystem/Main.fxml"));
-				Scene scene = new Scene(root, 720, 480);
-				primaryStage.setScene(scene);
-				primaryStage.show();
-			}
-			else
-			{
-				Parent root = FXMLLoader.load(getClass().getResource("/bookingSystem/MakeBusiness.fxml"));
-				Scene scene = new Scene(root, 720, 480);
-				primaryStage.setScene(scene);
-				primaryStage.show();
-			}
+			// if there is a business in system, load main
+			// else load make business scene
+			String sceneToLoad = SystemDriver.getBusiness() != null ? 
+										 "/bookingSystem/Main.fxml" : 
+										 "/bookingSystem/MakeBusiness.fxml";
+			Parent root = FXMLLoader.load(getClass().getResource(sceneToLoad));
+			Scene scene = new Scene(root, 720, 480);
+			primaryStage.setScene(scene);
+			primaryStage.show();
 		}
 		catch (Exception e)
 		{
