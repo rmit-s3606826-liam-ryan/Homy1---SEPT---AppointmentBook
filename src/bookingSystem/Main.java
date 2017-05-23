@@ -1,6 +1,10 @@
 package bookingSystem;
 
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+
+import db.Database;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -11,17 +15,27 @@ public class Main extends Application
 {
 	public static void main(String[] args)
 	{
-		SystemDriver system = new SystemDriver();
-		system.loadSystem();
+		test();
+		SystemDriver system = SystemDriver.getSystemDriver();
+		SeptFacade.getFacade().loadSystem();
 	    launch(args);
 	}
 	
+	private static void test() {
+		
+	}
+
 	@Override
 	public void start(Stage primaryStage) 
 	{
 		try
 		{
-			Parent root = FXMLLoader.load(getClass().getResource("/bookingSystem/Main.fxml"));
+			// if there is a business in system, load main
+			// else load make business scene
+			String sceneToLoad = SystemDriver.getBusiness() != null ? 
+										 "/bookingSystem/Main.fxml" : 
+										 "/bookingSystem/MakeBusiness.fxml";
+			Parent root = FXMLLoader.load(getClass().getResource(sceneToLoad));
 			Scene scene = new Scene(root, 720, 480);
 			primaryStage.setScene(scene);
 			primaryStage.show();

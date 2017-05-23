@@ -1,6 +1,8 @@
 package bookingSystem;
 
+import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Business
 {
@@ -8,19 +10,56 @@ public class Business
 	private String ownerName;
 	private String address;
 	private String phone;
-	private String adminPassword;
 	private String adminUsername;
-	ArrayList<Service> service = new ArrayList<>();
+    private HashMap<String, LocalTime[]> hours = new HashMap<String, LocalTime[]>();
+    private LocalTime earliest = null;
+    private LocalTime latest = null;
+	ArrayList<Service> services = new ArrayList<Service>();
 	
-	public Business(String businessName, String ownerName, String address, String phone, String adminUsername, String adminPassword)
+	private static Business business = null;
+	
+	public Business() { }
+	
+	public void updateBusiness(String businessName, String ownerName, String address, String phone, String adminUsername)
 	{
 		this.businessName = businessName;
 		this.ownerName = ownerName;
 		this.address = address;
 		this.phone = phone;
 		this.adminUsername = adminUsername;
-		this.adminPassword = adminPassword;
 	}
+	
+	public void updateBusinessTimes(String dayOfWeek, LocalTime open, LocalTime close)
+	{
+		LocalTime[] openCloseTimes = {open, close};
+		hours.put(dayOfWeek.toLowerCase(), openCloseTimes);
+		
+		if (earliest == null)
+		{
+			earliest = open;
+		}
+		else if (open.isBefore(earliest))
+		{
+			earliest = open;
+		}
+		if (latest == null)
+		{
+			latest = close;
+		}
+		else if (close.isAfter(latest))
+		{
+			latest = close;
+		}
+	}
+	
+    public static Business getBusiness()
+    {
+    	if (business == null)
+    	{
+    		business = new Business();
+    	}
+    return business;
+    }
 
 	public String getName()
 	{
@@ -46,4 +85,19 @@ public class Business
 	{
 		return adminUsername;
 	}
+	
+    public HashMap<String, LocalTime[]> getBusinessHrs()
+    {
+    	return hours;
+    }
+    
+    public LocalTime getEarliestOpen()
+    {
+    	return earliest;
+    }
+    
+    public LocalTime getLatestClose()
+    {
+    	return latest;
+    }
 }

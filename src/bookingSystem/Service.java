@@ -22,4 +22,9 @@ public class Service
 	{
 		return name;
 	}
+	
+	public int getID()
+	{
+		return id;
+	}
 }

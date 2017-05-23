@@ -1,96 +1,119 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.image.*?>
 <?import javafx.scene.text.*?>
 <?import java.lang.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<TabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="480.0" prefWidth="720.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bookingSystem.SystemDriver">
-  <tabs>
-      <Tab text="Welcome">
-        <content>
-          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-               <children>
-                  <Label layoutX="272.0" layoutY="108.0" text="Welcome Owner">
-                     <font>
-                        <Font size="24.0" />
-                     </font>
-                  </Label>
-                  <Button layoutX="316.0" layoutY="179.0" mnemonicParsing="false" onAction="#logout" text="Log Out" />
-               </children>
-            </AnchorPane>
-        </content>
-      </Tab>
-      <Tab text="View Bookings">
-        <content>
-          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-               <children>
-                  <RadioButton fx:id="radioLastWeek" layoutX="14.0" layoutY="67.0" mnemonicParsing="false" onAction="#viewBookings" text="Last Week">
-                     <toggleGroup>
-                        <ToggleGroup fx:id="one" />
-                     </toggleGroup></RadioButton>
-                  <RadioButton fx:id="radioNextWeek" layoutX="14.0" layoutY="106.0" mnemonicParsing="false" onAction="#viewBookings" text="Next Week" toggleGroup="$one" />
-                  <TextArea fx:id="bookingsView" editable="false" layoutX="229.0" layoutY="33.0" prefHeight="372.0" prefWidth="451.0" />
-                  <Button fx:id="ownerLogoutOne" layoutX="14.0" layoutY="382.0" mnemonicParsing="false" onAction="#logout" text="Log Out" />
-               </children>
-            </AnchorPane>
-        </content>
-      </Tab>
-      <Tab onSelectionChanged="#setUp" text="Employee Working Times">
-        <content>
-          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-               <children>
-                  <ComboBox fx:id="empSelect2" layoutX="215.0" layoutY="57.0" prefWidth="150.0" />
-                  <Label layoutX="216.0" layoutY="30.0" text="Select Employee" />
-                  <TextField fx:id="txtWorkStart" layoutX="215.0" layoutY="199.0" />
-                  <TextField fx:id="txtWorkEnd" layoutX="215.0" layoutY="269.0" />
-                  <Label layoutX="215.0" layoutY="172.0" text="Start time" />
-                  <Label layoutX="215.0" layoutY="242.0" text="End Time" />
-                  <Label fx:id="workTimeMessage" layoutX="174.0" layoutY="388.0" prefHeight="27.0" prefWidth="529.0" textFill="RED" />
-                  <Button fx:id="addTimeBut" layoutX="216.0" layoutY="343.0" mnemonicParsing="false" onAction="#addWorkingTimes" text="Add times" />
-                  <Label layoutX="215.0" layoutY="102.0" text="Day" />
-                  <ComboBox fx:id="selectDay" layoutX="214.0" layoutY="129.0" prefWidth="150.0" />
-                  <Button fx:id="ownerLogoutThree" layoutX="13.0" layoutY="382.0" mnemonicParsing="false" onAction="#logout" text="Log Out" />
-                  <Label fx:id="wtemp" layoutX="388.0" layoutY="63.0" textFill="RED" />
-                  <Label fx:id="wtday" layoutX="388.0" layoutY="135.0" textFill="RED" />
-                  <Label fx:id="wtstart" layoutX="451.0" layoutY="205.0" textFill="RED" />
-                  <Label fx:id="wtend" layoutX="451.0" layoutY="275.0" textFill="RED" />
-               </children></AnchorPane>
-        </content>
-      </Tab>
-      <Tab onSelectionChanged="#setUp" text="Remove Employee">
-        <content>
-          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="435.0" prefWidth="1004.0">
-               <children>
-                  <Button fx:id="empRemoveBut" alignment="CENTER" contentDisplay="CENTER" layoutX="316.0" layoutY="218.0" mnemonicParsing="false" onAction="#removeEmployee" text="Remove" />
-                  <Label alignment="CENTER" layoutX="250.0" layoutY="111.0" prefHeight="27.0" prefWidth="221.0" text="Select employee to remove" textAlignment="CENTER" />
-                  <ComboBox fx:id="empSelect3" layoutX="285.0" layoutY="160.0" prefWidth="150.0" />
-                  <Label fx:id="empRemoveMessage" alignment="CENTER" contentDisplay="CENTER" layoutX="248.0" layoutY="280.0" prefHeight="65.0" prefWidth="225.0" textAlignment="CENTER" textFill="RED" wrapText="true" />
-                  <Button fx:id="ownerLogoutFour" layoutX="14.0" layoutY="382.0" mnemonicParsing="false" onAction="#logout" text="Log Out" />
-               </children></AnchorPane>
-        </content>
-      </Tab>
-    <Tab text="Add Employee">
-      <content>
-        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-               <children>
-                  <TextField fx:id="txtAddEmp" layoutX="248.0" layoutY="179.0" onAction="#addEmployee" />
-                  <Label layoutX="236.0" layoutY="136.0" text="Enter the new Employees name" />
-                  <Label fx:id="addEmpMessage" layoutX="248.0" layoutY="239.0" prefHeight="27.0" prefWidth="224.0" />
-                  <Button fx:id="ownerLogoutFive" layoutX="14.0" layoutY="382.0" mnemonicParsing="false" onAction="#logout" text="Log Out" />
-               </children></AnchorPane>
-      </content>
-    </Tab>
-    <Tab onSelectionChanged="#setUp" text="Employee Availability">
-      <content>
-        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-               <children>
-                  <ComboBox fx:id="empSelect" layoutX="28.0" layoutY="147.0" onAction="#viewEmployeeAvailability" prefWidth="150.0" />
-                  <TextArea fx:id="empAvailView" layoutX="226.0" layoutY="37.0" prefHeight="357.0" prefWidth="455.0" />
-                  <Button fx:id="ownerLogoutTwo" layoutX="14.0" layoutY="382.0" mnemonicParsing="false" onAction="#logout" text="Log Out" />
-               </children></AnchorPane>
-      </content>
-    </Tab>
-  </tabs>
-</TabPane>
+
+<AnchorPane prefHeight="570.0" prefWidth="720.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bookingSystem.SystemDriver">
+   <children>
+      <TabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="480.0" prefWidth="720.0" tabClosingPolicy="UNAVAILABLE">
+        <tabs>
+            <Tab text="Welcome">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <Label layoutX="272.0" layoutY="108.0" text="Welcome Owner">
+                           <font>
+                              <Font size="24.0" />
+                           </font>
+                        </Label>
+                        <Button layoutX="316.0" layoutY="179.0" mnemonicParsing="false" onAction="#logout" text="Log Out" />
+                        <Button fx:id="changeImage" layoutX="290.0" layoutY="247.0" mnemonicParsing="false" onAction="#chooseFile" text="Change Image" />
+                        <Button fx:id="updateBusBut" layoutX="249.0" layoutY="313.0" mnemonicParsing="false" onAction="#loadMakeBusinessScene" text="Change/Update Business" />
+                     </children>
+                  </AnchorPane>
+              </content>
+            </Tab>
+            <Tab text="View Bookings">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <RadioButton fx:id="radioLastWeek" layoutX="14.0" layoutY="67.0" mnemonicParsing="false" onAction="#viewBookings" text="Last Week">
+                           <toggleGroup>
+                              <ToggleGroup fx:id="one" />
+                           </toggleGroup>
+                        </RadioButton>
+                        <RadioButton fx:id="radioNextWeek" layoutX="14.0" layoutY="106.0" mnemonicParsing="false" onAction="#viewBookings" text="Next Week" toggleGroup="$one" />
+                        <TextArea fx:id="bookingsView" editable="false" layoutX="229.0" layoutY="33.0" prefHeight="372.0" prefWidth="451.0" />
+                        <Button fx:id="ownerLogoutOne" layoutX="14.0" layoutY="382.0" mnemonicParsing="false" onAction="#logout" text="Log Out" />
+                     </children>
+                  </AnchorPane>
+              </content>
+            </Tab>
+            <Tab onSelectionChanged="#setUp" text="Employee Working Times">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <ComboBox fx:id="empSelect2" layoutX="215.0" layoutY="57.0" prefWidth="150.0" />
+                        <Label layoutX="216.0" layoutY="30.0" text="Select Employee" />
+                        <TextField fx:id="txtWorkStart" layoutX="215.0" layoutY="199.0" />
+                        <TextField fx:id="txtWorkEnd" layoutX="215.0" layoutY="269.0" />
+                        <Label layoutX="215.0" layoutY="172.0" text="Start time" />
+                        <Label layoutX="215.0" layoutY="242.0" text="End Time" />
+                        <Label fx:id="workTimeMessage" layoutX="174.0" layoutY="388.0" prefHeight="27.0" prefWidth="529.0" textFill="RED" />
+                        <Button fx:id="addTimeBut" layoutX="216.0" layoutY="343.0" mnemonicParsing="false" onAction="#addWorkingTimes" text="Add times" />
+                        <Label layoutX="215.0" layoutY="102.0" text="Day" />
+                        <ComboBox fx:id="selectDay" layoutX="214.0" layoutY="129.0" prefWidth="150.0" />
+                        <Button fx:id="ownerLogoutThree" layoutX="13.0" layoutY="382.0" mnemonicParsing="false" onAction="#logout" text="Log Out" />
+                        <Label fx:id="wtemp" layoutX="388.0" layoutY="63.0" textFill="RED" />
+                        <Label fx:id="wtday" layoutX="388.0" layoutY="135.0" textFill="RED" />
+                        <Label fx:id="wtstart" layoutX="451.0" layoutY="205.0" textFill="RED" />
+                        <Label fx:id="wtend" layoutX="451.0" layoutY="275.0" textFill="RED" />
+                     </children>
+                  </AnchorPane>
+              </content>
+            </Tab>
+            <Tab onSelectionChanged="#setUp" text="Remove Employee">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="435.0" prefWidth="1004.0">
+                     <children>
+                        <Button fx:id="empRemoveBut" alignment="CENTER" contentDisplay="CENTER" layoutX="316.0" layoutY="218.0" mnemonicParsing="false" onAction="#removeEmployee" text="Remove" />
+                        <Label alignment="CENTER" layoutX="250.0" layoutY="111.0" prefHeight="27.0" prefWidth="221.0" text="Select employee to remove" textAlignment="CENTER" />
+                        <ComboBox fx:id="empSelect3" layoutX="285.0" layoutY="160.0" prefWidth="150.0" />
+                        <Label fx:id="empRemoveMessage" alignment="CENTER" contentDisplay="CENTER" layoutX="248.0" layoutY="280.0" prefHeight="65.0" prefWidth="225.0" textAlignment="CENTER" textFill="RED" wrapText="true" />
+                        <Button fx:id="ownerLogoutFour" layoutX="14.0" layoutY="382.0" mnemonicParsing="false" onAction="#logout" text="Log Out" />
+                     </children>
+                  </AnchorPane>
+              </content>
+            </Tab>
+          <Tab text="Add Employee">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <TextField fx:id="txtAddEmpName" layoutX="248.0" layoutY="113.0" />
+                        <Label layoutX="276.0" layoutY="48.0" text="Add a new employee" />
+                        <Label fx:id="addEmpMessage" layoutX="248.0" layoutY="302.0" prefHeight="27.0" prefWidth="224.0" />
+                        <Button fx:id="ownerLogoutFive" layoutX="14.0" layoutY="382.0" mnemonicParsing="false" onAction="#logout" text="Log Out" />
+                        <TextField fx:id="txtAddEmpAddress" layoutX="248.0" layoutY="167.0" />
+                        <TextField fx:id="txtAddEmpPhone" layoutX="248.0" layoutY="220.0" />
+                        <Label layoutX="189.0" layoutY="119.0" text="Name:" />
+                        <Label layoutX="173.0" layoutY="173.0" text="Address:" />
+                        <Label layoutX="188.0" layoutY="226.0" text="Phone:" />
+                        <Label fx:id="invAddEmpName" layoutX="484.0" layoutY="119.0" textFill="RED" />
+                        <Label fx:id="invAddEmpAddress" layoutX="484.0" layoutY="173.0" textFill="RED" />
+                        <Label fx:id="invPhone" layoutX="484.0" layoutY="226.0" textFill="RED" />
+                        <Button fx:id="addEmpBut" layoutX="248.0" layoutY="351.0" mnemonicParsing="false" onAction="#addEmployee" text="Add Employee" />
+                     </children>
+                  </AnchorPane>
+            </content>
+          </Tab>
+          <Tab onSelectionChanged="#setUp" text="Employee Availability">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <ComboBox fx:id="empSelect" layoutX="28.0" layoutY="147.0" onAction="#viewEmployeeAvailability" prefWidth="150.0" />
+                        <TextArea fx:id="empAvailView" layoutX="226.0" layoutY="37.0" prefHeight="357.0" prefWidth="455.0" />
+                        <Button fx:id="ownerLogoutTwo" layoutX="14.0" layoutY="382.0" mnemonicParsing="false" onAction="#logout" text="Log Out" />
+                     </children>
+                  </AnchorPane>
+            </content>
+          </Tab>
+        </tabs>
+      </TabPane>
+      <ImageView fx:id="image1" fitHeight="90.0" fitWidth="720.0" layoutY="480.0" pickOnBounds="true" preserveRatio="true" />
+   </children>
+</AnchorPane>

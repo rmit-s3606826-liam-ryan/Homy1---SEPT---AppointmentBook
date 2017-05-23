@@ -23,6 +23,8 @@ import org.junit.rules.TemporaryFolder;
 
 import bookingSystem.DuplicateUserException;
 import bookingSystem.SystemDriver;
+import javafx.fxml.FXML;
+import javafx.scene.control.Label;
 import users.User;
 
 public class SystemTest
@@ -48,8 +50,7 @@ public class SystemTest
     {
         System.out.println("-Set up");
         testSystem = new SystemDriver();
-        testRegVal = new RegistrationValidation();
-        
+        testSystem.setTest();
     }
     
     @After
@@ -57,7 +58,6 @@ public class SystemTest
     {
         System.out.println("-Tear down");
         testSystem = null;
-        testRegVal = null;
     }
     
     @AfterClass
@@ -72,7 +72,7 @@ public class SystemTest
     @Test
     public void testThatUsernameValidationFunctionAcceptsValidInput()
     {
-        assertTrue(testSystem.validateUsername("Jimbob"));
+        assertTrue(testSystem.validateUsername("hooooot"));
     }
     
     @Test
@@ -216,7 +216,7 @@ public class SystemTest
     	String dateString = "4/10/19021";
     	LocalDate date = testSystem.parseDate(dateString);
     }
-    
+/*    
     @Test
     public void testingRegisterFunction()
     {
@@ -363,4 +363,5 @@ public class SystemTest
         
         assertEquals(testSystem.bookingList.get(0), testBooking);
     }
+*/    
 }

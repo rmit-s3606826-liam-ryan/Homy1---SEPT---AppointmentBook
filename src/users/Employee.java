@@ -63,4 +63,18 @@ public class Employee
     {
     	services.add(service);
     }
+    
+    public boolean isAvailable(String dayOfWeek, LocalTime time, Service service)
+    {
+    	boolean available = false;
+    	int duration = service.getDuration();
+    	LocalTime[] employeeTimes = getAvailability().get(dayOfWeek.toLowerCase());
+    	
+    	if (employeeTimes[0].isAfter(LocalTime.of(9, 0)))
+    	{
+    		System.out.println("employee starts work LATER than 9am");
+    	}
+    	
+    	return available;
+    }
 }

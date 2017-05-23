@@ -5,9 +5,6 @@ import java.time.LocalTime;
 
 public class Timeslot
 {
-	/* SimpleDateFormat sdf = new SimpleDateFormat("yyyy MMM dd HH:mm:ss");
-	Calendar calendar = new GregorianCalendar(0000,0,00,00,00,00);
-	private String employee; */
 	private boolean booked = false;
 	private int id = 0;
 	private LocalDate date = null;
@@ -30,17 +27,24 @@ public class Timeslot
 		return time;
 	}
 	
-	void cancelBooking()
+	public int getID()
+	{
+		return id;
+	}
+	
+	public void unBook()
 	{
 		booked = false;
 	}
 	
-	void book()
+	public void book()
 	{
 		booked = true;
 	}
-	
-	public boolean getStatus()
+	// returns if there are any bookings for this timeslot.
+	// note there can be multiple bookings for a given timeslot,
+	// maximum one for each employee.
+	public boolean isBooked()
 	{
 		return booked; 
 	}

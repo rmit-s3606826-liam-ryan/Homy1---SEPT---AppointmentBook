@@ -1,7 +1,9 @@
 package bookingSystem;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.Period;
@@ -11,7 +13,6 @@ import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.logging.Logger;
 
-//import com.sun.org.apache.xerces.internal.impl.xpath.regex.ParseException;
 
 import bookings.Booking;
 import bookings.Timeslot;
@@ -31,16 +32,61 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import users.Employee;
 import users.User;
+
+import static java.time.temporal.ChronoUnit.MINUTES;
 
 /**
  * System driver class - contains menus and functions used to run the system
  **/
 public class SystemDriver
 {
+	/** allows owner to add image, not persistent, or anywhere close to spec */
+	@FXML
+	public void chooseFile(ActionEvent event)
+	{
+		try
+		{
+			FileChooser fc = new FileChooser();
+			fc.getExtensionFilters()
+					.addAll(new FileChooser.ExtensionFilter("Image Files", "*.bmp", "*.png", "*.jpg", "*.gif"));
+			Stage primaryStage = new Stage();
+			File tmp = fc.showOpenDialog(primaryStage);
+			String imagepath = tmp.toURI().toURL().toString();
+			Image img = new Image(imagepath);
+			image1.setImage(img);
+		}
+		catch (Exception e)
+		{
+			logger.severe("nooo");
+		}
+	}
+	@FXML private Button changeImage;
+	@FXML private ImageView image1;
+	
+	// these prevent certain gui things being run and causing errors
+	// during test running. if testing function that sets something
+	// like changing a label, make sure to put them behind a check on
+	// this boolean
+	private static boolean test = false;
+	public void setTest(){test = true;}
+	public boolean getTest(){return test;}
+	
 	// new business scene
+	@FXML private PasswordField txtBusConfirmPassword;
+	@FXML private Button makeBusBut;
+	@FXML private Label invBusName;
+	@FXML private Label invBusAdminUsername;
+    @FXML private Label invBusAdminPassword;
+    @FXML private Label invBusAddress;
+    @FXML private Label invBusPhone;
+    @FXML private Label invBusOwnerName;
+    @FXML private Label invBusiness;
 	@FXML private TextField txtBusName;
     @FXML private TextField txtAdminUsername;
     @FXML private PasswordField txtAdminPassword;
@@ -50,9 +96,6 @@ public class SystemDriver
     @FXML private TextField txtServiceOne;
     @FXML private TextField txtServiceTwo;
     @FXML private TextField txtServiceThree;
-    @FXML private ComboBox<String> durationOne;
-    @FXML private ComboBox<String> durationTwo;
-    @FXML private ComboBox<String> durationThree;
 
 	// main scene
 	@FXML private Button mainLogin;
@@ -83,8 +126,14 @@ public class SystemDriver
 	@FXML private ComboBox<String> empSelect2;
 	@FXML private ComboBox<String> empSelect3;
 	@FXML private ComboBox<String> selectDay;
-	@FXML private TextField txtAddEmp;
+	@FXML private TextField txtAddEmpName;
+	@FXML private TextField txtAddEmpAddress;
+	@FXML private TextField txtAddEmpPhone;
 	@FXML private Label addEmpMessage;
+	@FXML private Label invAddEmpName;
+	@FXML private Label invAddEmpAddress;
+	@FXML private Label invAddEmpPhone;
+	@FXML private Button addEmpBut;
 	@FXML private Button empRemoveBut;
 	@FXML private Label empRemoveMessage;
 	@FXML private Label workTimeMessage;
@@ -102,11 +151,13 @@ public class SystemDriver
 	@FXML private Label wtend;
 
 	// customer menu scene
+	@FXML private ComboBox<String> custBookingID;
 	@FXML private ComboBox<String> makeBookingService;
 	@FXML private ComboBox<String> makeBookingEmployee;
 	@FXML private ComboBox<String> makeBookingDay;
 	@FXML private ComboBox<String> makeBookingTime;
 	@FXML private Button makeBookingBut;
+	@FXML private Button cancelBookingBut;
 	@FXML private Label makeBookingMessage;
 	@FXML private Label mbs;
 	@FXML private Label mbe;
@@ -121,6 +172,8 @@ public class SystemDriver
 	@FXML private Button customerLogoutThree;
 	@FXML private Button customerLogoutTwo;
 	@FXML private Button customerLogoutOne;
+	
+	private static final String comboBoxAccepted_Format = "-fx-opacity: 1; -fx-background-color: rgba(155,255,155,0.6)";
 
 	// login scene
 	@FXML private TextField txtLoginUsername;
@@ -136,56 +189,45 @@ public class SystemDriver
 	private static final DateTimeFormatter defaultTimeFormat = DateTimeFormatter.ofPattern("hh:mm a");
 	
 	private static Database db = Database.getDb();
+	private static SystemDriver systemDriver = null;
 
 	User authUser = null; // TODO Add logout options to menus?
 	static Business currentBusiness = null; // are we supposed to "login" as a business?? How are we supposed to implement/track this?
 
 	public SystemDriver()
-	{
-		SeptFacade sept = new SeptFacade();
-	}
-
-	/**
-	 * loads the system at start up, call functions to load users currently will
-	 * be used to load all data
-	 **/
-	public void loadSystem()
-	{
-		try
-		{
-			NotSeptLogger.setup();
-		}
-		catch (IOException e)
-		{
-			System.out.println("no file bro");
-		}
-
-		db.extractDbFile();
-		db.loadFromDB();
-		logger.info("database loaded into system");
-	}
-
+	{ }
+    
+    public static SystemDriver getSystemDriver()
+    {
+    	if (systemDriver == null)
+    	{
+    		systemDriver = new SystemDriver();
+    	}
+    return systemDriver;
+    }
+    
+    /**sets up combo boxes to keep them up to date... just bad */
 	public void setUp()
 	{
 		try
 		{
-		ObservableList<String> emplist = FXCollections.observableArrayList();
-		for (Employee employee : db.getEmployeeMap().values())
-		{
-			emplist.add(employee.getName());
-		}
+			ObservableList<String> emplist = FXCollections.observableArrayList();
+			for (Employee employee : db.getEmployeeMap().values())
+			{
+				emplist.add(employee.getName());
+			}
 
-		empSelect.setItems(emplist);
-		empSelect2.setItems(emplist);
-		empSelect3.setItems(emplist);
-		empSelect.getSelectionModel().selectFirst();
-		empSelect2.getSelectionModel().selectFirst();
-		empSelect3.getSelectionModel().selectFirst();
+			empSelect.setItems(emplist);
+			empSelect2.setItems(emplist);
+			empSelect3.setItems(emplist);
+			empSelect.getSelectionModel().selectFirst();
+			empSelect2.getSelectionModel().selectFirst();
+			empSelect3.getSelectionModel().selectFirst();
 
-		selectDay.getItems().clear();
-		selectDay.getItems().addAll("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday");
+			selectDay.getItems().clear();
+			selectDay.getItems().addAll("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday");
 
-		logger.info("Owner Menu: Employee/Day Comboboxes refilled");
+			logger.info("Owner Menu: Employee/Day Comboboxes refilled");
 		}
 		catch (Exception e)
 		{
@@ -195,33 +237,47 @@ public class SystemDriver
 
 	}
 
+	/** as above, for customer menu */
 	public void custSetUp()
 	{
-		ObservableList<String> oblist = FXCollections.observableArrayList();
-		for (Employee employee : db.getEmployeeMap().values())
+		try
 		{
-			oblist.add(employee.getName());
+			ObservableList<String> serviceList = FXCollections.observableArrayList();
+			for (Service service : db.getServiceMap().values())
+			{
+				serviceList.add(service.getName());
+			}
+			availBookingsService.setItems(serviceList);
+			makeBookingService.setItems(serviceList);
+			ObservableList<String> employeelist = FXCollections.observableArrayList();
+			for (Employee employee : db.getEmployeeMap().values())
+			{
+				employeelist.add(employee.getName());
+			}
+
+			availBookingsEmployee.setItems(employeelist);
+			String[] days = { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" };
+			availBookingsDay.getItems().clear();
+			availBookingsDay.getItems().addAll(days);
+			makeBookingDay.getItems().clear();
+			makeBookingDay.getItems().addAll(days);
+
+			resetAddBookingForm();
 		}
-		ObservableList<String> servicelist = FXCollections.observableArrayList();
-		for (Service service : db.getServiceMap().values())
+		catch (Exception e)
 		{
-			servicelist.add(service.getName());
+			logger.severe("trouble loading employees");
 		}
-		availBookingsService.setItems(servicelist);
-		makeBookingService.setItems(servicelist);
+	}
 
-		makeBookingEmployee.setItems(oblist);
-		availBookingsEmployee.setItems(oblist);
-		availBookingsDay.getItems().clear();
-		availBookingsDay.getItems().addAll("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
-				"Sunday");
-		makeBookingDay.getItems().clear();
-		makeBookingDay.getItems().addAll("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday");
-		makeBookingTime.getItems().clear();
-		makeBookingTime.getItems().addAll("09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00",
-				"17:00");
+	public void loadMakeBusinessScene(ActionEvent event) throws Exception
+	{
+		Parent root = FXMLLoader.load(getClass().getResource("/bookingSystem/MakeBusiness.fxml"));
+		Scene scene = new Scene(root, 720, 480);
+		Stage primaryStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+		primaryStage.setScene(scene);
+		logger.info("Changed to Make Business Scene");
 
-		logger.info("Customer Menu: Employee/Day Comboboxes refilled");
 	}
 
 	public void loadLoginScene(ActionEvent event) throws Exception
@@ -248,25 +304,78 @@ public class SystemDriver
 	 **/
 	static Boolean running = true;
 
-	public void createNewBusiness()
-	{
-		Business newBusiness = null;
-		
-		String businessName = txtBusName.getText();
-		String ownerName = txtOwnerName.getText();
-		String address = txtBusAddress.getText();
-		String phone = txtBusPhone.getText();
-		String adminUsername = txtAdminUsername.getText();
+	public void createNewBusiness(ActionEvent event)
+	{		
+	    String setText = null;
+	    test = true;
+	    
+		boolean validBusinessName = validateName(txtBusName.getText());
+		boolean validOwnerName = validateName(txtOwnerName.getText());
+		boolean validAddress = validateAddress(txtBusAddress.getText());
+		boolean validPhone = validatePhone(txtBusPhone.getText());
+		boolean validAdminUsername = validateUsername(txtAdminUsername.getText());
+//		boolean validPassword = validatePassword(txtAdminPassword.getText(), txtBusConfirmPassword.getText());
+
+		setText = validBusinessName ? "" : "Don't name your business that...";
+	    invBusName.setText(setText);
+	    
+	    setText = validOwnerName ? "" : "Invalid name.";
+	    invBusOwnerName.setText(setText);
+	    
+	    setText = validAdminUsername ? "" : "Invalid username.";
+	    invBusAdminUsername.setText(setText);
+	    
+	    setText = validAddress ? "" : "Invalid address.";
+	    invBusAddress.setText(setText);
+	    
+	    setText = validPhone ? "" : "Invalid Phone.";
+	    invBusPhone.setText(setText);
+	    
+//	    setText = validPassword ? "" : "Passwords do not match.";
+//	    invBusAdminPassword.setText(setText);
+		boolean validBusiness = validBusinessName
+							 && validOwnerName 
+							 && validAddress 
+							 && validPhone 
+							 && validAdminUsername;
+
+	    setText = validBusiness ? "" : "Invalid Fields... Look for the red.";
+	    invBusiness.setText(setText);
+
+		/*
 		String adminPassword = txtAdminPassword.getText();
-		Service service = new Service(1, txtServiceOne.getText(), Integer.parseInt(durationOne.getValue()));
+		Service service1 = new Service(1, txtServiceOne.getText(), Integer.parseInt(durationOne.getValue()));
 		Service service2 = new Service(1, txtServiceTwo.getText(), Integer.parseInt(durationTwo.getValue()));
 		Service service3 = new Service(1, txtServiceThree.getText(), Integer.parseInt(durationThree.getValue()));
-	
-		newBusiness = new Business(businessName, ownerName, address, phone, adminUsername, adminPassword);
-		newBusiness.service.add(service);
-		newBusiness.service.add(service2);
-		newBusiness.service.add(service3);
+		Service[] services = {service1, service2, service3};
+		*/
+		if (validBusiness)
+		{
+			SeptFacade sept = SeptFacade.getFacade();
+			sept.addBusiness(txtBusName.getText(),
+				         	 txtOwnerName.getText(),
+				         	 txtBusAddress.getText(),
+				         	 txtBusPhone.getText(),
+				         	 txtAdminUsername.getText());
+			test = false;
+			
+			try
+			{
+				Parent root;
+				root = FXMLLoader.load(getClass().getResource("/bookingSystem/Main.fxml"));
+				Scene scene = new Scene(root, 720, 480);
+				Stage primaryStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+				primaryStage.setScene(scene);
+				logger.info("Changed to Main Scene");
+			}
+			catch (IOException e)
+			{
+				logger.info("when the shit goes down, you better be ready... BETTER BE READY");
+			}
+
+		}
 	}
+	
 		
 	public static void setBusiness(Business business)
 	{
@@ -309,6 +418,7 @@ public class SystemDriver
 			System.out.println(e.getStackTrace());
 		}
 	}
+	
 
 	static LocalTime validateTime(String timeString)
 	{
@@ -417,6 +527,7 @@ public class SystemDriver
 			System.out.println(e.getMessage());
 		}
 	}
+	
 
 	/**
 	 * displays available time slots
@@ -427,117 +538,91 @@ public class SystemDriver
 		{
 			LocalDate date = timeslot.getDate();
 			LocalTime time = timeslot.getTime();
-			Boolean booked = timeslot.getStatus();
-			System.out.println(date.format(defaultDateFormat) + ", " + time.format(defaultTimeFormat) + " - "
-					+ "booked = " + booked);
+			//Boolean booked = timeslot.getStatus();
+			System.out.println(date.format(defaultDateFormat) + ", " + time.format(defaultTimeFormat));
 		}
 	}
 
 	public void addBooking() throws NumberFormatException, UserRequestsExitException
-	// TODO: VALIDATION NOT DONE. Waiting until this is implemented in gui as
-	// many of the fields will be
-	// doable with a dropdown box I think, so we won't need to validate manual
-	// user input
-
-	// also currently uses numerical IDs for all fields which is not user
-	// friendly. But you can pull
-	// details from the ID using, for example:
-	// db.getTimeslotMap().get(timeslotId).getTime(),
-	// .getDate(), .getStatus() and so on.
 	{
 		int bookingId = 0;
 		int employeeId = 0;
 		int customerId = authUser.getID();
 		int timeslotId = 0;
 		int serviceId = 0;
+		
+		Database db = Database.getDb();
 
 		boolean valid = false;
-		Employee employee = null;
-		if (makeBookingEmployee.getValue() != null)
+		Employee employee = db.getEmployeeByName(makeBookingEmployee.getValue());
+		if (employee != null)
 		{
 			mbe.setText("");
-
-			for (Entry<Integer, Employee> entry : db.getEmployeeMap().entrySet())
-			{
-				Integer key = entry.getKey();
-				Employee value = entry.getValue();
-				if (makeBookingEmployee.getValue().equals(value.getName()))
-				{
-					employee = db.getEmployeeMap().get(key);
-					employeeId = key;
-				}
-			}
+			employeeId = employee.getID();
 		}
 		else
 		{
 			mbe.setText(" select employee");
-
 		}
-
-		Service service = null;
-		if (makeBookingService.getValue() != null)
+		
+		Service service = db.getServiceByName(makeBookingService.getValue());
+		if (service != null)
 		{
 			mbs.setText("");
-
-			for (Entry<Integer, Service> entry : db.getServiceMap().entrySet())
-			{
-				Integer key = entry.getKey();
-				Service value = entry.getValue();
-				if (makeBookingService.getValue().equals(value.getName()))
-				{
-					service = db.getServiceMap().get(key);
-					serviceId = key;
-				}
-			}
+			serviceId = service.getID();
 		}
 		else
 		{
 			mbs.setText(" select service");
-
 		}
-
-		Timeslot timeslot = null;
-		if (makeBookingDay.getValue() != null && makeBookingTime.getValue() != null)
+		
+		if (makeBookingDay.getValue() == null || makeBookingTime.getValue() == null)
 		{
-			mbd.setText("");
-
-			for (Entry<Integer, Timeslot> entry : db.getTimeslotMap().entrySet())
-			{
-				Integer key = entry.getKey();
-				Timeslot value = entry.getValue();
-				if (makeBookingTime.getValue().equals(value.getTime())
-						&& makeBookingDay.getValue().equalsIgnoreCase(timeslot.getDate().getDayOfWeek().name()))
-				{
-					timeslot = db.getTimeslotMap().get(key);
-					timeslotId = key;
-				}
-			}
+			mbd.setText(" select day/time");
 		}
 		else
 		{
-			mbd.setText(" select day/time");
-
+			mbd.setText("");
+			
+			// start bookings from tomorrow onwards, cannot book remainder of
+			// current day, to prevent booking times that have already passed
+			LocalDate bookingDate = LocalDate.now().plusDays(1);
+			DayOfWeek futureBooking = DayOfWeek.valueOf(makeBookingDay.getValue().toUpperCase());
+			
+			// iterate the booking date forward through the next week until the
+			// day of week matches that chosen by the user.
+			while (bookingDate.getDayOfWeek().getValue() != (futureBooking.getValue()))
+			{
+				bookingDate = bookingDate.plusDays(1);
+			}
+			
+			LocalTime bookingTime = LocalTime.parse(makeBookingTime.getValue());
+			Timeslot timeslot = db.getTimeslot(bookingDate, bookingTime);
+			if (timeslot == null)
+			{
+				timeslotId = addTimeslot(bookingDate, bookingTime);
+				timeslot = db.getTimeslotMap().get(timeslotId);
+			}
 		}
-
+		
 		Booking newBooking = null;
 
-		valid = timeslot != null && service != null && employee != null;
-
+		valid = (serviceId > 0) && (employeeId > 0) && (timeslotId > 0);
+		System.out.println("sid="+serviceId + "eid=" + employeeId + "tid="+timeslotId);
 		try
 		{
-			if (valid)
+			Timeslot timeslot = db.getTimeslotMap().get(timeslotId);
+			if (valid && !isBooked(employee, timeslot))
 			{
+				
 				// Add entry to DB, return booking ID, add to local collection
 				bookingId = db.addBookingToDB(employeeId, customerId, timeslotId, serviceId);
 				newBooking = new Booking(bookingId, authUser, employee, timeslot, service);
-
 				db.getBookingMap().put(newBooking.getID(), newBooking);
-				// TODO: Have not written confirmation output as this will
-				// probably done in GUI. Can show the time and day booked, and
-				// with which employee, etc.
+				//addChildBookings(newBooking);
+				
 				makeBookingMessage.setText("Booking for " + makeBookingService.getValue() + " made for "
 						+ makeBookingTime.getValue() + " on " + makeBookingDay.getValue());
-
 			}
 			else
 			{
@@ -549,15 +634,71 @@ public class SystemDriver
 			System.out.println(e.getMessage());
 		}
 	}
-
-	private void addTimeSlots(int year, int month, int day, int startHour, int endHour)
-	{/*
-		 * for (int start = startHour; start < endHour; start++) {
-		 * db.timeslotMap.add(new Timeslot(year, month, day, start)); }
-		 */
+	
+	
+	private void addChildBookings(Booking parentBooking)
+	{
+		Employee employee = parentBooking.getEmployee();
+		Service service = parentBooking.getService();
+		User customer = parentBooking.getCustomer();
+		Timeslot timeslot = parentBooking.getTimeslot();
+		LocalDate date = timeslot.getDate();
+		int duration = service.getDuration();
+		int bookingsToAdd = (duration / 30) - 1;
+		
+		for (int i=1; i<=bookingsToAdd; i++)
+		{
+			int bookingId = 0;
+			Booking newBooking = null;
+			LocalTime newTime = timeslot.getTime().plusMinutes(30 * i);
+			timeslot = db.getTimeslot(timeslot.getDate(), newTime);
+			if (timeslot == null)
+			{
+				addTimeslot(date, newTime);
+			}
+			try // Add entry to DB, return booking ID, add to local collection
+			{
+				bookingId = db.addBookingToDB(employee.getID(), customer.getID(), timeslot.getID(), service.getID(), parentBooking.getID());
+				newBooking = new Booking(bookingId, timeslot, parentBooking);
+				db.getBookingMap().put(newBooking.getID(), newBooking);
+			}
+			catch (SQLException e)
+			{
+				e.printStackTrace();
+			}
+		}
 	}
 
-	// TODO mock up function - not yet implemented
+	private int addTimeslot(LocalDate date, LocalTime time)
+	{
+		Timeslot t = new Timeslot(date, time, false);
+		int timeslotId = 0;
+		try
+		{
+			timeslotId = db.addTimeslotToDB(date, time, false);
+			db.getTimeslotMap().put(timeslotId, t);
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
+		return timeslotId;
+	}
+	
+	public boolean isBooked(Employee e, Timeslot t)
+	{
+		for (Booking booking : db.getBookingMap().values())
+		{
+			Employee employee = booking.getEmployee();
+			Timeslot timeslot = booking.getTimeslot();
+			if (employee.equals(e) && timeslot.equals(t))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public void viewAvailableBooking()
 	{
 		availBookingsView.setText("");
@@ -569,10 +710,10 @@ public class SystemDriver
 				continue;
 			}
 
-			if (timeslot.getStatus() != false)
-			{
-				continue;
-			}
+			//if (timeslot.getStatus() != false)
+			//{
+				//continue;
+			//}
 			availBookingsView.appendText(timeslot.getDate() + " : " + timeslot.getTime() + "\n");
 
 		}
@@ -582,16 +723,44 @@ public class SystemDriver
 	public void viewCustomerBooking()
 	{
 		custBookingsView.setText("");
+		ObservableList<String> oblist = FXCollections.observableArrayList();
 		for (Booking booking : db.getBookingMap().values())
 		{
 			if (authUser.getID() == booking.getCustomer().getID())
 			{
+				String temp = Integer.toString(booking.getID());
+				oblist.add(temp);
+
 				custBookingsView.appendText("DATE: " + booking.getTimeslot().getDate().toString() + "\nAT: "
-						+ booking.getTimeslot().getTime().toString() + "\nFOR: " + booking.getService() + "\nWITH: "
-						+ booking.getEmployee().getName() + "\n==========================\n");
+						+ booking.getTimeslot().getTime().toString() + "\nFOR: " + booking.getService().getName() + "\nWITH: "
+						+ booking.getEmployee().getName() + "\n(booking ID)" + booking.getID() + "\n==========================\n");
 			}
 		}
+		custBookingID.setItems(oblist);
 		logger.info("Viewing bookings for " + authUser.getUsername());
+	}
+	
+	public void cancelBooking()
+	{
+		try
+		{
+			int temp = Integer.parseInt(custBookingID.getValue());
+			for (Entry<Integer, Booking> entry : db.getBookingMap().entrySet())
+			{
+				Integer key = entry.getKey();
+				Booking value = entry.getValue();
+				if (temp == value.getID())
+				{
+					db.getBookingMap().remove(key);
+				}
+			}
+			viewCustomerBooking();
+		}
+		catch (Exception e)
+		{
+			logger.severe("boom, headshot");
+			logger.severe("you missed, InvocationTargetException");
+		}
 	}
 
 	public void removeEmployee()
@@ -642,28 +811,30 @@ public class SystemDriver
 
 	public void addEmployee()
 	{
-		String name = null;
 		Employee newEmployee = null;
-		boolean valid = true;
+		boolean validAddress = txtAddEmpAddress.getLength() != 0 ? validateAddress(txtAddEmpAddress.getText()) : false;
+		boolean validPhone = txtAddEmpPhone.getLength() != 0 ? validatePhone(txtAddEmpPhone.getText()) : false;
+		boolean validName = txtAddEmpName.getLength() != 0 ? validateName(txtAddEmpName.getText()) : false;
 
-		name = txtAddEmp.getText();
+		boolean validEmployee = validAddress && validPhone && validName;
+
 		// valid = RegistrationValidation.validateName(name);
 		for (Employee employee : db.getEmployeeMap().values())
 		{
-			if (employee.getName().equals(name))
+			if (employee.getName().equals(txtAddEmpName.getText()))
 			{
 				addEmpMessage.setText("Employee already exists");
-				valid = false;
+				validEmployee = false;
 			}
 		}
-		if (valid)
+		if (validEmployee)
 		{
 			try
 			{
-				int id = db.addEmployeeToDB(name, null, null);
-				newEmployee = new Employee(id, name, null, null);
+				int id = db.addEmployeeToDB(txtAddEmpName.getText(), txtAddEmpPhone.getText(), txtAddEmpAddress.getText());
+				newEmployee = new Employee(id, txtAddEmpName.getText(), txtAddEmpPhone.getText(), txtAddEmpAddress.getText());
 				db.getEmployeeMap().put(newEmployee.getID(), newEmployee);
-				addEmpMessage.setText("\"" + name + "\" has been added as a new employee.");
+				addEmpMessage.setText("\"" + txtAddEmpName.getText() + "\" has been added as a new employee.");
 			}
 			catch (SQLException e)
 			{
@@ -671,7 +842,22 @@ public class SystemDriver
 			}
 		}
 	}
+	
 
+	private boolean validateAddress(String address)
+	{
+		boolean validAddress = address.matches("[a-zA-Z0-9'., -]+");
+		if (!validAddress && !test)
+		{
+			invAddEmpAddress.setText(" How can anyone live there?");
+		}
+		else if (!test)
+		{
+			invAddEmpAddress.setText("");
+		}
+		return validAddress;
+	}
+	
 	private void viewEmployees()
 	{
 		System.out.println("1. View all employees\n" + "2. Search an employee\n");
@@ -826,6 +1012,159 @@ public class SystemDriver
 		setAuthUser(null);
 		backToMain(event);
 	}
+	
+	public void resetAddBookingForm()
+	{
+		makeBookingService.setValue("");
+		makeBookingEmployee.setValue("");
+		makeBookingDay.setValue("");
+		makeBookingTime.setValue("");
+		
+		makeBookingService.setDisable(false);
+		makeBookingEmployee.setDisable(true);
+		makeBookingDay.setDisable(true);
+		makeBookingTime.setDisable(true);
+		
+		makeBookingService.setStyle("");
+		makeBookingEmployee.setStyle("");
+		makeBookingDay.setStyle("");
+		makeBookingTime.setStyle("");
+		
+		logger.info("Customer Menu: form reset");
+	}
+	
+	public void updateMakeBooking_Service(ActionEvent event)
+	{
+		Service selectedService = db.getServiceByName(makeBookingService.getValue());
+		
+		if (selectedService != null)
+		{
+			makeBookingService.setDisable(true); // accept input, disable box and enable next box
+			makeBookingService.setStyle(comboBoxAccepted_Format);
+			makeBookingEmployee.setDisable(false);
+			
+			populateEmployees(selectedService);
+			createTimeslotIncrements(selectedService);
+		}
+	}
+	
+	
+	public void populateEmployees(Service s)
+	{
+		ObservableList<String> employeeList = FXCollections.observableArrayList();
+		for (Employee employee : db.getEmployeeMap().values())
+		{
+			if (employee.getServices().contains(s))
+			{
+				employeeList.add(employee.getName());
+			}
+		}
+		// populate employee list with all employees who provide the selected service
+		makeBookingEmployee.getItems().clear();
+		makeBookingEmployee.setItems(employeeList);
+		
+		logger.info("Customer Menu: Employee Combobox refilled");
+	}
+	
+	public void createTimeslotIncrements (Service s)
+	{
+		Business b = Business.getBusiness();
+		LocalTime open = b.getEarliestOpen();
+		LocalTime close = b.getLatestClose();
+		
+		if (open.getMinute() != 0)
+		{
+			if (open.getMinute() > 30)
+			{ // round to next hour
+				open = open.withMinute(0);
+				open.withHour(open.getHour() + 1);
+			}
+			else
+			{ // round to next 30 mins
+				open = open.withMinute(30);
+			}
+		}
+		
+		// create booking times in increments of 30 minutes, between open and close times
+		int timeSlots = (int) (MINUTES.between(open, close) / 30);
+		
+		/* if the last possible booking slot + duration of the appointment would
+		 * book past the business closing time, drop the last appointment slot,
+		 * then repeat until the last appointment time would fit in before close.
+		 */
+		while (open.plusMinutes(((timeSlots - 1) * 30) + s.getDuration()).isAfter(close))
+		{
+			timeSlots--;
+		}
+		
+        String[] times = new String[timeSlots];
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+        
+        for (int i=0; i<timeSlots; i++)
+        {
+        	LocalTime adjusted = open.plusMinutes(i * 30);
+        	String timeSlot = adjusted.format(formatter);
+        	times[i] = timeSlot;
+        }
+        
+        makeBookingTime.getItems().clear();
+		makeBookingTime.getItems().addAll(times);
+
+		logger.info("Customer Menu: Time Combobox refilled");
+	}
+	
+	public void updateMakeBooking_Employee(ActionEvent event)
+	{
+		String employee = makeBookingEmployee.getValue();
+		Employee selectedEmployee = db.getEmployeeByName(employee);
+		
+		if (selectedEmployee != null)
+		{
+			makeBookingEmployee.setDisable(true); // accept input, disable box and enable next boxes
+			makeBookingEmployee.setStyle(comboBoxAccepted_Format);
+			makeBookingDay.setDisable(false);
+			makeBookingTime.setDisable(false);
+			
+			ObservableList<String> dayList = FXCollections.observableArrayList();
+			
+			for (String dayOfWeek : selectedEmployee.getAvailability().keySet())
+			{
+				dayList.add(dayOfWeek);
+			}
+			// populate day list with all days when the selected employee is working
+			makeBookingDay.getItems().clear();
+			makeBookingDay.setItems(dayList);
+			
+			logger.info("Customer Menu: Day Combobox refilled");
+		}
+	}
+	
+	public void updateMakeBooking_Day(ActionEvent event)
+	{
+		String employee = makeBookingEmployee.getValue();
+		Employee selectedEmployee = db.getEmployeeByName(employee);
+		Service selectedService = db.getServiceByName(makeBookingService.getValue());
+		
+		if (selectedEmployee != null && selectedService != null
+				&& makeBookingDay.getValue() != null)
+		{
+			makeBookingDay.setStyle(comboBoxAccepted_Format);
+		}
+	}
+	
+	public void updateMakeBooking_Time(ActionEvent event)
+	{
+		String employee = makeBookingEmployee.getValue();
+		Employee selectedEmployee = db.getEmployeeByName(employee);
+		Service selectedService = db.getServiceByName(makeBookingService.getValue());
+		
+		if (selectedEmployee != null && selectedService != null
+				&& makeBookingDay.getValue() != null
+				&& makeBookingTime.getValue() != null)
+		{
+			makeBookingTime.setStyle(comboBoxAccepted_Format);
+		}
+	}
 
 	/**
 	 * Username does not allow special characters Alphanumeric and punctuation
@@ -841,17 +1180,17 @@ public class SystemDriver
 				taken = true;
 			}
 		}
-
-		if (!validUsername) // need a regex that accepts only alphanumeric only
+		
+		if (!validUsername && !test)
 		{
 			invUsername.setText(" Invalid Username");
 		}
-		else if (taken)
+		else if (taken && !test)
 		{
 			invUsername.setText(" Username Taken");
 			validUsername = false;
 		}
-		else
+		else if (!test)
 		{
 			invUsername.setText("");
 		}
@@ -864,11 +1203,11 @@ public class SystemDriver
 	public boolean validatePassword(String password, String confirmPassword)
 	{
 		boolean validPassword = password.equals(confirmPassword);
-		if (!validPassword)
+		if (!validPassword && !test)
 		{
 			invPassword.setText(" Passwords do not match");
 		}
-		else
+		else if (!test)
 		{
 			invPassword.setText("");
 		}
@@ -882,12 +1221,12 @@ public class SystemDriver
 	public boolean validateEmail(String email)
 	{
 		boolean validEmail = email.matches("[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+[.]{1,1}+[a-zA-Z0-9-.]+");
-		if (!validEmail) // need a regex that accepts alphanumeric + a few
+		if (!validEmail && !test) // need a regex that accepts alphanumeric + a few
 							// special characters
 		{
 			invEmail.setText(" Invalid email format");
 		}
-		else
+		else if (!test)
 		{
 			invEmail.setText("");
 		}
@@ -900,11 +1239,11 @@ public class SystemDriver
 	public boolean validatePhone(String phone)
 	{
 		boolean validNumber = phone.matches("[0-9]{8,10}+");
-		if (!validNumber)
+		if (!validNumber && !test)
 		{
 			invPhone.setText(" Invalid phone number");
 		}
-		else
+		else if (!test)
 		{
 			invPhone.setText("");
 		}
@@ -918,11 +1257,11 @@ public class SystemDriver
 	public boolean validateName(String name)
 	{
 		boolean validName = name.matches("[a-zA-Z'., -]+");
-		if (!validName)
+		if (!validName && !test)
 		{
 			invName.setText(" Like no name I've seen");
 		}
-		else
+		else if (!test)
 		{
 			invName.setText("");
 		}
