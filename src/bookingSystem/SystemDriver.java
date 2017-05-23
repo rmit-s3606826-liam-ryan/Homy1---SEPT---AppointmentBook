@@ -2,22 +2,17 @@ package bookingSystem;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
 import java.sql.SQLException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.logging.Logger;
 
-//import com.sun.org.apache.xerces.internal.impl.xpath.regex.ParseException;
 
 import bookings.Booking;
 import bookings.Timeslot;
@@ -41,7 +36,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.stage.Window;
 import users.Employee;
 import users.User;
 
@@ -52,6 +46,7 @@ import static java.time.temporal.ChronoUnit.MINUTES;
  **/
 public class SystemDriver
 {
+	/** allows owner to add image, not persistent, or anywhere close to spec */
 	@FXML
 	public void chooseFile(ActionEvent event)
 	{
@@ -71,6 +66,9 @@ public class SystemDriver
 			logger.severe("nooo");
 		}
 	}
+	@FXML private Button changeImage;
+	@FXML private ImageView image1;
+	
 	// these prevent certain gui things being run and causing errors
 	// during test running. if testing function that sets something
 	// like changing a label, make sure to put them behind a check on
@@ -78,8 +76,6 @@ public class SystemDriver
 	private static boolean test = false;
 	public void setTest(){test = true;}
 	public boolean getTest(){return test;}
-	@FXML private Button changeImage;
-	@FXML private ImageView image1;
 	
 	// new business scene
 	@FXML private PasswordField txtBusConfirmPassword;
@@ -210,27 +206,28 @@ public class SystemDriver
     return systemDriver;
     }
     
+    /**sets up combo boxes to keep them up to date... just bad */
 	public void setUp()
 	{
 		try
 		{
-		ObservableList<String> emplist = FXCollections.observableArrayList();
-		for (Employee employee : db.getEmployeeMap().values())
-		{
-			emplist.add(employee.getName());
-		}
+			ObservableList<String> emplist = FXCollections.observableArrayList();
+			for (Employee employee : db.getEmployeeMap().values())
+			{
+				emplist.add(employee.getName());
+			}
 
-		empSelect.setItems(emplist);
-		empSelect2.setItems(emplist);
-		empSelect3.setItems(emplist);
-		empSelect.getSelectionModel().selectFirst();
-		empSelect2.getSelectionModel().selectFirst();
-		empSelect3.getSelectionModel().selectFirst();
+			empSelect.setItems(emplist);
+			empSelect2.setItems(emplist);
+			empSelect3.setItems(emplist);
+			empSelect.getSelectionModel().selectFirst();
+			empSelect2.getSelectionModel().selectFirst();
+			empSelect3.getSelectionModel().selectFirst();
 
-		selectDay.getItems().clear();
-		selectDay.getItems().addAll("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday");
+			selectDay.getItems().clear();
+			selectDay.getItems().addAll("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday");
 
-		logger.info("Owner Menu: Employee/Day Comboboxes refilled");
+			logger.info("Owner Menu: Employee/Day Comboboxes refilled");
 		}
 		catch (Exception e)
 		{
@@ -240,25 +237,37 @@ public class SystemDriver
 
 	}
 
+	/** as above, for customer menu */
 	public void custSetUp()
 	{
-		ObservableList<String> serviceList = FXCollections.observableArrayList();
-		for (Service service : db.getServiceMap().values())
+		try
 		{
-			serviceList.add(service.getName());
-		}
-		availBookingsService.setItems(serviceList);
-		makeBookingService.setItems(serviceList);
-		
+			ObservableList<String> serviceList = FXCollections.observableArrayList();
+			for (Service service : db.getServiceMap().values())
+			{
+				serviceList.add(service.getName());
+			}
+			availBookingsService.setItems(serviceList);
+			makeBookingService.setItems(serviceList);
+			ObservableList<String> employeelist = FXCollections.observableArrayList();
+			for (Employee employee : db.getEmployeeMap().values())
+			{
+				employeelist.add(employee.getName());
+			}
 
-		//availBookingsEmployee.setItems(employeeList);
-		String[] days = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
-		availBookingsDay.getItems().clear();
-		availBookingsDay.getItems().addAll(days);
-		makeBookingDay.getItems().clear();
-		makeBookingDay.getItems().addAll(days);
-		
-		resetAddBookingForm();
+			availBookingsEmployee.setItems(employeelist);
+			String[] days = { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" };
+			availBookingsDay.getItems().clear();
+			availBookingsDay.getItems().addAll(days);
+			makeBookingDay.getItems().clear();
+			makeBookingDay.getItems().addAll(days);
+
+			resetAddBookingForm();
+		}
+		catch (Exception e)
+		{
+			logger.severe("trouble loading employees");
+		}
 	}
 
 	public void loadMakeBusinessScene(ActionEvent event) throws Exception
@@ -745,8 +754,7 @@ public class SystemDriver
 					db.getBookingMap().remove(key);
 				}
 			}
-		
-		viewCustomerBooking();
+			viewCustomerBooking();
 		}
 		catch (Exception e)
 		{
