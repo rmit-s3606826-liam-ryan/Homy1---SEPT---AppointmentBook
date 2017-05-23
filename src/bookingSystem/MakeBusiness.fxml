@@ -6,28 +6,29 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
-
-<AnchorPane prefHeight="480.0" prefWidth="720.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8">
+<AnchorPane prefHeight="480.0" prefWidth="720.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bookingSystem.SystemDriver">
    <children>
       <Label layoutX="56.0" layoutY="96.0" text="Business Name:" />
-      <Label layoutX="54.0" layoutY="270.0" text="Service Types:" />
-      <Label layoutX="185.0" layoutY="270.0" text="Titles" />
-      <Label layoutX="450.0" layoutY="270.0" text="Duration (mins)" />
       <Label layoutX="56.0" layoutY="46.0" text="Create A New Business.">
          <font>
             <Font size="24.0" />
          </font>
       </Label>
       <Label layoutX="56.0" layoutY="145.0" text="Admin Username:" />
-      <Label layoutX="54.0" layoutY="194.0" text="Admn Password:" />
       <TextField fx:id="txtBusName" layoutX="226.0" layoutY="90.0" />
       <TextField fx:id="txtAdminUsername" layoutX="226.0" layoutY="139.0" />
-      <PasswordField fx:id="txtAdminPassword" layoutX="226.0" layoutY="188.0" />
-      <TextField fx:id="txtServiceOne" layoutX="185.0" layoutY="312.0" />
-      <TextField fx:id="txtServiceTwo" layoutX="185.0" layoutY="360.0" />
-      <TextField fx:id="txtServiceThree" layoutX="185.0" layoutY="407.0" />
-      <ComboBox fx:id="durationOne" layoutX="450.0" layoutY="312.0" prefWidth="150.0" />
-      <ComboBox fx:id="durationTwo" layoutX="450.0" layoutY="360.0" prefWidth="150.0" />
-      <ComboBox fx:id="durationThree" layoutX="450.0" layoutY="407.0" prefWidth="150.0" />
+      <Label layoutX="56.0" layoutY="194.0" text="Address:" />
+      <Label layoutX="54.0" layoutY="242.0" text="Phone:" />
+      <Label layoutX="55.0" layoutY="291.0" text="Owner Name:" />
+      <TextField fx:id="txtBusAddress" layoutX="226.0" layoutY="188.0" />
+      <TextField fx:id="txtBusPhone" layoutX="226.0" layoutY="236.0" />
+      <TextField fx:id="txtOwnerName" layoutX="226.0" layoutY="285.0" />
+      <Button fx:id="makeBusBut" layoutX="268.0" layoutY="362.0" mnemonicParsing="false" onAction="#createNewBusiness" text="Make Business" />
+      <Label fx:id="invBusName" layoutX="466.0" layoutY="96.0" textFill="RED" />
+      <Label fx:id="invBusAdminUsername" layoutX="466.0" layoutY="145.0" textFill="RED" />
+      <Label fx:id="invBusAddress" layoutX="466.0" layoutY="194.0" prefHeight="27.0" prefWidth="24.0" textFill="RED" />
+      <Label fx:id="invBusPhone" layoutX="466.0" layoutY="242.0" prefHeight="27.0" prefWidth="24.0" textFill="RED" />
+      <Label fx:id="invBusOwnerName" layoutX="466.0" layoutY="291.0" prefHeight="27.0" prefWidth="24.0" textFill="RED" />
+      <Label fx:id="invBusiness" layoutX="266.0" layoutY="420.0" prefHeight="27.0" prefWidth="75.0" textFill="RED" />
    </children>
 </AnchorPane>

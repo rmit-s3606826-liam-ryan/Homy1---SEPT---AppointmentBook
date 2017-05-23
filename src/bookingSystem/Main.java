@@ -31,10 +31,20 @@ public class Main extends Application
 	{
 		try
 		{
-			Parent root = FXMLLoader.load(getClass().getResource("/bookingSystem/Main.fxml"));
-			Scene scene = new Scene(root, 720, 480);
-			primaryStage.setScene(scene);
-			primaryStage.show();
+			if (SystemDriver.getBusiness() == null)
+			{
+				Parent root = FXMLLoader.load(getClass().getResource("/bookingSystem/Main.fxml"));
+				Scene scene = new Scene(root, 720, 480);
+				primaryStage.setScene(scene);
+				primaryStage.show();
+			}
+			else
+			{
+				Parent root = FXMLLoader.load(getClass().getResource("/bookingSystem/MakeBusiness.fxml"));
+				Scene scene = new Scene(root, 720, 480);
+				primaryStage.setScene(scene);
+				primaryStage.show();
+			}
 		}
 		catch (Exception e)
 		{
