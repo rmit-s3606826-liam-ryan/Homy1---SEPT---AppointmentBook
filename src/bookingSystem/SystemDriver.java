@@ -1,6 +1,8 @@
 package bookingSystem;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.sql.SQLException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -34,7 +36,11 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 import users.Employee;
 import users.User;
 
@@ -45,7 +51,45 @@ import static java.time.temporal.ChronoUnit.MINUTES;
  **/
 public class SystemDriver
 {
+	@FXML
+	public void chooseFile(ActionEvent event)
+	{
+		try
+		{
+			FileChooser fc = new FileChooser();
+			fc.getExtensionFilters()
+					.addAll(new FileChooser.ExtensionFilter("Image Files", "*.bmp", "*.png", "*.jpg", "*.gif"));
+			Stage primaryStage = new Stage();
+			File tmp = fc.showOpenDialog(primaryStage);
+			String imagepath = tmp.toURI().toURL().toString();
+			Image img = new Image(imagepath);
+			image1.setImage(img);
+		}
+		catch (Exception e)
+		{
+			logger.severe("nooo");
+		}
+	}
+	// these prevent certain gui things being run and causing errors
+	// during test running. if testing function that sets something
+	// like changing a label, make sure to put them behind a check on
+	// this boolean
+	private static boolean test = false;
+	public void setTest(){test = true;}
+	public boolean getTest(){return test;}
+	@FXML private Button changeImage;
+	@FXML private ImageView image1;
+	
 	// new business scene
+	@FXML private PasswordField txtBusConfirmPassword;
+	@FXML private Button makeBusBut;
+	@FXML private Label invBusName;
+	@FXML private Label invBusAdminUsername;
+    @FXML private Label invBusAdminPassword;
+    @FXML private Label invBusAddress;
+    @FXML private Label invBusPhone;
+    @FXML private Label invBusOwnerName;
+    @FXML private Label invBusiness;
 	@FXML private TextField txtBusName;
     @FXML private TextField txtAdminUsername;
     @FXML private PasswordField txtAdminPassword;
@@ -55,9 +99,6 @@ public class SystemDriver
     @FXML private TextField txtServiceOne;
     @FXML private TextField txtServiceTwo;
     @FXML private TextField txtServiceThree;
-    @FXML private ComboBox<String> durationOne;
-    @FXML private ComboBox<String> durationTwo;
-    @FXML private ComboBox<String> durationThree;
 
 	// main scene
 	@FXML private Button mainLogin;
@@ -88,8 +129,14 @@ public class SystemDriver
 	@FXML private ComboBox<String> empSelect2;
 	@FXML private ComboBox<String> empSelect3;
 	@FXML private ComboBox<String> selectDay;
-	@FXML private TextField txtAddEmp;
+	@FXML private TextField txtAddEmpName;
+	@FXML private TextField txtAddEmpAddress;
+	@FXML private TextField txtAddEmpPhone;
 	@FXML private Label addEmpMessage;
+	@FXML private Label invAddEmpName;
+	@FXML private Label invAddEmpAddress;
+	@FXML private Label invAddEmpPhone;
+	@FXML private Button addEmpBut;
 	@FXML private Button empRemoveBut;
 	@FXML private Label empRemoveMessage;
 	@FXML private Label workTimeMessage;
@@ -235,13 +282,44 @@ public class SystemDriver
 	 **/
 	static Boolean running = true;
 
-	public void createNewBusiness()
+	public void createNewBusiness(ActionEvent event)
 	{		
-		String businessName = txtBusName.getText();
-		String ownerName = txtOwnerName.getText();
-		String address = txtBusAddress.getText();
-		String phone = txtBusPhone.getText();
-		String adminUsername = txtAdminUsername.getText();
+	    String setText = null;
+	    test = true;
+	    
+		boolean validBusinessName = validateName(txtBusName.getText());
+		boolean validOwnerName = validateName(txtOwnerName.getText());
+		boolean validAddress = validateAddress(txtBusAddress.getText());
+		boolean validPhone = validatePhone(txtBusPhone.getText());
+		boolean validAdminUsername = validateUsername(txtAdminUsername.getText());
+//		boolean validPassword = validatePassword(txtAdminPassword.getText(), txtBusConfirmPassword.getText());
+
+		setText = validBusinessName ? "" : "Don't name your business that...";
+	    invBusName.setText(setText);
+	    
+	    setText = validOwnerName ? "" : "Invalid name.";
+	    invBusOwnerName.setText(setText);
+	    
+	    setText = validAdminUsername ? "" : "Invalid username.";
+	    invBusAdminUsername.setText(setText);
+	    
+	    setText = validAddress ? "" : "Invalid address.";
+	    invBusAddress.setText(setText);
+	    
+	    setText = validPhone ? "" : "Invalid Phone.";
+	    invBusPhone.setText(setText);
+	    
+//	    setText = validPassword ? "" : "Passwords do not match.";
+//	    invBusAdminPassword.setText(setText);
+		boolean validBusiness = validBusinessName
+							 && validOwnerName 
+							 && validAddress 
+							 && validPhone 
+							 && validAdminUsername;
+
+	    setText = validBusiness ? "" : "Invalid Fields... Look for the red.";
+	    invBusiness.setText(setText);
+
 		/*
 		String adminPassword = txtAdminPassword.getText();
 		Service service1 = new Service(1, txtServiceOne.getText(), Integer.parseInt(durationOne.getValue()));
@@ -249,10 +327,33 @@ public class SystemDriver
 		Service service3 = new Service(1, txtServiceThree.getText(), Integer.parseInt(durationThree.getValue()));
 		Service[] services = {service1, service2, service3};
 		*/
-		
-		SeptFacade sept = SeptFacade.getFacade();
-		sept.addBusiness(businessName, ownerName, address, phone, adminUsername);
+		if (validBusiness)
+		{
+			SeptFacade sept = SeptFacade.getFacade();
+			sept.addBusiness(txtBusName.getText(),
+				         	 txtOwnerName.getText(),
+				         	 txtBusAddress.getText(),
+				         	 txtBusPhone.getText(),
+				         	 txtAdminUsername.getText());
+			test = false;
+			
+			try
+			{
+				Parent root;
+				root = FXMLLoader.load(getClass().getResource("/bookingSystem/Main.fxml"));
+				Scene scene = new Scene(root, 720, 480);
+				Stage primaryStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+				primaryStage.setScene(scene);
+				logger.info("Changed to Main Scene");
+			}
+			catch (IOException e)
+			{
+				logger.info("when the shit goes down, you better be ready... BETTER BE READY");
+			}
+
+		}
 	}
+	
 		
 	public static void setBusiness(Business business)
 	{
@@ -295,6 +396,7 @@ public class SystemDriver
 			System.out.println(e.getStackTrace());
 		}
 	}
+	
 
 	static LocalTime validateTime(String timeString)
 	{
@@ -403,6 +505,7 @@ public class SystemDriver
 			System.out.println(e.getMessage());
 		}
 	}
+	
 
 	/**
 	 * displays available time slots
@@ -573,7 +676,6 @@ public class SystemDriver
 		return false;
 	}
 
-	// TODO mock up function - not yet implemented
 	public void viewAvailableBooking()
 	{
 		availBookingsView.setText("");
@@ -658,28 +760,30 @@ public class SystemDriver
 
 	public void addEmployee()
 	{
-		String name = null;
 		Employee newEmployee = null;
-		boolean valid = true;
+		boolean validAddress = txtAddEmpAddress.getLength() != 0 ? validateAddress(txtAddEmpAddress.getText()) : false;
+		boolean validPhone = txtAddEmpPhone.getLength() != 0 ? validatePhone(txtAddEmpPhone.getText()) : false;
+		boolean validName = txtAddEmpName.getLength() != 0 ? validateName(txtAddEmpName.getText()) : false;
 
-		name = txtAddEmp.getText();
+		boolean validEmployee = validAddress && validPhone && validName;
+
 		// valid = RegistrationValidation.validateName(name);
 		for (Employee employee : db.getEmployeeMap().values())
 		{
-			if (employee.getName().equals(name))
+			if (employee.getName().equals(txtAddEmpName.getText()))
 			{
 				addEmpMessage.setText("Employee already exists");
-				valid = false;
+				validEmployee = false;
 			}
 		}
-		if (valid)
+		if (validEmployee)
 		{
 			try
 			{
-				int id = db.addEmployeeToDB(name, null, null);
-				newEmployee = new Employee(id, name, null, null);
+				int id = db.addEmployeeToDB(txtAddEmpName.getText(), txtAddEmpPhone.getText(), txtAddEmpAddress.getText());
+				newEmployee = new Employee(id, txtAddEmpName.getText(), txtAddEmpPhone.getText(), txtAddEmpAddress.getText());
 				db.getEmployeeMap().put(newEmployee.getID(), newEmployee);
-				addEmpMessage.setText("\"" + name + "\" has been added as a new employee.");
+				addEmpMessage.setText("\"" + txtAddEmpName.getText() + "\" has been added as a new employee.");
 			}
 			catch (SQLException e)
 			{
@@ -687,7 +791,22 @@ public class SystemDriver
 			}
 		}
 	}
+	
 
+	private boolean validateAddress(String address)
+	{
+		boolean validAddress = address.matches("[a-zA-Z0-9'., -]+");
+		if (!validAddress && !test)
+		{
+			invAddEmpAddress.setText(" How can anyone live there?");
+		}
+		else if (!test)
+		{
+			invAddEmpAddress.setText("");
+		}
+		return validAddress;
+	}
+	
 	private void viewEmployees()
 	{
 		System.out.println("1. View all employees\n" + "2. Search an employee\n");
@@ -1009,17 +1128,17 @@ public class SystemDriver
 				taken = true;
 			}
 		}
-
-		if (!validUsername) // need a regex that accepts only alphanumeric only
+		
+		if (!validUsername && !test)
 		{
 			invUsername.setText(" Invalid Username");
 		}
-		else if (taken)
+		else if (taken && !test)
 		{
 			invUsername.setText(" Username Taken");
 			validUsername = false;
 		}
-		else
+		else if (!test)
 		{
 			invUsername.setText("");
 		}
@@ -1032,11 +1151,11 @@ public class SystemDriver
 	public boolean validatePassword(String password, String confirmPassword)
 	{
 		boolean validPassword = password.equals(confirmPassword);
-		if (!validPassword)
+		if (!validPassword && !test)
 		{
 			invPassword.setText(" Passwords do not match");
 		}
-		else
+		else if (!test)
 		{
 			invPassword.setText("");
 		}
@@ -1050,12 +1169,12 @@ public class SystemDriver
 	public boolean validateEmail(String email)
 	{
 		boolean validEmail = email.matches("[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+[.]{1,1}+[a-zA-Z0-9-.]+");
-		if (!validEmail) // need a regex that accepts alphanumeric + a few
+		if (!validEmail && !test) // need a regex that accepts alphanumeric + a few
 							// special characters
 		{
 			invEmail.setText(" Invalid email format");
 		}
-		else
+		else if (!test)
 		{
 			invEmail.setText("");
 		}
@@ -1068,11 +1187,11 @@ public class SystemDriver
 	public boolean validatePhone(String phone)
 	{
 		boolean validNumber = phone.matches("[0-9]{8,10}+");
-		if (!validNumber)
+		if (!validNumber && !test)
 		{
 			invPhone.setText(" Invalid phone number");
 		}
-		else
+		else if (!test)
 		{
 			invPhone.setText("");
 		}
@@ -1086,11 +1205,11 @@ public class SystemDriver
 	public boolean validateName(String name)
 	{
 		boolean validName = name.matches("[a-zA-Z'., -]+");
-		if (!validName)
+		if (!validName && !test)
 		{
 			invName.setText(" Like no name I've seen");
 		}
-		else
+		else if (!test)
 		{
 			invName.setText("");
 		}

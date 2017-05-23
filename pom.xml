@@ -1,8 +1,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+  
   <groupId>Homy1_SEPT_AppointmentBook</groupId>
   <artifactId>Homy1_SEPT_AppointmentBook</artifactId>
   <version>0.0.1-SNAPSHOT</version>
+  <packaging>jar</packaging>
+  
   <name>notSEPT_Appointmentbook</name>
   <description>notSEPT_In_Maven</description>
   <properties>
@@ -10,17 +13,7 @@
   </properties>
   <build>
     <sourceDirectory>src</sourceDirectory>
-    <resources>
-      <resource>
-        <directory>src</directory>
-      </resource>
-      <resource>
-        <directory>test_src/test</directory>
-        <includes>
-          <include>**/SystemTest.java</include>
-        </includes>
-      </resource>
-    </resources>
+    <testSourceDirectory>src/test</testSourceDirectory>
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -31,13 +24,25 @@
         </configuration>
       </plugin>
     </plugins>
+    <resources>
+    	<resource>
+    	<directory>src</directory>
+    	</resource>
+    </resources>
   </build>
   <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.12</version>
+    </dependency>
+  
   	<dependency>
   		<groupId>com.h2database</groupId>
   		<artifactId>h2</artifactId>
   		<version>1.4.194</version>
   	</dependency>
+  	
   	<dependency>
   		<groupId>com.github.stefanbirkner</groupId>
   		<artifactId>system-rules</artifactId>
