@@ -2,6 +2,7 @@ package bookingSystem;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.sql.SQLException;
 import java.time.DayOfWeek;
@@ -154,11 +155,13 @@ public class SystemDriver
 	@FXML private Label wtend;
 
 	// customer menu scene
+	@FXML private ComboBox<String> custBookingID;
 	@FXML private ComboBox<String> makeBookingService;
 	@FXML private ComboBox<String> makeBookingEmployee;
 	@FXML private ComboBox<String> makeBookingDay;
 	@FXML private ComboBox<String> makeBookingTime;
 	@FXML private Button makeBookingBut;
+	@FXML private Button cancelBookingBut;
 	@FXML private Label makeBookingMessage;
 	@FXML private Label mbs;
 	@FXML private Label mbe;
@@ -623,6 +626,7 @@ public class SystemDriver
 		}
 	}
 	
+	
 	private void addChildBookings(Booking parentBooking)
 	{
 		Employee employee = parentBooking.getEmployee();
@@ -710,16 +714,45 @@ public class SystemDriver
 	public void viewCustomerBooking()
 	{
 		custBookingsView.setText("");
+		ObservableList<String> oblist = FXCollections.observableArrayList();
 		for (Booking booking : db.getBookingMap().values())
 		{
 			if (authUser.getID() == booking.getCustomer().getID())
 			{
+				String temp = Integer.toString(booking.getID());
+				oblist.add(temp);
+
 				custBookingsView.appendText("DATE: " + booking.getTimeslot().getDate().toString() + "\nAT: "
 						+ booking.getTimeslot().getTime().toString() + "\nFOR: " + booking.getService().getName() + "\nWITH: "
-						+ booking.getEmployee().getName() + "\n==========================\n");
+						+ booking.getEmployee().getName() + "\n(booking ID)" + booking.getID() + "\n==========================\n");
 			}
 		}
+		custBookingID.setItems(oblist);
 		logger.info("Viewing bookings for " + authUser.getUsername());
+	}
+	
+	public void cancelBooking()
+	{
+		try
+		{
+			int temp = Integer.parseInt(custBookingID.getValue());
+			for (Entry<Integer, Booking> entry : db.getBookingMap().entrySet())
+			{
+				Integer key = entry.getKey();
+				Booking value = entry.getValue();
+				if (temp == value.getID())
+				{
+					db.getBookingMap().remove(key);
+				}
+			}
+		
+		viewCustomerBooking();
+		}
+		catch (Exception e)
+		{
+			logger.severe("boom, headshot");
+			logger.severe("you missed, InvocationTargetException");
+		}
 	}
 
 	public void removeEmployee()
@@ -1006,6 +1039,7 @@ public class SystemDriver
 			createTimeslotIncrements(selectedService);
 		}
 	}
+	
 	
 	public void populateEmployees(Service s)
 	{
