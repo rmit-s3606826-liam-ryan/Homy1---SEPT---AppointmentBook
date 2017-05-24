@@ -50,6 +50,7 @@ public class SeptFacade
     	catch (SQLException e)
     	{
 			e.printStackTrace();
+			System.out.println(e.getMessage());
 		}
     	
     	Business business = Business.getBusiness();
