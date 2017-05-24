@@ -16,8 +16,8 @@ public class Main extends Application
 	public static void main(String[] args)
 	{
 		test();
-		SystemDriver system = SystemDriver.getSystemDriver();
-		SeptFacade.getFacade().loadSystem();
+		SeptFacade sf = SeptFacade.getFacade();
+		sf.loadSystem();
 	    launch(args);
 	}
 	
