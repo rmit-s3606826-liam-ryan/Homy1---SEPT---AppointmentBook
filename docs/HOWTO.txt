@@ -1,5 +1,7 @@
 To run the program:
-Option A - Import the project into your chosen IDE (such as eclipse) and hit run
-Option B - In windows command prompt or a terminal, navigate to the directory containing the 
-           jar file and use the command 'java -jar notSEPT'
-	   The appropriate jaa files must be first installed (jdk 1.8) and must be in the path
+Option A - Import the project into your chosen IDE (such as eclipse) and hit run as ... maven build
+Option B - In windows command prompt or a terminal, you must first make sure that maven and java are both installed and
+           in the build path. 
+	   To set path on window hit ctrl + R and type in cmd. in the command prompt type 'set PATH=%PATH%;<directory>'
+	   Navigate to the directory containing the project. to build the project use the command 'mvn clean'
+           navigate into the targets directory, locate the jar file and use the command 'java -jar <filename>'
